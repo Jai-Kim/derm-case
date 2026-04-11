@@ -438,7 +438,9 @@ Rules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_c
     await delay(350); setStep('compile');
     await delay(600);
 
-    const clean = raw.replace(/^```json\s*/,'').replace(/\s*```$/,'').trim();
+    let clean = raw.trim();
+    const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if (fenceMatch) { clean = fenceMatch[1].trim(); } else { const b0 = clean.indexOf('{'), b1 = clean.lastIndexOf('}'); if (b0 !== -1 && b1 !== -1) clean = clean.slice(b0, b1+1); }
     let parsed;
     try { parsed = JSON.parse(clean); }
     catch(e) { throw new Error('JSON parse failed.\n\nRaw:\n' + raw); }
