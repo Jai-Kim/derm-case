@@ -279,8 +279,8 @@ let imageBase64 = null, imageMimeType = 'image/jpeg';
 const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
 function loadImage(file){if(!file||!file.type.startsWith('image/'))return;imageMimeType=file.type;const r=new FileReader();r.onload=e=>{imageBase64=e.target.result.split(',')[1];previewImg.src=e.target.result;uploadPrompt.style.display='none';uploadPreview.style.display='block';updateBtn();};r.readAsDataURL(file);}
 function updateBtn(){analyzeBtn.disabled=!imageBase64;}
+document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
 document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); });
-applyI18n();
 fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
