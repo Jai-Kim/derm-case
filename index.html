@@ -179,6 +179,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <label>Duration</label>
         <input type="text" id="duration" placeholder="e.g. 3 weeks, 6 months">
       </div>
+      <div class="form-group">
+        <label>Report language</label>
+        <select id="lang">
+          <option value="en">English</option>
+          <option value="ko">Korean (한국어)</option>
+        </select>
+      </div>
       <div class="form-group span-2">
         <label>Additional notes (optional)</label>
         <textarea id="notes" placeholder="Symptoms, prior treatments, Fitzpatrick type, relevant history…"></textarea>
@@ -210,11 +217,12 @@ function stopTicker(){clearInterval(tickInt);const el=document.getElementById('t
 const delay=ms=>new Promise(r=>setTimeout(r,ms));
 function confClass(pct){return pct>=65?'high':pct>=40?'mid':'low';}
 async function runAnalysis(){
-  const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim();
+  const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;
   const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
+  const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, reasoning, morphology, severity, workup, case titles, descriptions, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
   analyzeBtn.disabled=true;showProgress();
   await delay(300);setStep('vision');await delay(1100);setStep('pattern');await delay(800);setStep('search');startTicker();
-  const sys=`You are a board-certified dermatologist's AI assistant providing clinical decision support. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.\n\n{\n  "differentials": [\n    { "name": "Diagnosis name", "confidence": 78, "reasoning": "1-2 sentence clinical justification" }\n  ],\n  "morphology": "Detailed lesion description: size, shape, color, border, surface, distribution",\n  "severity": "Mild/Moderate/Severe — with brief rationale",\n  "workup": "Recommended next diagnostic or management steps",\n  "similar_cases": [\n    { "type": "classic",  "title": "Title", "description": "1-sentence description" },\n    { "type": "atypical", "title": "Title", "description": "1-sentence description" },\n    { "type": "mimic",    "title": "Title", "description": "1-sentence description" }\n  ],\n  "references": [\n    { "title": "Paper/guideline title", "relevance": "1-2 sentences on how this applies", "source": "Journal, year — DOI or URL" }\n  ]\n}\n\nRules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
+  const sys=`You are a board-certified dermatologist's AI assistant providing clinical decision support. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.\n\n${langInstruction}\n\n{\n  "differentials": [\n    { "name": "Diagnosis name", "confidence": 78, "reasoning": "1-2 sentence clinical justification" }\n  ],\n  "morphology": "Detailed lesion description: size, shape, color, border, surface, distribution",\n  "severity": "Mild/Moderate/Severe — with brief rationale",\n  "workup": "Recommended next diagnostic or management steps",\n  "similar_cases": [\n    { "type": "classic",  "title": "Title", "description": "1-sentence description" },\n    { "type": "atypical", "title": "Title", "description": "1-sentence description" },\n    { "type": "mimic",    "title": "Title", "description": "1-sentence description" }\n  ],\n  "references": [\n    { "title": "Paper/guideline title", "relevance": "1-2 sentences on how this applies", "source": "Journal, year — DOI or URL" }\n  ]\n}\n\nRules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
   try{
     const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
     const data=await resp.json();
