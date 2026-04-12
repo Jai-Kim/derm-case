@@ -25,18 +25,7 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .app-header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
 .app-header p { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.6; }
 
-.api-banner { background: var(--amber-light); border: 1px solid #E8CFA0; border-radius: var(--radius); padding: 13px 15px; margin-bottom: 1.25rem; transition: all 0.3s ease; }
-.api-banner-row { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-.api-banner label { font-size: 12.5px; font-weight: 500; color: var(--amber); white-space: nowrap; }
-.api-banner input { flex: 1; min-width: 180px; font-size: 13px; font-family: 'DM Mono', monospace; padding: 7px 10px; border: 1px solid #D4B87A; border-radius: var(--radius-sm); background: white; color: var(--text); outline: none; }
-.api-banner input:focus { border-color: var(--blue); }
-.api-banner .hint { font-size: 11px; color: var(--amber); opacity: 0.75; margin-top: 6px; }
-.api-set { display: flex; align-items: center; gap: 8px; }
-.api-set-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--green); flex-shrink: 0; }
-.api-set-label { font-size: 12.5px; color: var(--green); font-weight: 500; }
-.api-change-btn { font-size: 12px; color: var(--amber); background: none; border: none; cursor: pointer; padding: 0; margin-left: 4px; text-decoration: underline; font-family: 'DM Sans', sans-serif; opacity: 0.8; }
-.api-change-btn:hover { opacity: 1; }
-.api-banner.collapsed { background: var(--green-light); border-color: #A8D8BC; padding: 10px 15px; }
+
 
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
 .card-title { font-size: 10.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 1rem; }
@@ -171,23 +160,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
     </div>
   </div>
 
-  <div class="api-banner" id="apiBanner">
-    <div id="apiInputView">
-      <div class="api-banner-row">
-        <label>Anthropic API Key</label>
-        <input type="password" id="apiKey" placeholder="sk-ant-..." autocomplete="off" spellcheck="false">
-      </div>
-      <div class="hint">Stored in memory only. Press Enter or click away to confirm. Get yours at console.anthropic.com</div>
-    </div>
-    <div id="apiSetView" style="display:none;">
-      <div class="api-set">
-        <div class="api-set-dot"></div>
-        <span class="api-set-label">API key set</span>
-        <button class="api-change-btn" id="apiChangeBtn" type="button">change</button>
-      </div>
-    </div>
-  </div>
-
   <div class="card">
     <div class="card-title">Case photo</div>
     <div class="upload-zone" id="dropZone">
@@ -275,25 +247,9 @@ function loadImage(file) {
   r.readAsDataURL(file);
 }
 function updateBtn() {
-  analyzeBtn.disabled = !(imageBase64 && document.getElementById('apiKey').value.trim());
-}
-function collapseApiKey() {
-  if (!document.getElementById('apiKey').value.trim()) return;
-  document.getElementById('apiInputView').style.display = 'none';
-  document.getElementById('apiSetView').style.display = 'block';
-  document.getElementById('apiBanner').classList.add('collapsed');
-}
-function expandApiKey() {
-  document.getElementById('apiInputView').style.display = 'block';
-  document.getElementById('apiSetView').style.display = 'none';
-  document.getElementById('apiBanner').classList.remove('collapsed');
-  setTimeout(() => document.getElementById('apiKey').focus(), 50);
+  analyzeBtn.disabled = !imageBase64;
 }
 fileInput.addEventListener('change', e => loadImage(e.target.files[0]));
-document.getElementById('apiKey').addEventListener('input', updateBtn);
-document.getElementById('apiKey').addEventListener('blur', collapseApiKey);
-document.getElementById('apiKey').addEventListener('keydown', e => { if (e.key === 'Enter') { e.preventDefault(); collapseApiKey(); } });
-document.getElementById('apiChangeBtn').addEventListener('click', expandApiKey);
 dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
 dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); loadImage(e.dataTransfer.files[0]); });
@@ -367,7 +323,6 @@ const delay = ms => new Promise(r => setTimeout(r, ms));
 function confClass(pct) { return pct >= 65 ? 'high' : pct >= 40 ? 'mid' : 'low'; }
 
 async function runAnalysis() {
-  const apiKey   = document.getElementById('apiKey').value.trim();
   const age      = document.getElementById('age').value.trim();
   const sex      = document.getElementById('sex').value;
   const area     = document.getElementById('area').value.trim();
@@ -403,15 +358,9 @@ async function runAnalysis() {
 Rules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
 
   try {
-    const resp = await fetch('https://api.anthropic.com/v1/messages', {
+    const resp = await fetch('/api/analyze', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-        'x-api-key': apiKey,
-        'anthropic-version': '2023-06-01',
-        'anthropic-beta': 'web-search-2025-03-05',
-        'anthropic-dangerous-direct-browser-access': 'true'
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         model: 'claude-sonnet-4-20250514',
         max_tokens: 1800,
