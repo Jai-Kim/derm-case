@@ -234,6 +234,8 @@ async function runAnalysis(){
     let clean=raw.trim();
     const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
     if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
+    // Fix newlines inside JSON string values that break parsing
+    clean=clean.replace(/"((?:[^"\\]|\\.)*)"/gs,(match,inner)=>'"'+inner.replace(/\n/g,' ').replace(/\r/g,'')+ '"');
     let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
     renderOutput(parsed);
   }catch(err){stopTicker();outputArea.innerHTML=`<div class="error"><strong>Error</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
