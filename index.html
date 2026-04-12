@@ -244,10 +244,10 @@ const I18N = {
     copyChart: 'Copy for chart', copied: 'Copied!',
     shareReport: 'Share report', linkCopied: 'Link copied!',
     newCase: 'New case',
-    sectionDiff: t('sectionDiff'),
-    sectionDetail: t('sectionDetail'),
-    sectionLandscape: t('sectionLandscape'),
-    sectionLit: t('sectionLit'),
+    sectionDiff: 'Differential diagnoses',
+    sectionDetail: 'Clinical details',
+    sectionLandscape: 'Presentation landscape',
+    sectionLit: 'Published literature',
     tagClassic: 'Classic', tagAtypical: 'Atypical variant', tagMimic: 'Mimicker',
     stepVision: 'Analyzing image morphology', stepPattern: 'Pattern matching differentials',
     stepSearch: 'Searching published literature', stepCompile: 'Compiling clinical output',
@@ -326,7 +326,7 @@ function renderOutput(d){
   const detailHtml=details.map((item,i)=>`<div class="imp-item" id="ii-${i}"><span class="imp-label">${item.label}</span><br>${item.text}</div>`).join('');
   const casesHtml=cases.map((c,i)=>`<div class="case-card" id="cc-${i}"><div class="case-tag ${c.type}">${c.type==='classic'?t('tagClassic'):c.type==='atypical'?t('tagAtypical'):t('tagMimic')}</div><div class="case-name">${c.title}</div><div class="case-desc">${c.description}</div></div>`).join('');
   const refHtml=refs.map((r,i)=>`<div class="ref-item" id="ri-${i}"><div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`).join('');
-  outputArea.innerHTML=`<div class="result-card"><div class="result-section"><div class="result-section-title">Differential diagnoses</div>${diffHtml}</div>${detailHtml?`<div class="result-section"><div class="result-section-title">Clinical details</div>${detailHtml}</div>`:''} ${casesHtml?`<div class="result-section"><div class="result-section-title">Presentation landscape</div><div class="cases-grid">${casesHtml}</div></div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">Published literature</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">Copy for chart</button><button class="action-btn" id="shareBtn">Share report</button><button class="action-btn" id="newBtn">New case</button></div>`;
+  outputArea.innerHTML=`<div class="result-card"><div class="result-section"><div class="result-section-title">${t('sectionDiff')}</div>${diffHtml}</div>${detailHtml?`<div class="result-section"><div class="result-section-title">${t('sectionDetail')}</div>${detailHtml}</div>`:''} ${casesHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLandscape')}</div><div class="cases-grid">${casesHtml}</div></div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">Copy for chart</button><button class="action-btn" id="shareBtn">Share report</button><button class="action-btn" id="newBtn">New case</button></div>`;
   analyzeBtn.disabled=false;
   diffs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`di-${i}`);if(el)el.classList.add('visible');setTimeout(()=>{const bar=document.getElementById(`cf-${i}`);if(bar)bar.style.width=Math.min(100,parseInt(diffs[i].confidence)||0)+'%';},80);},i*120));
   const o=diffs.length*120;details.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ii-${i}`);if(el)el.classList.add('visible');},o+i*100));
