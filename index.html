@@ -19,17 +19,12 @@
 }
 body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
 .container { max-width: 700px; margin: 0 auto; }
-
 .app-header { margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 14px; }
 .header-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
 .app-header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
 .app-header p { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.6; }
-
-
-
 .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
 .card-title { font-size: 10.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 1rem; }
-
 .upload-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); min-height: 155px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: border-color 0.15s, background 0.15s; text-align: center; padding: 1.5rem; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-light); }
 .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
@@ -37,12 +32,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .upload-text span { color: var(--blue); }
 .upload-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
 .upload-ico { opacity: 0.25; margin-bottom: 10px; }
-
 .preview-wrap { position: relative; display: inline-block; }
 .preview-img { max-height: 195px; max-width: 100%; border-radius: var(--radius-sm); display: block; }
 .clear-btn { position: absolute; top: -9px; right: -9px; width: 23px; height: 23px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-2); transition: all 0.1s; }
 .clear-btn:hover { background: var(--red-light); color: var(--red-dark); }
-
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group.span-2 { grid-column: 1 / -1; }
@@ -50,21 +43,16 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .form-group input, .form-group select, .form-group textarea { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s, background 0.15s; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); background: white; }
 .form-group textarea { resize: vertical; min-height: 58px; }
-
 .submit-btn { width: 100%; margin-top: 1rem; padding: 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
 .submit-btn:hover:not(:disabled) { opacity: 0.88; }
 .submit-btn:active:not(:disabled) { transform: scale(0.99); }
 .submit-btn:disabled { opacity: 0.38; cursor: default; }
-
-/* Progress panel */
 .progress-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 1rem; animation: fadeUp 0.3s ease; }
 @keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-
 .progress-header { padding: 1rem 1.25rem 0.85rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
 .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; animation: pulse 1.2s ease-in-out infinite; }
 @keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
 .progress-header span { font-size: 13px; font-weight: 500; }
-
 .progress-steps { padding: 0.9rem 1.25rem; display: flex; flex-direction: column; gap: 11px; }
 .step-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-3); transition: color 0.3s; }
 .step-row.active { color: var(--text); }
@@ -73,18 +61,13 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .step-row.active .step-icon { border-color: var(--blue); background: var(--blue-light); animation: ringPulse 1s ease infinite; }
 @keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(26,86,160,0.2); } 50% { box-shadow: 0 0 0 4px rgba(26,86,160,0.08); } }
 .step-row.done .step-icon { border-color: var(--green); background: var(--green-light); color: var(--green); }
-
 .search-ticker { padding: 0.6rem 1.25rem 0.9rem; font-size: 11.5px; font-family: 'DM Mono', monospace; color: var(--text-3); border-top: 1px solid var(--border); min-height: 34px; }
 .ticker-line { animation: tickIn 0.2s ease; }
 @keyframes tickIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
-
-/* Results */
 .result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 1rem; animation: fadeUp 0.4s ease; }
 .result-section { padding: 1.1rem 1.25rem; }
 .result-section + .result-section { border-top: 1px solid var(--border); }
 .result-section-title { font-size: 10.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
-
-/* Differentials with confidence */
 .diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 11px 13px; margin-bottom: 9px; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .diff-item:last-child { margin-bottom: 0; }
 .diff-item.visible { opacity: 1; transform: translateY(0); }
@@ -100,14 +83,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .conf-fill.mid  { background: var(--blue); }
 .conf-fill.low  { background: #C8820A; }
 .diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.6; }
-
-/* Other details */
 .imp-item { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; font-size: 13.5px; line-height: 1.65; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .imp-item:last-child { margin-bottom: 0; }
 .imp-item.visible { opacity: 1; transform: translateY(0); }
 .imp-label { display: inline-block; font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--blue-light); color: var(--blue-dark); margin-bottom: 5px; }
-
-/* Similar cases */
 .cases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
 .case-card { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 11px 12px; background: var(--bg); opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .case-card.visible { opacity: 1; transform: translateY(0); }
@@ -118,24 +97,18 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .case-tag.mimic    { color: var(--amber); }
 .case-name { font-size: 12.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
 .case-desc { font-size: 11.5px; color: var(--text-2); line-height: 1.55; }
-
-/* References */
 .ref-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.65; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .ref-item:last-child { border-bottom: none; padding-bottom: 0; }
 .ref-item.visible { opacity: 1; transform: translateY(0); }
 .ref-title { font-weight: 500; }
 .ref-summary { color: var(--text-2); margin-top: 3px; }
 .ref-source { font-size: 11.5px; color: var(--blue); margin-top: 4px; font-family: 'DM Mono', monospace; }
-
 .actions { display: flex; gap: 8px; margin-top: 10px; margin-bottom: 1.5rem; }
 .action-btn { padding: 8px 15px; font-size: 13px; font-family: 'DM Sans', sans-serif; background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: background 0.1s, color 0.1s, border-color 0.1s; }
 .action-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-strong); }
-
 .error { padding: 14px 16px; border-radius: var(--radius); background: var(--red-light); color: var(--red-dark); font-size: 13px; line-height: 1.6; border: 1px solid #E8B8B8; margin-top: 1rem; }
 .error pre { margin-top: 8px; font-size: 11px; font-family: 'DM Mono', monospace; white-space: pre-wrap; word-break: break-all; opacity: 0.85; }
-
 .disclaimer { font-size: 11.5px; color: var(--text-3); line-height: 1.6; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-top: 0.5rem; }
-
 @media (max-width: 500px) {
   .form-grid { grid-template-columns: 1fr; }
   .form-group.span-2 { grid-column: 1; }
@@ -145,7 +118,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 </head>
 <body>
 <div class="container">
-
   <div class="app-header">
     <div class="header-icon">
       <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -159,7 +131,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       <p>AI-assisted differential diagnosis and literature guidance for dermatology cases.</p>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">Case photo</div>
     <div class="upload-zone" id="dropZone">
@@ -184,7 +155,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
   </div>
-
   <div class="card">
     <div class="card-title">Patient context</div>
     <div class="form-grid">
@@ -215,299 +185,65 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
       </div>
     </div>
   </div>
-
   <button class="submit-btn" id="analyzeBtn" disabled>Analyze case</button>
   <div id="outputArea"></div>
   <div class="disclaimer">For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.</div>
-
 </div>
 <script>
 let imageBase64 = null, imageMimeType = 'image/jpeg';
-
-const dropZone    = document.getElementById('dropZone');
-const fileInput   = document.getElementById('fileInput');
-const uploadPrompt= document.getElementById('uploadPrompt');
-const uploadPreview=document.getElementById('uploadPreview');
-const previewImg  = document.getElementById('previewImg');
-const clearBtn    = document.getElementById('clearBtn');
-const analyzeBtn  = document.getElementById('analyzeBtn');
-const outputArea  = document.getElementById('outputArea');
-
-function loadImage(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  imageMimeType = file.type;
-  const r = new FileReader();
-  r.onload = e => {
-    imageBase64 = e.target.result.split(',')[1];
-    previewImg.src = e.target.result;
-    uploadPrompt.style.display = 'none';
-    uploadPreview.style.display = 'block';
-    updateBtn();
-  };
-  r.readAsDataURL(file);
-}
-function updateBtn() {
-  analyzeBtn.disabled = !imageBase64;
-}
-fileInput.addEventListener('change', e => loadImage(e.target.files[0]));
-dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
-dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop', e => { e.preventDefault(); dropZone.classList.remove('drag-over'); loadImage(e.dataTransfer.files[0]); });
-clearBtn.addEventListener('click', e => {
-  e.stopPropagation();
-  imageBase64 = null; previewImg.src = ''; fileInput.value = '';
-  uploadPrompt.style.display = 'block'; uploadPreview.style.display = 'none';
-  outputArea.innerHTML = ''; updateBtn();
-});
-analyzeBtn.addEventListener('click', runAnalysis);
-
-const STEPS = [
-  { id:'vision',  label:'Analyzing image morphology' },
-  { id:'pattern', label:'Pattern matching differentials' },
-  { id:'search',  label:'Searching published literature' },
-  { id:'compile', label:'Compiling clinical output' }
-];
-const TICKERS = [
-  'Querying PubMed database…',
-  'Scanning JAAD archives…',
-  'Reviewing AAD clinical guidelines…',
-  'Cross-referencing NEJM case reports…',
-  'Evaluating Cochrane evidence…',
-  'Checking recent meta-analyses…',
-  'Ranking sources by relevance…',
-  'Filtering highest-quality evidence…'
-];
-
-function showProgress() {
-  outputArea.innerHTML = `
-    <div class="progress-panel">
-      <div class="progress-header"><div class="pulse-dot"></div><span>Running case analysis</span></div>
-      <div class="progress-steps" id="pSteps">
-        ${STEPS.map((s,i)=>`<div class="step-row" id="sr-${s.id}"><div class="step-icon" id="si-${s.id}">${i+1}</div><span>${s.label}</span></div>`).join('')}
-      </div>
-      <div class="search-ticker" id="ticker"></div>
-    </div>`;
-}
-
-function setStep(id) {
-  const activeIdx = STEPS.findIndex(s => s.id === id);
-  STEPS.forEach((s, i) => {
-    const row = document.getElementById(`sr-${s.id}`);
-    const ico = document.getElementById(`si-${s.id}`);
-    if (!row) return;
-    if (i < activeIdx)      { row.className = 'step-row done';   ico.textContent = '✓'; }
-    else if (i === activeIdx){ row.className = 'step-row active'; ico.textContent = ''; }
-    else                    { row.className = 'step-row';        ico.textContent = i+1; }
-  });
-}
-
-let tickInt = null;
-function startTicker() {
-  const el = document.getElementById('ticker'); if (!el) return;
-  let i = 0;
-  el.innerHTML = `<div class="ticker-line">${TICKERS[0]}</div>`;
-  tickInt = setInterval(() => {
-    const t = document.getElementById('ticker'); if (!t) { clearInterval(tickInt); return; }
-    i = (i+1) % TICKERS.length;
-    t.innerHTML = `<div class="ticker-line">${TICKERS[i]}</div>`;
-  }, 1400);
-}
-function stopTicker() {
-  clearInterval(tickInt);
-  const el = document.getElementById('ticker');
-  if (el) el.innerHTML = `<div class="ticker-line" style="color:var(--green);">Literature search complete</div>`;
-}
-
-const delay = ms => new Promise(r => setTimeout(r, ms));
-
-function confClass(pct) { return pct >= 65 ? 'high' : pct >= 40 ? 'mid' : 'low'; }
-
-async function runAnalysis() {
-  const age      = document.getElementById('age').value.trim();
-  const sex      = document.getElementById('sex').value;
-  const area     = document.getElementById('area').value.trim();
-  const duration = document.getElementById('duration').value.trim();
-  const notes    = document.getElementById('notes').value.trim();
-  const ctx = [age&&`Age: ${age}`, sex&&`Sex: ${sex}`, area&&`Affected area: ${area}`, duration&&`Duration: ${duration}`, notes&&`Notes: ${notes}`].filter(Boolean).join('\n') || 'No patient context provided.';
-
-  analyzeBtn.disabled = true;
-  showProgress();
-  await delay(300); setStep('vision');
-  await delay(1100); setStep('pattern');
-  await delay(800); setStep('search'); startTicker();
-
-  const sys = `You are a board-certified dermatologist's AI assistant providing clinical decision support. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
-
-{
-  "differentials": [
-    { "name": "Diagnosis name", "confidence": 78, "reasoning": "1-2 sentence clinical justification" }
-  ],
-  "morphology": "Detailed lesion description: size, shape, color, border, surface, distribution",
-  "severity": "Mild/Moderate/Severe — with brief rationale",
-  "workup": "Recommended next diagnostic or management steps",
-  "similar_cases": [
-    { "type": "classic",  "title": "Title", "description": "1-sentence description" },
-    { "type": "atypical", "title": "Title", "description": "1-sentence description" },
-    { "type": "mimic",    "title": "Title", "description": "1-sentence description" }
-  ],
-  "references": [
-    { "title": "Paper/guideline title", "relevance": "1-2 sentences on how this applies", "source": "Journal, year — DOI or URL" }
-  ]
-}
-
-Rules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
-
-  try {
-    const resp = await fetch('/api/analyze', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        model: 'claude-sonnet-4-20250514',
-        max_tokens: 1800,
-        system: sys,
-        tools: [{ type: 'web_search_20250305', name: 'web_search' }],
-        messages: [{
-          role: 'user',
-          content: [
-            { type: 'image', source: { type: 'base64', media_type: imageMimeType, data: imageBase64 } },
-            { type: 'text', text: `Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.` }
-          ]
-        }]
-      })
-    });
-
-    const data = await resp.json();
-    if (!resp.ok || data.error) throw new Error(JSON.stringify(data.error || data, null, 2));
-
-    let raw = '';
-    for (const b of (data.content || [])) { if (b.type === 'text') raw += b.text; }
-    if (!raw) throw new Error('No text in response.\n\n' + JSON.stringify(data, null, 2));
-
-    stopTicker();
-    await delay(350); setStep('compile');
-    await delay(600);
-
-    let clean = raw.trim();
-    const fenceMatch = clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if (fenceMatch) { clean = fenceMatch[1].trim(); } else { const b0 = clean.indexOf('{'), b1 = clean.lastIndexOf('}'); if (b0 !== -1 && b1 !== -1) clean = clean.slice(b0, b1+1); }
-    let parsed;
-    try { parsed = JSON.parse(clean); }
-    catch(e) { throw new Error('JSON parse failed.\n\nRaw:\n' + raw); }
-
+const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
+function loadImage(file){if(!file||!file.type.startsWith('image/'))return;imageMimeType=file.type;const r=new FileReader();r.onload=e=>{imageBase64=e.target.result.split(',')[1];previewImg.src=e.target.result;uploadPrompt.style.display='none';uploadPreview.style.display='block';updateBtn();};r.readAsDataURL(file);}
+function updateBtn(){analyzeBtn.disabled=!imageBase64;}
+fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');loadImage(e.dataTransfer.files[0]);});
+clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';outputArea.innerHTML='';updateBtn();});
+analyzeBtn.addEventListener('click',runAnalysis);
+const STEPS=[{id:'vision',label:'Analyzing image morphology'},{id:'pattern',label:'Pattern matching differentials'},{id:'search',label:'Searching published literature'},{id:'compile',label:'Compiling clinical output'}];
+const TICKERS=['Querying PubMed database…','Scanning JAAD archives…','Reviewing AAD clinical guidelines…','Cross-referencing NEJM case reports…','Evaluating Cochrane evidence…','Checking recent meta-analyses…','Ranking sources by relevance…','Filtering highest-quality evidence…'];
+function showProgress(){outputArea.innerHTML=`<div class="progress-panel"><div class="progress-header"><div class="pulse-dot"></div><span>Running case analysis</span></div><div class="progress-steps" id="pSteps">${STEPS.map((s,i)=>`<div class="step-row" id="sr-${s.id}"><div class="step-icon" id="si-${s.id}">${i+1}</div><span>${s.label}</span></div>`).join('')}</div><div class="search-ticker" id="ticker"></div></div>`;}
+function setStep(id){const activeIdx=STEPS.findIndex(s=>s.id===id);STEPS.forEach((s,i)=>{const row=document.getElementById(`sr-${s.id}`),ico=document.getElementById(`si-${s.id}`);if(!row)return;if(i<activeIdx){row.className='step-row done';ico.textContent='✓';}else if(i===activeIdx){row.className='step-row active';ico.textContent='';}else{row.className='step-row';ico.textContent=i+1;}});}
+let tickInt=null;
+function startTicker(){const el=document.getElementById('ticker');if(!el)return;let i=0;el.innerHTML=`<div class="ticker-line">${TICKERS[0]}</div>`;tickInt=setInterval(()=>{const t=document.getElementById('ticker');if(!t){clearInterval(tickInt);return;}i=(i+1)%TICKERS.length;t.innerHTML=`<div class="ticker-line">${TICKERS[i]}</div>`;},1400);}
+function stopTicker(){clearInterval(tickInt);const el=document.getElementById('ticker');if(el)el.innerHTML=`<div class="ticker-line" style="color:var(--green);">Literature search complete</div>`;}
+const delay=ms=>new Promise(r=>setTimeout(r,ms));
+function confClass(pct){return pct>=65?'high':pct>=40?'mid':'low';}
+async function runAnalysis(){
+  const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim();
+  const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
+  analyzeBtn.disabled=true;showProgress();
+  await delay(300);setStep('vision');await delay(1100);setStep('pattern');await delay(800);setStep('search');startTicker();
+  const sys=`You are a board-certified dermatologist's AI assistant providing clinical decision support. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.\n\n{\n  "differentials": [\n    { "name": "Diagnosis name", "confidence": 78, "reasoning": "1-2 sentence clinical justification" }\n  ],\n  "morphology": "Detailed lesion description: size, shape, color, border, surface, distribution",\n  "severity": "Mild/Moderate/Severe — with brief rationale",\n  "workup": "Recommended next diagnostic or management steps",\n  "similar_cases": [\n    { "type": "classic",  "title": "Title", "description": "1-sentence description" },\n    { "type": "atypical", "title": "Title", "description": "1-sentence description" },\n    { "type": "mimic",    "title": "Title", "description": "1-sentence description" }\n  ],\n  "references": [\n    { "title": "Paper/guideline title", "relevance": "1-2 sentences on how this applies", "source": "Journal, year — DOI or URL" }\n  ]\n}\n\nRules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
+  try{
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
+    const data=await resp.json();
+    if(!resp.ok||data.error)throw new Error(JSON.stringify(data.error||data,null,2));
+    let raw='';
+    for(const b of(data.content||[])){if(b.type==='text')raw+=b.text;}
+    if(!raw)throw new Error('No text in response.\n\n'+JSON.stringify(data,null,2));
+    stopTicker();await delay(350);setStep('compile');await delay(600);
+    let clean=raw.trim();
+    const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
+    if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
+    let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
     renderOutput(parsed);
-
-  } catch(err) {
-    stopTicker();
-    outputArea.innerHTML = `<div class="error"><strong>Error</strong><pre>${err.message}</pre></div>`;
-    analyzeBtn.disabled = false;
-  }
+  }catch(err){stopTicker();outputArea.innerHTML=`<div class="error"><strong>Error</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
 }
-
-function renderOutput(d) {
-  const diffs = d.differentials || [];
-  const details = [
-    { label: 'Morphology', text: d.morphology },
-    { label: 'Severity',   text: d.severity },
-    { label: 'Workup',     text: d.workup }
-  ].filter(x => x.text);
-  const cases = d.similar_cases || [];
-  const refs  = d.references || [];
-
-  const diffHtml = diffs.map((item, i) => {
-    const pct = Math.min(100, Math.max(0, parseInt(item.confidence)||0));
-    const cls = confClass(pct);
-    return `<div class="diff-item" id="di-${i}">
-      <div class="diff-top">
-        <span class="diff-name">${item.name}</span>
-        <span class="diff-pct ${cls}">${pct}%</span>
-      </div>
-      <div class="conf-track"><div class="conf-fill ${cls}" id="cf-${i}"></div></div>
-      <div class="diff-reasoning">${item.reasoning}</div>
-    </div>`;
-  }).join('');
-
-  const detailHtml = details.map((item,i) =>
-    `<div class="imp-item" id="ii-${i}"><span class="imp-label">${item.label}</span><br>${item.text}</div>`
-  ).join('');
-
-  const casesHtml = cases.map((c,i) =>
-    `<div class="case-card" id="cc-${i}">
-      <div class="case-tag ${c.type}">${c.type==='classic'?'Classic':c.type==='atypical'?'Atypical variant':'Mimicker'}</div>
-      <div class="case-name">${c.title}</div>
-      <div class="case-desc">${c.description}</div>
-    </div>`
-  ).join('');
-
-  const refHtml = refs.map((r,i) =>
-    `<div class="ref-item" id="ri-${i}">
-      <div class="ref-title">${r.title}</div>
-      <div class="ref-summary">${r.relevance}</div>
-      <div class="ref-source">${r.source}</div>
-    </div>`
-  ).join('');
-
-  outputArea.innerHTML = `
-    <div class="result-card">
-      <div class="result-section">
-        <div class="result-section-title">Differential diagnoses</div>
-        ${diffHtml}
-      </div>
-      ${detailHtml ? `<div class="result-section">
-        <div class="result-section-title">Clinical details</div>
-        ${detailHtml}
-      </div>` : ''}
-      ${casesHtml ? `<div class="result-section">
-        <div class="result-section-title">Presentation landscape</div>
-        <div class="cases-grid">${casesHtml}</div>
-      </div>` : ''}
-      ${refHtml ? `<div class="result-section">
-        <div class="result-section-title">Published literature</div>
-        ${refHtml}
-      </div>` : ''}
-    </div>
-    <div class="actions">
-      <button class="action-btn" id="copyBtn">Copy for chart</button>
-      <button class="action-btn" id="newBtn">New case</button>
-    </div>`;
-
-  analyzeBtn.disabled = false;
-
-  // Staggered entrance animations
-  diffs.forEach((_,i) => setTimeout(() => {
-    const el = document.getElementById(`di-${i}`); if (el) el.classList.add('visible');
-    setTimeout(() => {
-      const bar = document.getElementById(`cf-${i}`);
-      if (bar) bar.style.width = Math.min(100, parseInt(diffs[i].confidence)||0) + '%';
-    }, 80);
-  }, i * 120));
-
-  const o = diffs.length * 120;
-  details.forEach((_,i) => setTimeout(() => { const el = document.getElementById(`ii-${i}`); if (el) el.classList.add('visible'); }, o + i*100));
-  const o2 = o + details.length * 100;
-  cases.forEach((_,i) => setTimeout(() => { const el = document.getElementById(`cc-${i}`); if (el) el.classList.add('visible'); }, o2 + i*80));
-  const o3 = o2 + cases.length * 80;
-  refs.forEach((_,i)  => setTimeout(() => { const el = document.getElementById(`ri-${i}`); if (el) el.classList.add('visible'); }, o3 + i*90));
-
-  document.getElementById('copyBtn').addEventListener('click', () => {
-    const lines = ['DIFFERENTIAL DIAGNOSES'];
-    diffs.forEach(x => lines.push(`• ${x.name} (${x.confidence}%) — ${x.reasoning}`));
-    if (d.morphology) lines.push(`\nMorphology: ${d.morphology}`);
-    if (d.severity)   lines.push(`Severity: ${d.severity}`);
-    if (d.workup)     lines.push(`Workup: ${d.workup}`);
-    lines.push('\nLITERATURE REFERENCES');
-    refs.forEach((r,i) => lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));
-    navigator.clipboard.writeText(lines.join('\n')).then(() => {
-      const btn = document.getElementById('copyBtn');
-      btn.textContent = 'Copied!';
-      setTimeout(() => btn.textContent = 'Copy for chart', 2000);
-    });
-  });
-
-  document.getElementById('newBtn').addEventListener('click', () => {
-    clearBtn.click();
-    ['age','sex','area','duration','notes'].forEach(id => { const el = document.getElementById(id); if (el) el.value=''; });
-    outputArea.innerHTML = '';
-  });
+function renderOutput(d){
+  const diffs=d.differentials||[],details=[{label:'Morphology',text:d.morphology},{label:'Severity',text:d.severity},{label:'Workup',text:d.workup}].filter(x=>x.text),cases=d.similar_cases||[],refs=d.references||[];
+  const diffHtml=diffs.map((item,i)=>{const pct=Math.min(100,Math.max(0,parseInt(item.confidence)||0)),cls=confClass(pct);return`<div class="diff-item" id="di-${i}"><div class="diff-top"><span class="diff-name">${item.name}</span><span class="diff-pct ${cls}">${pct}%</span></div><div class="conf-track"><div class="conf-fill ${cls}" id="cf-${i}"></div></div><div class="diff-reasoning">${item.reasoning}</div></div>`;}).join('');
+  const detailHtml=details.map((item,i)=>`<div class="imp-item" id="ii-${i}"><span class="imp-label">${item.label}</span><br>${item.text}</div>`).join('');
+  const casesHtml=cases.map((c,i)=>`<div class="case-card" id="cc-${i}"><div class="case-tag ${c.type}">${c.type==='classic'?'Classic':c.type==='atypical'?'Atypical variant':'Mimicker'}</div><div class="case-name">${c.title}</div><div class="case-desc">${c.description}</div></div>`).join('');
+  const refHtml=refs.map((r,i)=>`<div class="ref-item" id="ri-${i}"><div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`).join('');
+  outputArea.innerHTML=`<div class="result-card"><div class="result-section"><div class="result-section-title">Differential diagnoses</div>${diffHtml}</div>${detailHtml?`<div class="result-section"><div class="result-section-title">Clinical details</div>${detailHtml}</div>`:''} ${casesHtml?`<div class="result-section"><div class="result-section-title">Presentation landscape</div><div class="cases-grid">${casesHtml}</div></div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">Published literature</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">Copy for chart</button><button class="action-btn" id="newBtn">New case</button></div>`;
+  analyzeBtn.disabled=false;
+  diffs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`di-${i}`);if(el)el.classList.add('visible');setTimeout(()=>{const bar=document.getElementById(`cf-${i}`);if(bar)bar.style.width=Math.min(100,parseInt(diffs[i].confidence)||0)+'%';},80);},i*120));
+  const o=diffs.length*120;details.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ii-${i}`);if(el)el.classList.add('visible');},o+i*100));
+  const o2=o+details.length*100;cases.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`cc-${i}`);if(el)el.classList.add('visible');},o2+i*80));
+  const o3=o2+cases.length*80;refs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ri-${i}`);if(el)el.classList.add('visible');},o3+i*90));
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['DIFFERENTIAL DIAGNOSES'];diffs.forEach(x=>lines.push(`• ${x.name} (${x.confidence}%) — ${x.reasoning}`));if(d.morphology)lines.push(`\nMorphology: ${d.morphology}`);if(d.severity)lines.push(`Severity: ${d.severity}`);if(d.workup)lines.push(`Workup: ${d.workup}`);lines.push('\nLITERATURE REFERENCES');refs.forEach((r,i)=>lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy for chart',2000);});});
+  document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
 </body>
