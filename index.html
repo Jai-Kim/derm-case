@@ -252,6 +252,12 @@ function renderOutput(d){
   const o=diffs.length*120;details.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ii-${i}`);if(el)el.classList.add('visible');},o+i*100));
   const o2=o+details.length*100;cases.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`cc-${i}`);if(el)el.classList.add('visible');},o2+i*80));
   const o3=o2+cases.length*80;refs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ri-${i}`);if(el)el.classList.add('visible');},o3+i*90));
+  document.getElementById('shareBtn').addEventListener('click',()=>{
+    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
+    const payload=btoa(JSON.stringify({result:d,meta}));
+    const url=window.location.origin+'/report.html#'+payload;
+    navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent='Link copied!';setTimeout(()=>btn.textContent='Share report',2000);});
+  });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['DIFFERENTIAL DIAGNOSES'];diffs.forEach(x=>lines.push(`• ${x.name} (${x.confidence}%) — ${x.reasoning}`));if(d.morphology)lines.push(`\nMorphology: ${d.morphology}`);if(d.severity)lines.push(`Severity: ${d.severity}`);if(d.workup)lines.push(`Workup: ${d.workup}`);lines.push('\nLITERATURE REFERENCES');refs.forEach((r,i)=>lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent='Copied!';setTimeout(()=>btn.textContent='Copy for chart',2000);});});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
