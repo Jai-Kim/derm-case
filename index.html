@@ -71,32 +71,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 11px 13px; margin-bottom: 9px; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .diff-item:last-child { margin-bottom: 0; }
 .diff-item.visible { opacity: 1; transform: translateY(0); }
-.diff-top { display: flex; align-items: center; justify-content: space-between; gap: 10px; margin-bottom: 7px; }
 .diff-name { font-size: 14px; font-weight: 500; }
-.diff-pct { font-size: 13px; font-weight: 500; font-family: 'DM Mono', monospace; }
-.diff-pct.high { color: var(--green); }
-.diff-pct.mid  { color: var(--blue); }
-.diff-pct.low  { color: var(--amber); }
-.conf-track { height: 4px; background: var(--border); border-radius: 99px; overflow: hidden; margin-bottom: 8px; }
-.conf-fill { height: 100%; border-radius: 99px; width: 0; transition: width 0.95s cubic-bezier(0.22,1,0.36,1); }
-.conf-fill.high { background: #27A060; }
-.conf-fill.mid  { background: var(--blue); }
-.conf-fill.low  { background: #C8820A; }
 .diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.6; }
-.imp-item { background: var(--bg); border-radius: var(--radius-sm); padding: 10px 12px; margin-bottom: 8px; font-size: 13.5px; line-height: 1.65; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
-.imp-item:last-child { margin-bottom: 0; }
-.imp-item.visible { opacity: 1; transform: translateY(0); }
-.imp-label { display: inline-block; font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; background: var(--blue-light); color: var(--blue-dark); margin-bottom: 5px; }
-.cases-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 9px; }
-.case-card { border-radius: var(--radius-sm); border: 1px solid var(--border); padding: 11px 12px; background: var(--bg); opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
-.case-card.visible { opacity: 1; transform: translateY(0); }
-.case-card:hover { border-color: var(--border-strong); background: white; }
-.case-tag { font-size: 10px; font-weight: 500; letter-spacing: 0.07em; text-transform: uppercase; margin-bottom: 5px; }
-.case-tag.classic  { color: var(--green); }
-.case-tag.atypical { color: var(--blue); }
-.case-tag.mimic    { color: var(--amber); }
-.case-name { font-size: 12.5px; font-weight: 500; color: var(--text); margin-bottom: 4px; line-height: 1.35; }
-.case-desc { font-size: 11.5px; color: var(--text-2); line-height: 1.55; }
 .ref-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.65; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
 .ref-item:last-child { border-bottom: none; padding-bottom: 0; }
 .ref-item.visible { opacity: 1; transform: translateY(0); }
@@ -112,7 +88,6 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 @media (max-width: 500px) {
   .form-grid { grid-template-columns: 1fr; }
   .form-group.span-2 { grid-column: 1; }
-  .cases-grid { grid-template-columns: 1fr; }
 }
 </style>
 </head>
@@ -216,9 +191,7 @@ const I18N = {
     copyChart: '차트에 복사', copied: '복사됨!',
     shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
     newCase: '새 증례',
-    sectionDiff: '감별 진단',
-    sectionDetail: '임상 세부사항',
-    sectionLandscape: '증례 유형',
+    sectionAssessment: '임상 평가',
     sectionLit: '관련 문헌',
     tagClassic: '전형적', tagAtypical: '비전형 변이', tagMimic: '유사 질환',
     stepVision: '이미지 형태 분석 중', stepPattern: '감별진단 패턴 매칭 중',
@@ -244,10 +217,8 @@ const I18N = {
     copyChart: 'Copy for chart', copied: 'Copied!',
     shareReport: 'Share report', linkCopied: 'Link copied!',
     newCase: 'New case',
-    sectionDiff: 'Differential diagnoses',
-    sectionDetail: 'Clinical details',
-    sectionLandscape: 'Presentation landscape',
-    sectionLit: 'Published literature',
+    sectionAssessment: 'Clinical assessment',
+    sectionLit: 'Literature'
     tagClassic: 'Classic', tagAtypical: 'Atypical variant', tagMimic: 'Mimicker',
     stepVision: 'Analyzing image morphology', stepPattern: 'Pattern matching differentials',
     stepSearch: 'Searching published literature', stepCompile: 'Compiling clinical output',
@@ -318,10 +289,25 @@ function confClass(pct){return pct>=65?'high':pct>=40?'mid':'low';}
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
   const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
-  const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, reasoning, morphology, severity, workup, case titles, descriptions, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
+  const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, rationale, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
   analyzeBtn.disabled=true;showProgress();
   await delay(300);setStep('vision');await delay(1100);setStep('pattern');await delay(800);setStep('search');startTicker();
-  const sys=`You are a board-certified dermatologist's AI assistant providing clinical decision support. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.\n\n${langInstruction}\n\n{\n  "differentials": [\n    { "name": "Diagnosis name", "confidence": 78, "reasoning": "1-2 sentence clinical justification" }\n  ],\n  "morphology": "Detailed lesion description: size, shape, color, border, surface, distribution",\n  "severity": "Mild/Moderate/Severe — with brief rationale",\n  "workup": "Recommended next diagnostic or management steps",\n  "similar_cases": [\n    { "type": "classic",  "title": "Title", "description": "1-sentence description" },\n    { "type": "atypical", "title": "Title", "description": "1-sentence description" },\n    { "type": "mimic",    "title": "Title", "description": "1-sentence description" }\n  ],\n  "references": [\n    { "title": "Paper/guideline title", "relevance": "1-2 sentences on how this applies", "source": "Journal, year — DOI or URL" }\n  ]\n}\n\nRules: differentials 2-4 entries ranked by confidence (integer 0-100). similar_cases exactly 3 entries with types classic/atypical/mimic. references 3-5 from PubMed/JAAD/NEJM/AAD/Cochrane, prefer last 10 years.`;
+  const sys=`You are a clinical literature assistant for practicing dermatologists. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
+
+${langInstruction}
+
+{
+  "assessment": [
+    { "diagnosis": "Diagnosis name", "rationale": "1-2 sentence clinical rationale based on visible morphology and patient context" }
+  ],
+  "references": [
+    { "title": "Paper or guideline title", "relevance": "1-2 sentences on direct applicability to this specific case", "source": "Journal, year — DOI or URL" }
+  ]
+}
+
+Rules:
+- assessment: 1-2 entries only, ranked by likelihood. No confidence numbers.
+- references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.`
   try{
     const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
     let data;
@@ -343,24 +329,20 @@ async function runAnalysis(){
   }catch(err){stopTicker();outputArea.innerHTML=`<div class="error"><strong>${t('errStrong')}</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
 }
 function renderOutput(d){
-  const diffs=d.differentials||[],details=[{label:'Morphology',text:d.morphology},{label:'Severity',text:d.severity},{label:'Workup',text:d.workup}].filter(x=>x.text),cases=d.similar_cases||[],refs=d.references||[];
-  const diffHtml=diffs.map((item,i)=>{const pct=Math.min(100,Math.max(0,parseInt(item.confidence)||0)),cls=confClass(pct);return`<div class="diff-item" id="di-${i}"><div class="diff-top"><span class="diff-name">${item.name}</span><span class="diff-pct ${cls}">${pct}%</span></div><div class="conf-track"><div class="conf-fill ${cls}" id="cf-${i}"></div></div><div class="diff-reasoning">${item.reasoning}</div></div>`;}).join('');
-  const detailHtml=details.map((item,i)=>`<div class="imp-item" id="ii-${i}"><span class="imp-label">${item.label}</span><br>${item.text}</div>`).join('');
-  const casesHtml=cases.map((c,i)=>`<div class="case-card" id="cc-${i}"><div class="case-tag ${c.type}">${c.type==='classic'?t('tagClassic'):c.type==='atypical'?t('tagAtypical'):t('tagMimic')}</div><div class="case-name">${c.title}</div><div class="case-desc">${c.description}</div></div>`).join('');
+  const assessment=d.assessment||[],refs=d.references||[];
+  const assessHtml=assessment.map((item,i)=>`<div class="diff-item" id="di-${i}"><div class="diff-top"><span class="diff-name">${item.diagnosis}</span></div><div class="diff-reasoning">${item.rationale}</div></div>`).join('');
   const refHtml=refs.map((r,i)=>`<div class="ref-item" id="ri-${i}"><div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`).join('');
-  outputArea.innerHTML=`<div class="result-card"><div class="result-section"><div class="result-section-title">${t('sectionDiff')}</div>${diffHtml}</div>${detailHtml?`<div class="result-section"><div class="result-section-title">${t('sectionDetail')}</div>${detailHtml}</div>`:''} ${casesHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLandscape')}</div><div class="cases-grid">${casesHtml}</div></div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">Copy for chart</button><button class="action-btn" id="shareBtn">Share report</button><button class="action-btn" id="newBtn">${t('newCase')}</button></div>`;
+  outputArea.innerHTML=`<div class="result-card">${assessHtml?`<div class="result-section"><div class="result-section-title">${t('sectionAssessment')}</div>${assessHtml}</div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">${t('copyChart')}</button><button class="action-btn" id="shareBtn">${t('shareReport')}</button><button class="action-btn" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
-  diffs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`di-${i}`);if(el)el.classList.add('visible');setTimeout(()=>{const bar=document.getElementById(`cf-${i}`);if(bar)bar.style.width=Math.min(100,parseInt(diffs[i].confidence)||0)+'%';},80);},i*120));
-  const o=diffs.length*120;details.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ii-${i}`);if(el)el.classList.add('visible');},o+i*100));
-  const o2=o+details.length*100;cases.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`cc-${i}`);if(el)el.classList.add('visible');},o2+i*80));
-  const o3=o2+cases.length*80;refs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ri-${i}`);if(el)el.classList.add('visible');},o3+i*90));
+  assessment.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`di-${i}`);if(el)el.classList.add('visible');},i*120));
+  const o=assessment.length*120;refs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ri-${i}`);if(el)el.classList.add('visible');},o+i*90));
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
     const payload=btoa(JSON.stringify({result:d,meta}));
     const url=window.location.origin+'/report.html#'+payload;
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['DIFFERENTIAL DIAGNOSES'];diffs.forEach(x=>lines.push(`• ${x.name} (${x.confidence}%) — ${x.reasoning}`));if(d.morphology)lines.push(`\nMorphology: ${d.morphology}`);if(d.severity)lines.push(`Severity: ${d.severity}`);if(d.workup)lines.push(`Workup: ${d.workup}`);lines.push('\nLITERATURE REFERENCES');refs.forEach((r,i)=>lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis} — ${x.rationale}`));lines.push('\nLITERATURE');refs.forEach((r,i)=>lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
