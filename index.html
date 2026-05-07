@@ -111,6 +111,10 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
         <div class="upload-text" data-i18n="uploadText"></div>
         <div class="upload-sub" data-i18n="uploadSub"></div>
       </div>
+      <div id="uploadLoading" style="display:none; align-items:center; gap:10px; color:var(--text-2); font-size:13px;">
+        <div class="spinner"></div>
+        <span data-i18n="optimizing"></span>
+      </div>
       <div id="uploadPreview" style="display:none;">
         <div class="preview-wrap">
           <img class="preview-img" id="previewImg" src="" alt="">
@@ -177,6 +181,7 @@ const I18N = {
     analyzeBtn: '증례 분석',
     disclaimer: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
     analyzing: '증례 분석 중',
+    optimizing: '이미지 처리 중…',
     copyChart: '차트에 복사', copied: '복사됨!',
     shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
     newCase: '새 증례',
@@ -204,6 +209,7 @@ const I18N = {
     analyzeBtn: 'Analyze case',
     disclaimer: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
     analyzing: 'Running case analysis',
+    optimizing: 'Optimizing image…',
     copyChart: 'Copy for chart', copied: 'Copied!',
     shareReport: 'Share report', linkCopied: 'Link copied!',
     newCase: 'New case',
@@ -238,24 +244,37 @@ function applyI18n() {
 
 let currentLang = 'ko';
 let imageBase64 = null, imageMimeType = 'image/jpeg';
-const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
+const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),uploadLoading=document.getElementById('uploadLoading'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
 function loadImage(file){
   if(!file||!file.type.startsWith('image/'))return;
   imageMimeType='image/jpeg';
+  uploadPrompt.style.display='none';
+  uploadPreview.style.display='none';
+  uploadLoading.style.display='flex';
   const img=new Image();
   const objectUrl=URL.createObjectURL(file);
   img.onload=()=>{
+    // Defer the heavy canvas work so the loading state renders first
+    setTimeout(()=>{
+      URL.revokeObjectURL(objectUrl);
+      const MAX=1200;
+      let w=img.width,h=img.height;
+      if(w>MAX||h>MAX){const s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}
+      const canvas=document.createElement('canvas');
+      canvas.width=w;canvas.height=h;
+      canvas.getContext('2d').drawImage(img,0,0,w,h);
+      const dataUrl=canvas.toDataURL('image/jpeg',0.82);
+      imageBase64=dataUrl.split(',')[1];
+      previewImg.src=dataUrl;
+      uploadLoading.style.display='none';
+      uploadPreview.style.display='block';
+      updateBtn();
+    },0);
+  };
+  img.onerror=()=>{
     URL.revokeObjectURL(objectUrl);
-    const MAX=1200;
-    let w=img.width,h=img.height;
-    if(w>MAX||h>MAX){const s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}
-    const canvas=document.createElement('canvas');
-    canvas.width=w;canvas.height=h;
-    canvas.getContext('2d').drawImage(img,0,0,w,h);
-    const dataUrl=canvas.toDataURL('image/jpeg',0.82);
-    imageBase64=dataUrl.split(',')[1];
-    previewImg.src=dataUrl;
-    uploadPrompt.style.display='none';uploadPreview.style.display='block';updateBtn();
+    uploadLoading.style.display='none';
+    uploadPrompt.style.display='block';
   };
   img.src=objectUrl;
 }
@@ -266,7 +285,7 @@ fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');loadImage(e.dataTransfer.files[0]);});
-clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';outputArea.innerHTML='';updateBtn();});
+clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';uploadLoading.style.display='none';outputArea.innerHTML='';updateBtn();});
 analyzeBtn.addEventListener('click',runAnalysis);
 function showProgress(){outputArea.innerHTML=`<div class="progress-panel"><div class="spinner"></div><span>${t('analyzing')}</span></div>`;}
 async function runAnalysis(){
