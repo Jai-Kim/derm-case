@@ -17,14 +17,14 @@
   --red-light: #FBEAEA; --red-dark: #7A1A1A;
   --radius: 12px; --radius-sm: 7px;
 }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 2rem 1rem 4rem; }
+body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem 1rem 3rem; -webkit-font-smoothing: antialiased; }
 .container { max-width: 700px; margin: 0 auto; }
-.app-header { margin-bottom: 2rem; display: flex; align-items: flex-start; gap: 14px; }
-.header-icon { width: 40px; height: 40px; border-radius: 10px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; margin-top: 2px; }
-.app-header h1 { font-size: 20px; font-weight: 500; letter-spacing: -0.3px; }
-.app-header p { font-size: 13px; color: var(--text-2); margin-top: 4px; line-height: 1.6; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.25rem; margin-bottom: 1rem; }
-.card-title { font-size: 10.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 1rem; }
+.app-header { margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
+.header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.app-header h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
+.app-header p { font-size: 12.5px; color: var(--text-3); margin-top: 2px; line-height: 1.5; }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.125rem 1.25rem; margin-bottom: 0.75rem; }
+.card-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 0.875rem; }
 .upload-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); min-height: 155px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: border-color 0.15s, background 0.15s; text-align: center; padding: 1.5rem; }
 .upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-light); }
 .upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
@@ -39,52 +39,37 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
 .form-group { display: flex; flex-direction: column; gap: 5px; }
 .form-group.span-2 { grid-column: 1 / -1; }
-.form-group label { font-size: 11.5px; font-weight: 500; color: var(--text-2); }
+.form-group label { font-size: 12px; font-weight: 400; color: var(--text-2); }
 .form-group input, .form-group select, .form-group textarea { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s, background 0.15s; }
 .form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); background: white; }
 .form-group textarea { resize: vertical; min-height: 58px; }
-.submit-btn { width: 100%; margin-top: 1rem; padding: 11px; font-family: 'DM Sans', sans-serif; font-size: 14px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: var(--radius); cursor: pointer; transition: opacity 0.15s, transform 0.1s; }
+.submit-btn { width: 100%; margin-top: 0.75rem; padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; }
 .submit-btn:hover:not(:disabled) { opacity: 0.88; }
 .submit-btn:active:not(:disabled) { transform: scale(0.99); }
 .submit-btn:disabled { opacity: 0.38; cursor: default; }
-.progress-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 1rem; animation: fadeUp 0.3s ease; }
-@keyframes fadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
-.progress-header { padding: 1rem 1.25rem 0.85rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; gap: 10px; }
-.pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--blue); flex-shrink: 0; animation: pulse 1.2s ease-in-out infinite; }
-@keyframes pulse { 0%,100% { opacity: 1; transform: scale(1); } 50% { opacity: 0.35; transform: scale(0.8); } }
-.progress-header span { font-size: 13px; font-weight: 500; }
-.progress-steps { padding: 0.9rem 1.25rem; display: flex; flex-direction: column; gap: 11px; }
-.step-row { display: flex; align-items: center; gap: 10px; font-size: 13px; color: var(--text-3); transition: color 0.3s; }
-.step-row.active { color: var(--text); }
-.step-row.done { color: var(--green); }
-.step-icon { width: 20px; height: 20px; border-radius: 50%; border: 1.5px solid var(--border-strong); display: flex; align-items: center; justify-content: center; font-size: 10px; flex-shrink: 0; background: var(--bg); transition: all 0.3s; }
-.step-row.active .step-icon { border-color: var(--blue); background: var(--blue-light); animation: ringPulse 1s ease infinite; }
-@keyframes ringPulse { 0%,100% { box-shadow: 0 0 0 0 rgba(26,86,160,0.2); } 50% { box-shadow: 0 0 0 4px rgba(26,86,160,0.08); } }
-.step-row.done .step-icon { border-color: var(--green); background: var(--green-light); color: var(--green); }
-.search-ticker { padding: 0.6rem 1.25rem 0.9rem; font-size: 11.5px; font-family: 'DM Mono', monospace; color: var(--text-3); border-top: 1px solid var(--border); min-height: 34px; }
-.ticker-line { animation: tickIn 0.2s ease; }
-@keyframes tickIn { from { opacity: 0; transform: translateY(3px); } to { opacity: 1; transform: translateY(0); } }
-.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 1rem; animation: fadeUp 0.4s ease; }
-.result-section { padding: 1.1rem 1.25rem; }
+.progress-panel { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1rem; font-size: 13px; color: var(--text-2); }
+.spinner { width: 14px; height: 14px; border: 1.5px solid var(--border-strong); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
+@keyframes spin { to { transform: rotate(360deg); } }
+.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 0.75rem; }
+.result-section { padding: 1.125rem 1.25rem; }
 .result-section + .result-section { border-top: 1px solid var(--border); }
-.result-section-title { font-size: 10.5px; font-weight: 500; letter-spacing: 0.09em; text-transform: uppercase; color: var(--text-3); margin-bottom: 12px; }
-.diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 11px 13px; margin-bottom: 9px; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
+.result-section-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 14px; }
+.diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
 .diff-item:last-child { margin-bottom: 0; }
-.diff-item.visible { opacity: 1; transform: translateY(0); }
-.diff-name { font-size: 14px; font-weight: 500; }
-.diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.6; }
-.ref-item { padding: 10px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.65; opacity: 0; transform: translateY(6px); transition: opacity 0.35s ease, transform 0.35s ease; }
+.diff-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+.ref-item { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.55; }
 .ref-item:last-child { border-bottom: none; padding-bottom: 0; }
-.ref-item.visible { opacity: 1; transform: translateY(0); }
+.ref-item:first-child { padding-top: 0; }
 .ref-title { font-weight: 500; }
-.ref-summary { color: var(--text-2); margin-top: 3px; }
-.ref-source { font-size: 11.5px; color: var(--blue); margin-top: 4px; font-family: 'DM Mono', monospace; }
-.actions { display: flex; gap: 8px; margin-top: 10px; margin-bottom: 1.5rem; }
-.action-btn { padding: 8px 15px; font-size: 13px; font-family: 'DM Sans', sans-serif; background: white; border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: background 0.1s, color 0.1s, border-color 0.1s; }
+.ref-summary { color: var(--text-2); margin-top: 4px; }
+.ref-source { font-size: 11.5px; color: var(--blue); margin-top: 6px; font-family: 'DM Mono', monospace; }
+.actions { display: flex; gap: 6px; margin-top: 0.75rem; margin-bottom: 1.5rem; }
+.action-btn { padding: 7px 14px; font-size: 12.5px; font-family: 'DM Sans', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: background 0.1s, color 0.1s, border-color 0.1s; }
 .action-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-strong); }
 .error { padding: 14px 16px; border-radius: var(--radius); background: var(--red-light); color: var(--red-dark); font-size: 13px; line-height: 1.6; border: 1px solid #E8B8B8; margin-top: 1rem; }
 .error pre { margin-top: 8px; font-size: 11px; font-family: 'DM Mono', monospace; white-space: pre-wrap; word-break: break-all; opacity: 0.85; }
-.disclaimer { font-size: 11.5px; color: var(--text-3); line-height: 1.6; padding: 10px 12px; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--bg); margin-top: 0.5rem; }
+.disclaimer { font-size: 11.5px; color: var(--text-3); line-height: 1.55; padding: 10px 14px; border-radius: var(--radius-sm); margin-top: 0.5rem; }
 @media (max-width: 500px) {
   .form-grid { grid-template-columns: 1fr; }
   .form-group.span-2 { grid-column: 1; }
@@ -95,10 +80,8 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 <div class="container">
   <div class="app-header">
     <div class="header-icon">
-      <svg width="20" height="20" viewBox="0 0 20 20" fill="none">
-        <circle cx="10" cy="10" r="7.5" stroke="white" stroke-width="1.4"/>
-        <circle cx="10" cy="10" r="2.8" fill="white" opacity="0.9"/>
-        <path d="M10 2.5V4M10 16v1.5M2.5 10H4M16 10h1.5" stroke="white" stroke-width="1.4" stroke-linecap="round"/>
+      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+        <path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
       </svg>
     </div>
     <div>
@@ -277,21 +260,12 @@ dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over')
 dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');loadImage(e.dataTransfer.files[0]);});
 clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';outputArea.innerHTML='';updateBtn();});
 analyzeBtn.addEventListener('click',runAnalysis);
-const STEPS=()=>[{id:'vision',label:t('stepVision')},{id:'pattern',label:t('stepPattern')},{id:'search',label:t('stepSearch')},{id:'compile',label:t('stepCompile')}];
-const TICKERS=['Querying PubMed database…','Scanning JAAD archives…','Reviewing AAD clinical guidelines…','Cross-referencing NEJM case reports…','Evaluating Cochrane evidence…','Checking recent meta-analyses…','Ranking sources by relevance…','Filtering highest-quality evidence…'];
-function showProgress(){outputArea.innerHTML=`<div class="progress-panel"><div class="progress-header"><div class="pulse-dot"></div><span>${t('analyzing')}</span></div><div class="progress-steps" id="pSteps">${STEPS().map((s,i)=>`<div class="step-row" id="sr-${s.id}"><div class="step-icon" id="si-${s.id}">${i+1}</div><span>${s.label}</span></div>`).join('')}</div><div class="search-ticker" id="ticker"></div></div>`;}
-function setStep(id){const activeIdx=STEPS().findIndex(s=>s.id===id);STEPS().forEach((s,i)=>{const row=document.getElementById(`sr-${s.id}`),ico=document.getElementById(`si-${s.id}`);if(!row)return;if(i<activeIdx){row.className='step-row done';ico.textContent='✓';}else if(i===activeIdx){row.className='step-row active';ico.textContent='';}else{row.className='step-row';ico.textContent=i+1;}});}
-let tickInt=null;
-function startTicker(){const el=document.getElementById('ticker');if(!el)return;let i=0;el.innerHTML=`<div class="ticker-line">${TICKERS[0]}</div>`;tickInt=setInterval(()=>{const t=document.getElementById('ticker');if(!t){clearInterval(tickInt);return;}i=(i+1)%TICKERS.length;t.innerHTML=`<div class="ticker-line">${TICKERS[i]}</div>`;},1400);}
-function stopTicker(){clearInterval(tickInt);const el=document.getElementById('ticker');if(el)el.innerHTML=`<div class="ticker-line" style="color:var(--green);">${t('searchDone')}</div>`;}
-const delay=ms=>new Promise(r=>setTimeout(r,ms));
-function confClass(pct){return pct>=65?'high':pct>=40?'mid':'low';}
+function showProgress(){outputArea.innerHTML=`<div class="progress-panel"><div class="spinner"></div><span>${t('analyzing')}</span></div>`;}
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
   const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
   const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, rationale, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
   analyzeBtn.disabled=true;showProgress();
-  await delay(300);setStep('vision');await delay(1100);setStep('pattern');await delay(800);setStep('search');startTicker();
   const sys=`You are a clinical literature assistant for practicing dermatologists. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
 
 ${langInstruction}
@@ -318,7 +292,6 @@ Rules:
     let raw='';
     for(const b of(data.content||[])){if(b.type==='text')raw+=b.text;}
     if(!raw)throw new Error('No text in response.\n\n'+JSON.stringify(data,null,2));
-    stopTicker();await delay(350);setStep('compile');await delay(600);
     let clean=raw.trim();
     const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
     if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
@@ -326,7 +299,7 @@ Rules:
     clean=clean.replace(/[\r\n]/g,' ');
     let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
     renderOutput(parsed);
-  }catch(err){stopTicker();outputArea.innerHTML=`<div class="error"><strong>${t('errStrong')}</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
+  }catch(err){outputArea.innerHTML=`<div class="error"><strong>${t('errStrong')}</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
 }
 function renderOutput(d){
   const assessment=d.assessment||[],refs=d.references||[];
@@ -334,8 +307,6 @@ function renderOutput(d){
   const refHtml=refs.map((r,i)=>`<div class="ref-item" id="ri-${i}"><div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`).join('');
   outputArea.innerHTML=`<div class="result-card">${assessHtml?`<div class="result-section"><div class="result-section-title">${t('sectionAssessment')}</div>${assessHtml}</div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">${t('copyChart')}</button><button class="action-btn" id="shareBtn">${t('shareReport')}</button><button class="action-btn" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
-  assessment.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`di-${i}`);if(el)el.classList.add('visible');},i*120));
-  const o=assessment.length*120;refs.forEach((_,i)=>setTimeout(()=>{const el=document.getElementById(`ri-${i}`);if(el)el.classList.add('visible');},o+i*90));
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
     const payload=btoa(JSON.stringify({result:d,meta}));
