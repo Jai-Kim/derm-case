@@ -6,12 +6,12 @@ _Last updated: May 2026_
 
 ## Phase 1 — Premise Validation
 
-**Goal:** Confirm that a practicing dermatologist finds an AI-synthesized literature brief useful during or after a real case.
+**Goal:** Confirm that a practicing dermatologist finds an AI-synthesized literature brief useful on a non-trivial case.
 
 **Done criteria:**
-- 5 dermatologist conversations completed on real cases
-- Each conversation logged in CONVERSATIONS.md
-- Clear signal (yes/no/maybe) on: does the literature brief save time or surface something they wouldn't have found?
+- 5 dermatologist conversations completed on **non-trivial** real cases (uncommon presentation, treatment-resistant, edge case, atypical population — not routine bread-and-butter)
+- Each conversation logged in CONVERSATIONS.md with structured signal questions
+- Clear signal on the sharper success criterion: **did the brief change a management decision, OR meaningfully reduce search time on a case the derm rated non-trivial?**
 - Decision point: proceed to Phase 2, pivot output format, or stop
 
 **Timeline:** ~4 weeks from first conversation
@@ -26,11 +26,20 @@ _Last updated: May 2026_
 
 | # | Task | Status | Notes |
 |---|------|--------|-------|
-| 1 | Rewrite system prompt → literature brief output | 🔲 open | Strip confidence, similar_cases, severity, workup. Output: assessment + targeted references. |
-| 2 | Strip UI render to match new output schema | 🔲 open | Remove confidence bars, case landscape, severity/workup panels. Keep form + image upload intact. |
-| 3 | Commit ROADMAP.md + CONVERSATIONS.md | ✅ done | This commit. |
+| 1 | Rewrite system prompt → literature brief output | ✅ done | Commit 053b392, fix 1da71f0. |
+| 2 | Strip UI render to match new output schema | ✅ done | Same commits. Confidence bars, case landscape, severity/workup panels removed. |
+| 3 | Commit ROADMAP.md + CONVERSATIONS.md | ✅ done | Commit 45d2ccd. Updated this commit with sharpened criteria. |
 | 4 | Recruit 5 dermatologists (lead: clinical partner) | 🔄 in progress | Email sent. Need 4 more via brother. |
-| 5 | Run 5 conversations, log in CONVERSATIONS.md | 🔲 open | Gate: prototype changes (#1, #2) must ship first. |
+| 5 | Run 5 conversations, log in CONVERSATIONS.md | 🔲 open | Gate: prototype + recruits ready. Each derm must bring at least one non-trivial case. |
+
+### Where the brief is most likely to win (from pre-conversation feedback)
+Concentrate test cases here, not on routine derm:
+- Uncommon presentations
+- Treatment-resistant disease
+- Off-label treatment synthesis
+- Pregnancy / immunosuppression edge cases
+- Rapid updates on emerging biologic data
+- Cases where morphology alone is insufficient
 
 ---
 
@@ -38,6 +47,8 @@ _Last updated: May 2026_
 
 Depends on what Phase 1 conversations surface. Likely directions:
 - Two-phase search (targeted per-diagnosis literature queries)
+- Evidence-strength visual indicators (guideline vs case report vs RCT)
+- Treatment pathway comparisons (especially biologics)
 - ICD-10 codes on output
 - PDF export for referral attachment
 - Fitzpatrick skin type structured input
