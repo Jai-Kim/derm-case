@@ -56,8 +56,14 @@ body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--t
 .result-section-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 14px; }
 .diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
 .diff-item:last-child { margin-bottom: 0; }
-.diff-name { font-size: 14px; font-weight: 500; margin-bottom: 4px; }
+.diff-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+.diff-name { font-size: 14px; font-weight: 500; }
+.icd-chip { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); padding: 1px 7px; border-radius: 4px; }
 .diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.55; }
+.ev-pill { display: inline-block; font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-bottom: 5px; }
+.ev-pill.strong { background: #E1F5EE; color: #0F6E56; }
+.ev-pill.mid    { background: #E6F1FB; color: #0C447C; }
+.ev-pill.weak   { background: #FAEEDA; color: #854F0B; }
 .ref-item { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.55; }
 .ref-item:last-child { border-bottom: none; padding-bottom: 0; }
 .ref-item:first-child { padding-top: 0; }
@@ -176,6 +182,7 @@ const I18N = {
     newCase: '새 증례',
     sectionAssessment: '임상 평가',
     sectionLit: '관련 문헌',
+    evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
     tagClassic: '전형적', tagAtypical: '비전형 변이', tagMimic: '유사 질환',
     stepVision: '이미지 형태 분석 중', stepPattern: '감별진단 패턴 매칭 중',
     stepSearch: '문헌 검색 중', stepCompile: '임상 결과 정리 중',
@@ -202,6 +209,7 @@ const I18N = {
     newCase: 'New case',
     sectionAssessment: 'Clinical assessment',
     sectionLit: 'Literature',
+    evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
     tagClassic: 'Classic', tagAtypical: 'Atypical variant', tagMimic: 'Mimicker',
     stepVision: 'Analyzing image morphology', stepPattern: 'Pattern matching differentials',
     stepSearch: 'Searching published literature', stepCompile: 'Compiling clinical output',
@@ -272,16 +280,17 @@ ${langInstruction}
 
 {
   "assessment": [
-    { "diagnosis": "Diagnosis name", "rationale": "1-2 sentence clinical rationale based on visible morphology and patient context" }
+    { "diagnosis": "Diagnosis name", "icd10": "L40.0", "rationale": "1-2 sentence clinical rationale based on visible morphology and patient context" }
   ],
   "references": [
-    { "title": "Paper or guideline title", "relevance": "1-2 sentences on direct applicability to this specific case", "source": "Journal, year — DOI or URL" }
+    { "title": "Paper or guideline title", "relevance": "1-2 sentences on direct applicability to this specific case", "source": "Journal, year — DOI or URL", "evidence_level": "guideline" }
   ]
 }
 
 Rules:
-- assessment: 1-2 entries only, ranked by likelihood. No confidence numbers.
-- references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.`
+- assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
+- references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
+- evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`
   try{
     const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
     let data;
@@ -303,8 +312,9 @@ Rules:
 }
 function renderOutput(d){
   const assessment=d.assessment||[],refs=d.references||[];
-  const assessHtml=assessment.map((item,i)=>`<div class="diff-item" id="di-${i}"><div class="diff-top"><span class="diff-name">${item.diagnosis}</span></div><div class="diff-reasoning">${item.rationale}</div></div>`).join('');
-  const refHtml=refs.map((r,i)=>`<div class="ref-item" id="ri-${i}"><div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`).join('');
+  const assessHtml=assessment.map((item,i)=>`<div class="diff-item"><div class="diff-name-row"><span class="diff-name">${item.diagnosis}</span>${item.icd10?`<span class="icd-chip">ICD-10 · ${item.icd10}</span>`:''}</div><div class="diff-reasoning">${item.rationale}</div></div>`).join('');
+  const evMap={'guideline':{tier:'strong',key:'evGuideline'},'meta-analysis':{tier:'strong',key:'evMetaAnalysis'},'rct':{tier:'strong',key:'evRct'},'cohort':{tier:'mid',key:'evCohort'},'review':{tier:'mid',key:'evReview'},'case-report':{tier:'weak',key:'evCaseReport'}};
+  const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="ev-pill ${ev.tier}">${t(ev.key)}</div>`:'';return `<div class="ref-item">${pill}<div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`;}).join('');
   outputArea.innerHTML=`<div class="result-card">${assessHtml?`<div class="result-section"><div class="result-section-title">${t('sectionAssessment')}</div>${assessHtml}</div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">${t('copyChart')}</button><button class="action-btn" id="shareBtn">${t('shareReport')}</button><button class="action-btn" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
@@ -313,7 +323,7 @@ function renderOutput(d){
     const url=window.location.origin+'/report.html#'+payload;
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis} — ${x.rationale}`));lines.push('\nLITERATURE');refs.forEach((r,i)=>lines.push(`${i+1}. ${r.title} — ${r.relevance} [${r.source}]`));navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
