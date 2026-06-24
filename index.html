@@ -4,172 +4,130 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Darae DermCase Assistant</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-:root {
-  --bg: #F5F4F0; --surface: #FFFFFF;
-  --border: #E0DDD5; --border-strong: #C5C2B8;
-  --text: #18170F; --text-2: #68655C; --text-3: #9C9990;
-  --blue: #1A6640; --blue-light: #EBF5EF; --blue-dark: #0D3D22;
-  --green: #1A6640; --green-light: #EBF5EF;
-  --amber: #8A5200; --amber-light: #FBF4E8;
-  --red-light: #FBEAEA; --red-dark: #7A1A1A;
-  --radius: 12px; --radius-sm: 7px;
+[data-theme="dermcase"] {
+  --color-primary: #1A6640;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #0D3D22;
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F5F4F0;
+  --color-base-300: #E0DDD5;
+  --color-base-content: #18170F;
+  --color-success: #0F6E56;
+  --color-info: #0C447C;
+  --color-warning: #854F0B;
+  --color-error: #7A1A1A;
 }
-body { font-family: 'DM Sans', sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; padding: 1.5rem 1rem 3rem; -webkit-font-smoothing: antialiased; }
-.container { max-width: 700px; margin: 0 auto; }
-.app-header { margin-bottom: 1.5rem; display: flex; align-items: center; gap: 12px; }
-.header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--blue); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.app-header h1 { font-size: 17px; font-weight: 500; letter-spacing: -0.2px; }
-.app-header p { font-size: 12.5px; color: var(--text-3); margin-top: 2px; line-height: 1.5; }
-.card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 1.125rem 1.25rem; margin-bottom: 0.75rem; }
-.card-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 0.875rem; }
-.upload-zone { border: 1.5px dashed var(--border-strong); border-radius: var(--radius-sm); background: var(--bg); min-height: 155px; display: flex; align-items: center; justify-content: center; cursor: pointer; position: relative; transition: border-color 0.15s, background 0.15s; text-align: center; padding: 1.5rem; }
-.upload-zone:hover, .upload-zone.drag-over { border-color: var(--blue); background: var(--blue-light); }
-.upload-zone input[type=file] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.upload-text { font-size: 14px; color: var(--text-2); line-height: 1.7; }
-.upload-text span { color: var(--blue); }
-.upload-sub { font-size: 12px; color: var(--text-3); margin-top: 4px; }
-.upload-ico { opacity: 0.25; margin-bottom: 10px; }
-.preview-wrap { position: relative; display: inline-block; }
-.preview-img { max-height: 195px; max-width: 100%; border-radius: var(--radius-sm); display: block; }
-.clear-btn { position: absolute; top: -9px; right: -9px; width: 23px; height: 23px; border-radius: 50%; background: var(--surface); border: 1px solid var(--border-strong); font-size: 11px; cursor: pointer; display: flex; align-items: center; justify-content: center; color: var(--text-2); transition: all 0.1s; }
-.clear-btn:hover { background: var(--red-light); color: var(--red-dark); }
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 11px; }
-.form-group { display: flex; flex-direction: column; gap: 5px; }
-.form-group.span-2 { grid-column: 1 / -1; }
-.form-group label { font-size: 12px; font-weight: 400; color: var(--text-2); }
-.form-group input, .form-group select, .form-group textarea { font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 8px 10px; border: 1px solid var(--border); border-radius: var(--radius-sm); background: var(--bg); color: var(--text); outline: none; transition: border-color 0.15s, background 0.15s; }
-.form-group input:focus, .form-group select:focus, .form-group textarea:focus { border-color: var(--blue); background: white; }
-.form-group textarea { resize: vertical; min-height: 58px; }
-.submit-btn { width: 100%; margin-top: 0.75rem; padding: 10px; font-family: 'DM Sans', sans-serif; font-size: 13.5px; font-weight: 500; background: var(--blue); color: white; border: none; border-radius: var(--radius-sm); cursor: pointer; transition: opacity 0.15s; }
-.submit-btn:hover:not(:disabled) { opacity: 0.88; }
-.submit-btn:active:not(:disabled) { transform: scale(0.99); }
-.submit-btn:disabled { opacity: 0.38; cursor: default; }
-.progress-panel { display: flex; align-items: center; gap: 10px; padding: 14px 16px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); margin-top: 1rem; font-size: 13px; color: var(--text-2); }
-.spinner { width: 14px; height: 14px; border: 1.5px solid var(--border-strong); border-top-color: var(--blue); border-radius: 50%; animation: spin 0.7s linear infinite; flex-shrink: 0; }
-@keyframes spin { to { transform: rotate(360deg); } }
-.result-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; margin-top: 0.75rem; }
-.result-section { padding: 1.125rem 1.25rem; }
-.result-section + .result-section { border-top: 1px solid var(--border); }
-.result-section-title { font-size: 12px; font-weight: 500; color: var(--text-2); margin-bottom: 14px; }
-.diff-item { background: var(--bg); border-radius: var(--radius-sm); padding: 12px 14px; margin-bottom: 8px; }
-.diff-item:last-child { margin-bottom: 0; }
-.diff-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
-.diff-name { font-size: 14px; font-weight: 500; }
-.icd-chip { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-2); background: var(--surface); border: 1px solid var(--border); padding: 1px 7px; border-radius: 4px; }
-.diff-reasoning { font-size: 13px; color: var(--text-2); line-height: 1.55; }
-.ev-pill { display: inline-block; font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-bottom: 5px; }
-.ev-pill.strong { background: #E1F5EE; color: #0F6E56; }
-.ev-pill.mid    { background: #E6F1FB; color: #0C447C; }
-.ev-pill.weak   { background: #FAEEDA; color: #854F0B; }
-.ref-item { padding: 12px 0; border-bottom: 1px solid var(--border); font-size: 13px; line-height: 1.55; }
-.ref-item:last-child { border-bottom: none; padding-bottom: 0; }
-.ref-item:first-child { padding-top: 0; }
-.ref-title { font-weight: 500; }
-.ref-summary { color: var(--text-2); margin-top: 4px; }
-.ref-source { font-size: 11.5px; color: var(--blue); margin-top: 6px; font-family: 'DM Mono', monospace; }
-.actions { display: flex; gap: 6px; margin-top: 0.75rem; margin-bottom: 1.5rem; }
-.action-btn { padding: 7px 14px; font-size: 12.5px; font-family: 'DM Sans', sans-serif; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-sm); cursor: pointer; color: var(--text-2); transition: background 0.1s, color 0.1s, border-color 0.1s; }
-.action-btn:hover { background: var(--bg); color: var(--text); border-color: var(--border-strong); }
-.error { padding: 14px 16px; border-radius: var(--radius); background: var(--red-light); color: var(--red-dark); font-size: 13px; line-height: 1.6; border: 1px solid #E8B8B8; margin-top: 1rem; }
-.error pre { margin-top: 8px; font-size: 11px; font-family: 'DM Mono', monospace; white-space: pre-wrap; word-break: break-all; opacity: 0.85; }
-.disclaimer { font-size: 11.5px; color: var(--text-3); line-height: 1.55; padding: 10px 14px; border-radius: var(--radius-sm); margin-top: 0.5rem; }
-@media (max-width: 500px) {
-  .form-grid { grid-template-columns: 1fr; }
-  .form-group.span-2 { grid-column: 1; }
-}
+body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smoothing: antialiased; }
+.font-mono-dm { font-family: 'DM Mono', monospace; }
 </style>
 </head>
-<body>
-<div class="container">
-  <div class="app-header">
-    <div class="header-icon">
-      <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+<body data-theme="dermcase">
+<div class="max-w-[700px] mx-auto px-4 py-6 pb-12">
+
+  <!-- Header -->
+  <div class="flex items-center gap-3 mb-4 px-1">
+    <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
+      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
         <path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
       </svg>
     </div>
     <div>
-      <h1>Darae DermCase Assistant</h1>
-      <p data-i18n="subtitle"></p>
+      <h1 class="text-[17px] font-medium leading-tight">Darae DermCase Assistant</h1>
+      <p class="text-[12.5px] text-base-content/60 leading-tight mt-0.5" data-i18n="subtitle"></p>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title" data-i18n="casePhoto"></div>
-    <div class="upload-zone" id="dropZone">
-      <input type="file" id="fileInput" accept="image/*">
-      <div id="uploadPrompt">
-        <div class="upload-ico">
-          <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-            <rect x="3" y="7" width="26" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
-            <circle cx="11" cy="15" r="3" stroke="currentColor" stroke-width="1.5"/>
-            <path d="M3 22l7-5 5 4 5-6 9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            <path d="M21 4v7M18.5 6.5L21 4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-          </svg>
+
+  <!-- Upload card -->
+  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
+    <div class="card-body p-5">
+      <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="casePhoto"></h3>
+      <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center cursor-pointer relative text-center p-6 transition-colors hover:border-primary hover:bg-primary/5">
+        <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
+        <div id="uploadPrompt">
+          <div class="opacity-25 mb-2 flex justify-center">
+            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
+              <rect x="3" y="7" width="26" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
+              <circle cx="11" cy="15" r="3" stroke="currentColor" stroke-width="1.5"/>
+              <path d="M3 22l7-5 5 4 5-6 9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+              <path d="M21 4v7M18.5 6.5L21 4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div class="text-[14px] text-base-content/70 leading-relaxed" data-i18n="uploadText"></div>
+          <div class="text-[12px] text-base-content/50 mt-1" data-i18n="uploadSub"></div>
         </div>
-        <div class="upload-text" data-i18n="uploadText"></div>
-        <div class="upload-sub" data-i18n="uploadSub"></div>
-      </div>
-      <div id="uploadLoading" style="display:none; align-items:center; gap:10px; color:var(--text-2); font-size:13px;">
-        <div class="spinner"></div>
-        <span data-i18n="optimizing"></span>
-      </div>
-      <div id="uploadPreview" style="display:none;">
-        <div class="preview-wrap">
-          <img class="preview-img" id="previewImg" src="" alt="">
-          <button class="clear-btn" id="clearBtn" type="button">✕</button>
+        <div id="uploadLoading" style="display:none;" class="items-center gap-2.5 text-base-content/70 text-[13px]">
+          <span class="loading loading-spinner loading-sm text-primary"></span>
+          <span data-i18n="optimizing"></span>
+        </div>
+        <div id="uploadPreview" style="display:none;">
+          <div class="relative inline-block">
+            <img id="previewImg" class="max-h-[195px] max-w-full rounded-md block" src="" alt="">
+            <button id="clearBtn" type="button" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-base-100 border border-base-300 text-base-content/60 text-xs hover:bg-error/10 hover:text-error">✕</button>
+          </div>
         </div>
       </div>
     </div>
   </div>
-  <div class="card">
-    <div class="card-title" data-i18n="patientContext"></div>
-    <div class="form-grid">
-      <div class="form-group">
-        <label data-i18n="age"></label>
-        <input type="number" id="age" data-i18n-placeholder="agePh" min="0" max="120">
-      </div>
-      <div class="form-group">
-        <label data-i18n="sex"></label>
-        <select id="sex">
-          <option value="" data-i18n="sexSelect"></option>
-          <option value="Male" data-i18n="sexMale"></option>
-          <option value="Female" data-i18n="sexFemale"></option>
-          <option value="Other" data-i18n="sexOther"></option>
-        </select>
-      </div>
-      <div class="form-group">
-        <label data-i18n="area"></label>
-        <input type="text" id="area" data-i18n-placeholder="areaPh">
-      </div>
-      <div class="form-group">
-        <label data-i18n="duration"></label>
-        <input type="text" id="duration" data-i18n-placeholder="durationPh">
-      </div>
-      <div class="form-group">
-        <label data-i18n="reportLang"></label>
-        <select id="lang">
-          <option value="ko">한국어</option>
-          <option value="en">English</option>
-        </select>
-      </div>
-      <div class="form-group span-2">
-        <label data-i18n="notes"></label>
-        <textarea id="notes" data-i18n-placeholder="notesPh"></textarea>
+
+  <!-- Patient context card -->
+  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
+    <div class="card-body p-5">
+      <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="patientContext"></h3>
+      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="age"></span></label>
+          <input type="number" id="age" data-i18n-placeholder="agePh" min="0" max="120" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="sex"></span></label>
+          <select id="sex" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
+            <option value="" data-i18n="sexSelect"></option>
+            <option value="Male" data-i18n="sexMale"></option>
+            <option value="Female" data-i18n="sexFemale"></option>
+            <option value="Other" data-i18n="sexOther"></option>
+          </select>
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="area"></span></label>
+          <input type="text" id="area" data-i18n-placeholder="areaPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="duration"></span></label>
+          <input type="text" id="duration" data-i18n-placeholder="durationPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
+        </div>
+        <div class="form-control">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="reportLang"></span></label>
+          <select id="lang" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
+            <option value="ko">한국어</option>
+            <option value="en">English</option>
+          </select>
+        </div>
+        <div class="form-control sm:col-span-2">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="notes"></span></label>
+          <textarea id="notes" data-i18n-placeholder="notesPh" class="textarea textarea-bordered textarea-sm w-full bg-base-200 text-[14px] min-h-[58px]"></textarea>
+        </div>
       </div>
     </div>
   </div>
-  <button class="submit-btn" id="analyzeBtn" disabled data-i18n="analyzeBtn"></button>
+
+  <button class="btn btn-primary w-full normal-case mt-2" id="analyzeBtn" disabled data-i18n="analyzeBtn"></button>
+
   <div id="outputArea"></div>
-  <div class="disclaimer" data-i18n="disclaimer"></div>
+
+  <div class="text-[11.5px] text-base-content/50 leading-relaxed mt-3 px-3" data-i18n="disclaimer"></div>
+
 </div>
+
 <script>
 const I18N = {
   ko: {
     subtitle: '피부과 증례를 위한 AI 감별진단 및 문헌 가이드.',
     casePhoto: '증례 사진',
-    uploadText: '사진을 여기에 끌어다 놓거나 <span style="color:var(--blue)">파일 선택</span>',
+    uploadText: '사진을 여기에 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
     uploadSub: 'JPG, PNG — 저장되지 않습니다',
     patientContext: '환자 정보',
     age: '나이', agePh: '예: 42',
@@ -188,16 +146,12 @@ const I18N = {
     sectionAssessment: '임상 평가',
     sectionLit: '관련 문헌',
     evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
-    tagClassic: '전형적', tagAtypical: '비전형 변이', tagMimic: '유사 질환',
-    stepVision: '이미지 형태 분석 중', stepPattern: '감별진단 패턴 매칭 중',
-    stepSearch: '문헌 검색 중', stepCompile: '임상 결과 정리 중',
-    searchDone: '문헌 검색 완료',
     errStrong: '오류',
   },
   en: {
     subtitle: 'AI-assisted differential diagnosis and literature guidance for dermatology cases.',
     casePhoto: 'Case photo',
-    uploadText: 'Drop case photo here or <span style="color:var(--blue)">browse</span>',
+    uploadText: 'Drop case photo here or <span class="text-primary">browse</span>',
     uploadSub: 'JPG, PNG — not stored anywhere',
     patientContext: 'Patient context',
     age: 'Age', agePh: 'e.g. 42',
@@ -216,25 +170,19 @@ const I18N = {
     sectionAssessment: 'Clinical assessment',
     sectionLit: 'Literature',
     evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
-    tagClassic: 'Classic', tagAtypical: 'Atypical variant', tagMimic: 'Mimicker',
-    stepVision: 'Analyzing image morphology', stepPattern: 'Pattern matching differentials',
-    stepSearch: 'Searching published literature', stepCompile: 'Compiling clinical output',
-    searchDone: 'Literature search complete',
     errStrong: 'Error',
   }
 };
 
+let currentLang = 'ko';
 function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
-
 function applyI18n() {
   document.querySelectorAll('[data-i18n]').forEach(el => {
-    const key = el.getAttribute('data-i18n');
-    el.innerHTML = t(key);
+    el.innerHTML = t(el.getAttribute('data-i18n'));
   });
   document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
     el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
   });
-  // sex options
   const sex = document.getElementById('sex');
   if (sex) {
     const keys = ['sexSelect','sexMale','sexFemale','sexOther'];
@@ -242,9 +190,9 @@ function applyI18n() {
   }
 }
 
-let currentLang = 'ko';
 let imageBase64 = null, imageMimeType = 'image/jpeg';
 const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),uploadLoading=document.getElementById('uploadLoading'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
+
 function loadImage(file){
   if(!file||!file.type.startsWith('image/'))return;
   imageMimeType='image/jpeg';
@@ -254,7 +202,6 @@ function loadImage(file){
   const img=new Image();
   const objectUrl=URL.createObjectURL(file);
   img.onload=()=>{
-    // Defer the heavy canvas work so the loading state renders first
     setTimeout(()=>{
       URL.revokeObjectURL(objectUrl);
       const MAX=1200;
@@ -279,15 +226,20 @@ function loadImage(file){
   img.src=objectUrl;
 }
 function updateBtn(){analyzeBtn.disabled=!imageBase64;}
+
 document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
 document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); });
 fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
-dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('drag-over');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('drag-over'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('drag-over');loadImage(e.dataTransfer.files[0]);});
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('border-primary','bg-primary/5'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('border-primary','bg-primary/5');loadImage(e.dataTransfer.files[0]);});
 clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';uploadLoading.style.display='none';outputArea.innerHTML='';updateBtn();});
 analyzeBtn.addEventListener('click',runAnalysis);
-function showProgress(){outputArea.innerHTML=`<div class="progress-panel"><div class="spinner"></div><span>${t('analyzing')}</span></div>`;}
+
+function showProgress(){
+  outputArea.innerHTML=`<div class="alert bg-base-100 border border-base-300 mt-3 py-3.5 rounded-2xl"><span class="loading loading-spinner loading-sm text-primary"></span><span class="text-[13px] text-base-content/70">${t('analyzing')}</span></div>`;
+}
+
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
   const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
@@ -309,7 +261,7 @@ ${langInstruction}
 Rules:
 - assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
 - references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
-- evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`
+- evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
   try{
     const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
     let data;
@@ -323,18 +275,21 @@ Rules:
     let clean=raw.trim();
     const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
     if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
-    // Strip bare newlines (invalid in JSON strings, breaks on Android browsers that lack s-flag regex)
     clean=clean.replace(/[\r\n]/g,' ');
     let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
     renderOutput(parsed);
-  }catch(err){outputArea.innerHTML=`<div class="error"><strong>${t('errStrong')}</strong><pre>${err.message}</pre></div>`;analyzeBtn.disabled=false;}
+  }catch(err){
+    outputArea.innerHTML=`<div class="alert alert-error mt-3 rounded-2xl"><div><strong class="text-[13px]">${t('errStrong')}</strong><pre class="text-[11px] font-mono-dm whitespace-pre-wrap break-all opacity-80 mt-1">${err.message}</pre></div></div>`;
+    analyzeBtn.disabled=false;
+  }
 }
+
 function renderOutput(d){
   const assessment=d.assessment||[],refs=d.references||[];
-  const assessHtml=assessment.map((item,i)=>`<div class="diff-item"><div class="diff-name-row"><span class="diff-name">${item.diagnosis}</span>${item.icd10?`<span class="icd-chip">ICD-10 · ${item.icd10}</span>`:''}</div><div class="diff-reasoning">${item.rationale}</div></div>`).join('');
-  const evMap={'guideline':{tier:'strong',key:'evGuideline'},'meta-analysis':{tier:'strong',key:'evMetaAnalysis'},'rct':{tier:'strong',key:'evRct'},'cohort':{tier:'mid',key:'evCohort'},'review':{tier:'mid',key:'evReview'},'case-report':{tier:'weak',key:'evCaseReport'}};
-  const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="ev-pill ${ev.tier}">${t(ev.key)}</div>`:'';return `<div class="ref-item">${pill}<div class="ref-title">${r.title}</div><div class="ref-summary">${r.relevance}</div><div class="ref-source">${r.source}</div></div>`;}).join('');
-  outputArea.innerHTML=`<div class="result-card">${assessHtml?`<div class="result-section"><div class="result-section-title">${t('sectionAssessment')}</div>${assessHtml}</div>`:''} ${refHtml?`<div class="result-section"><div class="result-section-title">${t('sectionLit')}</div>${refHtml}</div>`:''}</div><div class="actions"><button class="action-btn" id="copyBtn">${t('copyChart')}</button><button class="action-btn" id="shareBtn">${t('shareReport')}</button><button class="action-btn" id="newBtn">${t('newCase')}</button></div>`;
+  const assessHtml=assessment.map((item,i)=>`<div class="bg-base-200 rounded-lg p-3.5 mb-2 last:mb-0"><div class="flex items-center gap-2 flex-wrap mb-1.5"><span class="text-[14px] font-medium">${item.diagnosis}</span>${item.icd10?`<span class="badge badge-sm font-mono-dm text-[11px] bg-base-100 border-base-300">ICD-10 · ${item.icd10}</span>`:''}</div><div class="text-[13px] text-base-content/70 leading-relaxed">${item.rationale}</div></div>`).join('');
+  const evMap={'guideline':{variant:'success',key:'evGuideline'},'meta-analysis':{variant:'success',key:'evMetaAnalysis'},'rct':{variant:'success',key:'evRct'},'cohort':{variant:'info',key:'evCohort'},'review':{variant:'info',key:'evReview'},'case-report':{variant:'warning',key:'evCaseReport'}};
+  const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="badge badge-${ev.variant} badge-sm text-[10.5px] mb-1.5">${t(ev.key)}</div>`:'';return `<div class="border-b border-base-300 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">${pill}<div class="text-[13px] font-medium">${r.title}</div><div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${r.relevance}</div><div class="text-[11.5px] text-primary font-mono-dm mt-1.5">${r.source}</div></div>`;}).join('');
+  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
