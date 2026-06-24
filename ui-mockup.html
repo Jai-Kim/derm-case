@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>DermCase — Current vs DaisyUI mockup</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg-cur: #F5F4F0;
+  --surface-cur: #FFFFFF;
+  --border-cur: #E0DDD5;
+  --border-strong-cur: #C5C2B8;
+  --text-cur: #18170F;
+  --text-2-cur: #68655C;
+  --text-3-cur: #9C9990;
+  --blue-cur: #1A6640;
+  --blue-light-cur: #EBF5EF;
+}
+body { font-family: 'DM Sans', sans-serif; background: #FAFAFA; padding: 20px; margin: 0; }
+.comparison { max-width: 1280px; margin: 0 auto; }
+.header-bar { text-align: center; margin-bottom: 24px; }
+.header-bar h1 { font-size: 18px; font-weight: 500; color: #18170F; margin-bottom: 4px; }
+.header-bar p { font-size: 13px; color: #68655C; margin: 0; }
+
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; align-items: start; }
+@media (max-width: 768px) {
+  .cols { grid-template-columns: 1fr; }
+  body { padding: 12px; }
+  .app-frame { padding: 14px 10px; min-height: auto; }
+}
+.col-label { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; padding: 0 4px; }
+.col-label .badge-l { font-size: 11px; font-weight: 500; padding: 3px 10px; border-radius: 99px; }
+.col-label.cur .badge-l { background: #FBEAF0; color: #993556; }
+.col-label.new .badge-l { background: #E1F5EE; color: #0F6E56; }
+.col-label .desc { font-size: 12px; color: #68655C; }
+
+.app-frame { background: #EFEEE9; border-radius: 16px; padding: 18px 14px; min-height: 700px; }
+
+/* CURRENT STYLES — copied from production */
+.cur-header { display: flex; align-items: center; gap: 12px; margin-bottom: 18px; }
+.cur-header-icon { width: 32px; height: 32px; border-radius: 8px; background: var(--blue-cur); display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.cur-h1 { font-size: 17px; font-weight: 500; color: var(--text-cur); letter-spacing: -0.2px; margin: 0; }
+.cur-sub { font-size: 12.5px; color: var(--text-3-cur); margin-top: 2px; line-height: 1.5; }
+.cur-card { background: var(--surface-cur); border: 1px solid var(--border-cur); border-radius: 12px; padding: 18px 20px; margin-bottom: 12px; }
+.cur-title { font-size: 12px; font-weight: 500; color: var(--text-2-cur); margin-bottom: 14px; }
+.cur-label { font-size: 12px; color: var(--text-2-cur); margin-bottom: 5px; display: block; }
+.cur-input { width: 100%; font-family: 'DM Sans', sans-serif; font-size: 14px; padding: 8px 10px; background: var(--bg-cur); border: 1px solid var(--border-cur); border-radius: 7px; color: var(--text-3-cur); margin-bottom: 8px; box-sizing: border-box; }
+.cur-btn { width: 100%; padding: 10px; font-size: 13.5px; font-weight: 500; background: var(--blue-cur); color: white; border: none; border-radius: 7px; margin-top: 6px; cursor: pointer; }
+.cur-diff-item { background: var(--bg-cur); border-radius: 7px; padding: 12px 14px; }
+.cur-diff-name-row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; margin-bottom: 5px; }
+.cur-diff-name { font-size: 14px; font-weight: 500; }
+.cur-icd-chip { font-family: 'DM Mono', monospace; font-size: 11px; color: var(--text-2-cur); background: var(--surface-cur); border: 1px solid var(--border-cur); padding: 1px 7px; border-radius: 4px; }
+.cur-diff-reason { font-size: 13px; color: var(--text-2-cur); line-height: 1.55; }
+.cur-section-title { font-size: 12px; font-weight: 500; color: var(--text-2-cur); margin-bottom: 14px; }
+.cur-section { padding: 18px 20px; }
+.cur-section + .cur-section { border-top: 1px solid var(--border-cur); }
+.cur-ev-pill { display: inline-block; font-size: 10.5px; font-weight: 500; padding: 2px 8px; border-radius: 99px; margin-bottom: 5px; background: #E1F5EE; color: #0F6E56; }
+.cur-ref-title { font-weight: 500; font-size: 13px; }
+.cur-ref-summary { color: var(--text-2-cur); margin-top: 4px; font-size: 13px; line-height: 1.55; }
+.cur-ref-source { font-size: 11.5px; color: var(--blue-cur); margin-top: 6px; font-family: 'DM Mono', monospace; }
+.cur-ref-item { padding: 12px 0; border-bottom: 1px solid var(--border-cur); }
+.cur-ref-item:first-child { padding-top: 0; }
+
+/* Custom DaisyUI theme matching dark green */
+[data-theme="dermcase"] {
+  --color-primary: #1A6640;
+  --color-primary-content: #FFFFFF;
+  --color-secondary: #0D3D22;
+  --color-base-100: #FFFFFF;
+  --color-base-200: #F5F4F0;
+  --color-base-300: #E0DDD5;
+  --color-base-content: #18170F;
+  --color-success: #0F6E56;
+  --color-info: #0C447C;
+  --color-warning: #854F0B;
+}
+</style>
+</head>
+<body>
+
+<div class="comparison">
+  <div class="header-bar">
+    <h1>DermCase Assistant — Current vs Tailwind + DaisyUI</h1>
+    <p>Same content, two implementations. Mobile-portrait widths to match the real app.</p>
+  </div>
+
+  <div class="cols">
+
+    <!-- =================== CURRENT =================== -->
+    <div>
+      <div class="col-label cur">
+        <span class="badge-l">Current</span>
+        <span class="desc">What's live at derm-case.vercel.app</span>
+      </div>
+      <div class="app-frame">
+
+        <div class="cur-header">
+          <div class="cur-header-icon">
+            <svg width="16" height="16" viewBox="0 0 16 16" fill="none">
+              <path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
+            </svg>
+          </div>
+          <div>
+            <div class="cur-h1">Darae DermCase Assistant</div>
+            <div class="cur-sub">피부과 증례를 위한 AI 감별진단 및 문헌 가이드.</div>
+          </div>
+        </div>
+
+        <div class="cur-card">
+          <div class="cur-title">환자 정보</div>
+          <label class="cur-label">나이</label>
+          <input class="cur-input" placeholder="예: 42" disabled>
+          <label class="cur-label">발생 부위</label>
+          <input class="cur-input" placeholder="예: 왼쪽 팔뚝, 두피" disabled>
+          <button class="cur-btn">증례 분석</button>
+        </div>
+
+        <!-- result -->
+        <div style="background: white; border: 1px solid #E0DDD5; border-radius: 12px; overflow: hidden;">
+          <div class="cur-section">
+            <div class="cur-section-title">임상 평가</div>
+            <div class="cur-diff-item">
+              <div class="cur-diff-name-row">
+                <span class="cur-diff-name">건선 (판상형)</span>
+                <span class="cur-icd-chip">ICD-10 · L40.0</span>
+              </div>
+              <div class="cur-diff-reason">두피와 팔꿈치의 경계가 뚜렷한 비늘성 홍반판은 판상 건선의 전형적 소견이며, 환자의 만성 경과와 일치합니다.</div>
+            </div>
+          </div>
+          <div class="cur-section">
+            <div class="cur-section-title">관련 문헌</div>
+            <div class="cur-ref-item">
+              <div class="cur-ev-pill">가이드라인</div>
+              <div class="cur-ref-title">AAD-NPF Guidelines: Topical Treatment of Psoriasis</div>
+              <div class="cur-ref-summary">두피 건선의 1차 치료로 강력한 국소 코르티코스테로이드 권장.</div>
+              <div class="cur-ref-source">JAAD 2021 — doi.org/10.1016/j.jaad.2020</div>
+            </div>
+            <div class="cur-ref-item">
+              <div class="cur-ev-pill">가이드라인</div>
+              <div class="cur-ref-title">JAK Inhibitors for Plaque Psoriasis</div>
+              <div class="cur-ref-summary">중등도-중증 환자에서 deucravacitinib 효과.</div>
+              <div class="cur-ref-source">NEJM 2022 — doi.org/10.1056/NEJMoa</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+    <!-- =================== TAILWIND + DAISYUI =================== -->
+    <div>
+      <div class="col-label new">
+        <span class="badge-l">After (DaisyUI)</span>
+        <span class="desc">Custom dermcase theme, Tailwind + DaisyUI via CDN</span>
+      </div>
+      <div class="app-frame" data-theme="dermcase">
+
+        <div class="navbar bg-base-100 rounded-2xl shadow-sm mb-3 px-4 min-h-0 py-3">
+          <div class="flex items-center gap-3">
+            <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center">
+              <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
+                <path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
+              </svg>
+            </div>
+            <div>
+              <div class="text-[17px] font-medium leading-tight">Darae DermCase Assistant</div>
+              <div class="text-[12px] text-base-content/60 leading-tight mt-0.5">피부과 증례를 위한 AI 감별진단 및 문헌 가이드.</div>
+            </div>
+          </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
+          <div class="card-body p-5">
+            <h3 class="text-[12px] font-medium text-base-content/70 mb-3">환자 정보</h3>
+            <div class="form-control mb-3">
+              <label class="label py-1"><span class="label-text text-[12px]">나이</span></label>
+              <input type="number" placeholder="예: 42" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" disabled />
+            </div>
+            <div class="form-control mb-3">
+              <label class="label py-1"><span class="label-text text-[12px]">발생 부위</span></label>
+              <input type="text" placeholder="예: 왼쪽 팔뚝, 두피" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" disabled />
+            </div>
+            <button class="btn btn-primary btn-sm w-full mt-2 normal-case">증례 분석</button>
+          </div>
+        </div>
+
+        <div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden">
+          <div class="card-body p-5 pb-4">
+            <h3 class="text-[12px] font-medium text-base-content/70 mb-3">임상 평가</h3>
+            <div class="bg-base-200 rounded-lg p-3.5">
+              <div class="flex items-center gap-2 flex-wrap mb-1.5">
+                <span class="text-[14px] font-medium">건선 (판상형)</span>
+                <span class="badge badge-sm font-mono text-[11px] bg-base-100 border-base-300">ICD-10 · L40.0</span>
+              </div>
+              <div class="text-[13px] text-base-content/70 leading-relaxed">두피와 팔꿈치의 경계가 뚜렷한 비늘성 홍반판은 판상 건선의 전형적 소견이며, 환자의 만성 경과와 일치합니다.</div>
+            </div>
+          </div>
+          <div class="divider my-0 mx-5"></div>
+          <div class="card-body p-5">
+            <h3 class="text-[12px] font-medium text-base-content/70 mb-3">관련 문헌</h3>
+            <div class="border-b border-base-300 pb-3 mb-3">
+              <div class="badge badge-success badge-sm text-[10.5px] mb-1.5">가이드라인</div>
+              <div class="text-[13px] font-medium">AAD-NPF Guidelines: Topical Treatment of Psoriasis</div>
+              <div class="text-[13px] text-base-content/70 leading-relaxed mt-1">두피 건선의 1차 치료로 강력한 국소 코르티코스테로이드 권장.</div>
+              <div class="text-[11.5px] text-primary font-mono mt-1.5">JAAD 2021 — doi.org/10.1016/j.jaad.2020</div>
+            </div>
+            <div>
+              <div class="badge badge-success badge-sm text-[10.5px] mb-1.5">가이드라인</div>
+              <div class="text-[13px] font-medium">JAK Inhibitors for Plaque Psoriasis</div>
+              <div class="text-[13px] text-base-content/70 leading-relaxed mt-1">중등도-중증 환자에서 deucravacitinib 효과.</div>
+              <div class="text-[11.5px] text-primary font-mono mt-1.5">NEJM 2022 — doi.org/10.1056/NEJMoa</div>
+            </div>
+          </div>
+        </div>
+
+      </div>
+    </div>
+
+  </div>
+
+  <!-- Annotations -->
+  <div style="margin-top: 24px; background: white; border: 1px solid #E0DDD5; border-radius: 12px; padding: 18px 22px;">
+    <div style="font-size: 13px; font-weight: 500; color: #18170F; margin-bottom: 12px;">What's different in the DaisyUI version</div>
+    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 16px; font-size: 12.5px; color: #68655C; line-height: 1.55;">
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">More rounded</div>
+        Border radius increases from 12px → 16px (rounded-2xl). Slightly more "consumer product" feel.
+      </div>
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">Card shadows</div>
+        Cards get a subtle shadow (shadow-sm) instead of just borders. Adds depth.
+      </div>
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">Inputs more prominent</div>
+        DaisyUI's input-bordered has a visible border + more padding. Easier to see input fields.
+      </div>
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">Evidence pills brighter</div>
+        DaisyUI's badge-success/info/warning are saturated. More obvious at a glance.
+      </div>
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">Looks more "designed"</div>
+        Header in a navbar component, divider between sections. Recognizable DaisyUI patterns.
+      </div>
+      <div>
+        <div style="color: #18170F; font-weight: 500; margin-bottom: 4px;">What stays the same</div>
+        Dark green primary, all content/copy, Korean i18n, image upload, all functionality.
+      </div>
+    </div>
+  </div>
+
+</div>
+
+</body>
+</html>
