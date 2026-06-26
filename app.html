@@ -4,59 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Darae DermCase Assistant</title>
-<script src="https://cdn.tailwindcss.com">
-// ── Local case history (localStorage only, never leaves device) ──
-const HKEY = 'dermcase_history';
-function loadHistory(){ try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch(e){ return []; } }
-function saveHistory(arr){ try { localStorage.setItem(HKEY, JSON.stringify(arr)); } catch(e){} }
-function saveCase(result, meta){
-  const arr = loadHistory();
-  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '—';
-  arr.unshift({ id: Date.now(), savedAt: new Date().toISOString(), dx, meta, result });
-  saveHistory(arr.slice(0, 50));
-  renderHistory();
-}
-function deleteCase(id){
-  saveHistory(loadHistory().filter(x => x.id !== id));
-  renderHistory();
-}
-function clearAllCases(){
-  if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); }
-}
-function renderHistory(){
-  const arr = loadHistory();
-  const el = document.getElementById('historyArea');
-  if (!el) return;
-  if (!arr.length){ el.innerHTML = ''; return; }
-  const rows = arr.map(x => {
-    const d = new Date(x.savedAt);
-    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area].filter(Boolean).join(' · ');
-    return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
-      <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
-        <div class="text-[13px] font-medium truncate">${x.dx}</div>
-        <div class="text-[11.5px] text-base-content/55 truncate">${ctx ? ctx + ' · ' : ''}${dateStr}</div>
-      </button>
-      <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
-    </div>`;
-  }).join('');
-  el.innerHTML = `<div class="card bg-base-100 shadow-sm rounded-2xl"><div class="card-body p-5">
-    <div class="flex items-center justify-between mb-1">
-      <h3 class="text-[12px] font-medium text-base-content/70">${t('savedCases')}</h3>
-      <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
-    </div>
-    <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
-    ${rows}
-  </div></div>`;
-}
-function reopenCase(id){
-  const x = loadHistory().find(c => c.id === id);
-  if (!x) return;
-  renderOutput(x.result);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-document.addEventListener('DOMContentLoaded', renderHistory);
-</script>
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -426,6 +374,59 @@ function renderOutput(d){
   document.getElementById('saveBtn').addEventListener('click',()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};saveCase(d,meta);const btn=document.getElementById('saveBtn');btn.textContent=t('caseSaved');setTimeout(()=>btn.textContent=t('saveCase'),2000);});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
+</script>
+<script>
+// ── Local case history (localStorage only, never leaves device) ──
+const HKEY = 'dermcase_history';
+function loadHistory(){ try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch(e){ return []; } }
+function saveHistory(arr){ try { localStorage.setItem(HKEY, JSON.stringify(arr)); } catch(e){} }
+function saveCase(result, meta){
+  const arr = loadHistory();
+  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '—';
+  arr.unshift({ id: Date.now(), savedAt: new Date().toISOString(), dx, meta, result });
+  saveHistory(arr.slice(0, 50));
+  renderHistory();
+}
+function deleteCase(id){
+  saveHistory(loadHistory().filter(x => x.id !== id));
+  renderHistory();
+}
+function clearAllCases(){
+  if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); }
+}
+function renderHistory(){
+  const arr = loadHistory();
+  const el = document.getElementById('historyArea');
+  if (!el) return;
+  if (!arr.length){ el.innerHTML = ''; return; }
+  const rows = arr.map(x => {
+    const d = new Date(x.savedAt);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area].filter(Boolean).join(' · ');
+    return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
+      <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
+        <div class="text-[13px] font-medium truncate">${x.dx}</div>
+        <div class="text-[11.5px] text-base-content/55 truncate">${ctx ? ctx + ' · ' : ''}${dateStr}</div>
+      </button>
+      <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="card bg-base-100 shadow-sm rounded-2xl"><div class="card-body p-5">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-[12px] font-medium text-base-content/70">${t('savedCases')}</h3>
+      <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
+    </div>
+    <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
+    ${rows}
+  </div></div>`;
+}
+function reopenCase(id){
+  const x = loadHistory().find(c => c.id === id);
+  if (!x) return;
+  renderOutput(x.result);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('DOMContentLoaded', renderHistory);
 </script>
 </body>
 </html>
