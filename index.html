@@ -125,7 +125,12 @@ section{position:relative}
 .tabcard .l{height:5px;background:#EBE8E0;border-radius:99px;margin-bottom:5px}
 .tabcard .l.s{width:80%}.tabcard .l.t{width:55%}
 .tabcard .q{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;background:var(--weak-bg);color:var(--weak);display:grid;place-items:center;font-size:12px;font-weight:700}
-.t1{top:8px;left:0;transform:rotate(-5deg)} .t2{top:60px;left:120px;transform:rotate(4deg);z-index:2} .t3{top:140px;left:24px;transform:rotate(-2deg)} .t4{top:170px;left:150px;transform:rotate(6deg)}
+.tabcard{opacity:0;transform:translateY(26px) rotate(0deg);transition:transform .7s cubic-bezier(.22,1,.36,1),opacity .55s}
+.t1{top:8px;left:0} .t2{top:60px;left:120px;z-index:2} .t3{top:140px;left:24px} .t4{top:170px;left:150px}
+.chaos.scattered .t1{opacity:1;transform:rotate(-5deg);transition-delay:.05s}
+.chaos.scattered .t2{opacity:1;transform:rotate(4deg);transition-delay:.16s}
+.chaos.scattered .t3{opacity:1;transform:rotate(-2deg);transition-delay:.27s}
+.chaos.scattered .t4{opacity:1;transform:rotate(6deg);transition-delay:.38s}
 .stat{font-family:'DM Mono',monospace}
 .stat .big{font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--green)}
 .stat .lbl{font-size:13px;color:var(--ink-2);margin-top:2px}
@@ -189,6 +194,8 @@ footer{border-top:1px solid var(--border);padding:34px 0}
   .ring,.line{animation:none!important}
   .cbrief-rows>*{opacity:1!important;transform:none!important}
   .step{opacity:1}
+  .tabcard{opacity:1!important;transform:none!important}
+  [data-px]{transform:none!important}
 }
 </style>
 </head>
@@ -209,8 +216,8 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 
 <!-- HERO -->
 <section class="dark hero" id="hero">
-  <div class="grid-tex"></div>
-  <svg class="motif" viewBox="0 0 200 200" fill="none">
+  <div class="grid-tex" data-px="0.12"></div>
+  <svg class="motif" data-px="0.22" viewBox="0 0 200 200" fill="none">
     <g class="ring r1"><circle cx="100" cy="100" r="78" stroke="#4E9E73" stroke-width="1" stroke-dasharray="3 7" opacity=".7"/></g>
     <g class="ring r2"><path d="M100 38c34 0 62 28 62 62s-28 62-62 62" stroke="#4E9E73" stroke-width="1.5" opacity=".6"/><path d="M100 162c-34 0-62-28-62-62" stroke="#CFE3D7" stroke-width="1" opacity=".4"/></g>
     <g class="ring r3"><circle cx="100" cy="100" r="50" stroke="#4E9E73" stroke-width="1" opacity=".5"/><circle cx="100" cy="100" r="30" stroke="#CFE3D7" stroke-width="1.2" opacity=".5"/></g>
@@ -267,8 +274,8 @@ footer{border-top:1px solid var(--border);padding:34px 0}
         <div class="tabcard t4"><span class="q">?</span><div class="h"></div><div class="l s"></div><div class="l t"></div></div>
       </div>
       <div class="reveal">
-        <div class="stat" style="margin-bottom:26px"><div class="big" data-i18n="a1s1n"></div><div class="lbl" data-i18n="a1s1l"></div></div>
-        <div class="stat"><div class="big" data-i18n="a1s2n"></div><div class="lbl" data-i18n="a1s2l"></div></div>
+        <div class="stat" style="margin-bottom:26px"><div class="big cup" data-i18n="a1s1n"></div><div class="lbl" data-i18n="a1s1l"></div></div>
+        <div class="stat"><div class="big cup" data-i18n="a1s2n"></div><div class="lbl" data-i18n="a1s2l"></div></div>
       </div>
     </div>
   </div>
@@ -364,7 +371,7 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 <section class="finale">
   <div class="wrap">
     <div class="finale-card reveal">
-      <div class="grid-tex" style="opacity:.5"></div>
+      <div class="grid-tex" data-px="0.1" style="opacity:.5"></div>
       <h2 data-i18n="finH" style="position:relative"></h2>
       <p data-i18n="finP" style="position:relative"></p>
       <a href="/app.html" class="btn btn-light" style="position:relative;padding:12px 24px" data-i18n="finCta"></a>
@@ -480,6 +487,47 @@ function compose(){
   steps.forEach(function(st){var n=parseInt(st.getAttribute('data-step'),10);st.classList.toggle('on',n<=stage);});
 }
 window.addEventListener('scroll',compose,{passive:true});compose();
+
+// extra scroll-based motion --------------------------------------------------
+var reduce = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+// parallax on tagged graphics
+var pxEls = [].slice.call(document.querySelectorAll('[data-px]'));
+var ticking = false;
+function parallax(){
+  var vh = window.innerHeight;
+  pxEls.forEach(function(el){
+    var r = el.getBoundingClientRect();
+    var center = r.top + r.height/2;
+    var off = (center - vh/2) / vh;            // ~ -1..1
+    var sp = parseFloat(el.getAttribute('data-px')) || 0.1;
+    el.style.transform = 'translate3d(0,' + (off * sp * -90).toFixed(1) + 'px,0)';
+  });
+  ticking = false;
+}
+function onPx(){ if(!ticking && !reduce){ ticking = true; requestAnimationFrame(parallax); } }
+if(!reduce){ window.addEventListener('scroll', onPx, {passive:true}); parallax(); }
+
+// count-up the Act-01 stats when they scroll into view
+function countUp(el){
+  var target = (el.textContent || '').trim();
+  var m = target.match(/^(\d+)(.*)$/);
+  if(!m){ return; }
+  if(reduce){ el.textContent = target; return; }
+  var end = parseInt(m[1],10), suffix = m[2], dur = 1000, t0 = null;
+  function step(ts){ if(!t0)t0=ts; var p=Math.min((ts-t0)/dur,1); var e=1-Math.pow(1-p,3);
+    el.textContent = Math.round(e*end) + suffix; if(p<1) requestAnimationFrame(step); }
+  requestAnimationFrame(step);
+}
+var cio = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ countUp(e.target); cio.unobserve(e.target); } }); }, {threshold:.7});
+document.querySelectorAll('.cup').forEach(function(el){ cio.observe(el); });
+
+// scatter the chaos tab cards as they enter
+var chaos = document.querySelector('.chaos');
+if(chaos){
+  var sio = new IntersectionObserver(function(es){ es.forEach(function(e){ if(e.isIntersecting){ chaos.classList.add('scattered'); sio.unobserve(e.target); } }); }, {threshold:.3});
+  sio.observe(chaos);
+}
 </script>
 </body>
 </html>
