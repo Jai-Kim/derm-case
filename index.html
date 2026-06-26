@@ -1,64 +1,13 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Darae DermCase Assistant</title>
-<script src="https://cdn.tailwindcss.com">
-// ── Local case history (localStorage only, never leaves device) ──
-const HKEY = 'dermcase_history';
-function loadHistory(){ try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch(e){ return []; } }
-function saveHistory(arr){ try { localStorage.setItem(HKEY, JSON.stringify(arr)); } catch(e){} }
-function saveCase(result, meta){
-  const arr = loadHistory();
-  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '—';
-  arr.unshift({ id: Date.now(), savedAt: new Date().toISOString(), dx, meta, result });
-  saveHistory(arr.slice(0, 50));
-  renderHistory();
-}
-function deleteCase(id){
-  saveHistory(loadHistory().filter(x => x.id !== id));
-  renderHistory();
-}
-function clearAllCases(){
-  if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); }
-}
-function renderHistory(){
-  const arr = loadHistory();
-  const el = document.getElementById('historyArea');
-  if (!el) return;
-  if (!arr.length){ el.innerHTML = ''; return; }
-  const rows = arr.map(x => {
-    const d = new Date(x.savedAt);
-    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area].filter(Boolean).join(' · ');
-    return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
-      <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
-        <div class="text-[13px] font-medium truncate">${x.dx}</div>
-        <div class="text-[11.5px] text-base-content/55 truncate">${ctx ? ctx + ' · ' : ''}${dateStr}</div>
-      </button>
-      <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
-    </div>`;
-  }).join('');
-  el.innerHTML = `<div class="card bg-base-100 shadow-sm rounded-2xl"><div class="card-body p-5">
-    <div class="flex items-center justify-between mb-1">
-      <h3 class="text-[12px] font-medium text-base-content/70">${t('savedCases')}</h3>
-      <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
-    </div>
-    <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
-    ${rows}
-  </div></div>`;
-}
-function reopenCase(id){
-  const x = loadHistory().find(c => c.id === id);
-  if (!x) return;
-  renderOutput(x.result);
-  window.scrollTo({ top: 0, behavior: 'smooth' });
-}
-document.addEventListener('DOMContentLoaded', renderHistory);
-</script>
+<title>DermCase Assistant — 증례에 맞춘 문헌 검토</title>
+<meta name="description" content="증례 사진과 환자 정보를 집중된 임상 문헌 브리프로. 현직 피부과 전문의를 위한 근거 기반 도구.">
+<script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
 [data-theme="dermcase"] {
   --color-primary: #1A6640;
@@ -71,340 +20,294 @@ document.addEventListener('DOMContentLoaded', renderHistory);
   --color-success: #0F6E56;
   --color-info: #0C447C;
   --color-warning: #854F0B;
-  --color-error: #7A1A1A;
 }
-body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smoothing: antialiased; }
-.font-mono-dm { font-family: 'DM Mono', monospace; }
+html { scroll-behavior: smooth; }
+body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; color: #18170F; -webkit-font-smoothing: antialiased; }
+.mono { font-family: 'DM Mono', monospace; }
+.display { letter-spacing: -0.025em; line-height: 1.04; }
+.grid-bg {
+  background-image: linear-gradient(rgba(26,102,64,0.05) 1px, transparent 1px),
+                    linear-gradient(90deg, rgba(26,102,64,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+          mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
+.rise { opacity: 0; animation: rise .7s cubic-bezier(.22,1,.36,1) forwards; }
+.d1 { animation-delay: .05s } .d2 { animation-delay: .15s } .d3 { animation-delay: .25s }
+.d4 { animation-delay: .35s } .d5 { animation-delay: .45s }
+@keyframes compose { from { opacity: 0; transform: translateY(8px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
+.brief-row { opacity: 0; animation: compose .55s cubic-bezier(.22,1,.36,1) forwards; }
+.cr1{animation-delay:.55s}.cr2{animation-delay:.8s}.cr3{animation-delay:1.05s}.cr4{animation-delay:1.35s}.cr5{animation-delay:1.6s}.cr6{animation-delay:1.9s}
+.caret { display:inline-block; width:7px; height:15px; background:#1A6640; margin-left:2px; vertical-align:-2px; animation: blink 1s steps(1) infinite; }
+@keyframes blink { 50% { opacity: 0; } }
+.reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
+.reveal.in { opacity: 1; transform: translateY(0); }
+.lift { transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
+.lift:hover { transform: translateY(-3px); box-shadow: 0 12px 30px -12px rgba(13,61,34,.22); }
+.evpill { font-size: 10.5px; font-weight: 500; padding: 2px 9px; border-radius: 99px; }
+.ev-strong { background:#E1F5EE; color:#0F6E56; } .ev-mid { background:#E6F1FB; color:#0C447C; }
+@media (prefers-reduced-motion: reduce) {
+  html { scroll-behavior: auto; }
+  .rise, .brief-row { animation: none; opacity: 1; }
+  .reveal { opacity: 1; transform: none; transition: none; }
+  .caret { animation: none; }
+}
 </style>
 </head>
 <body data-theme="dermcase">
-<div class="max-w-[700px] mx-auto px-4 py-6 pb-12">
 
-  <!-- Header -->
-  <div class="flex items-center gap-3 mb-4 px-1">
-    <div class="w-9 h-9 rounded-lg bg-primary flex items-center justify-center flex-shrink-0">
-      <svg width="18" height="18" viewBox="0 0 16 16" fill="none">
-        <path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/>
-      </svg>
+<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
+  <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 group">
+      <span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-[8deg]">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="text-[14px] font-medium tracking-tight">DermCase</span>
+    </a>
+    <div class="flex items-center gap-1 text-[13px]">
+      <a href="#how" class="hidden sm:block px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navHow"></a>
+      <a href="/about.html" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navAbout"></a>
+      <button id="langBtn" class="px-2.5 py-1.5 rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-300/60 transition mono text-[12px]">EN</button>
+      <a href="/app.html" class="ml-1 btn btn-primary btn-sm normal-case rounded-lg" data-i18n="navOpen"></a>
     </div>
+  </div>
+</nav>
+
+<header class="relative overflow-hidden">
+  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+  <div class="relative max-w-[1100px] mx-auto px-5 pt-16 pb-14 md:pt-24 md:pb-20 grid md:grid-cols-2 gap-10 md:gap-8 items-center">
     <div>
-      <h1 class="text-[17px] font-medium leading-tight">Darae DermCase Assistant</h1>
-      <p class="text-[12.5px] text-base-content/60 leading-tight mt-0.5" data-i18n="subtitle"></p>
+      <div class="rise d1 inline-flex items-center gap-2 text-[12px] text-base-content/60 mb-5">
+        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
+        <span data-i18n="eyebrow"></span>
+      </div>
+      <h1 class="rise d2 display text-[34px] md:text-[46px] font-medium mb-5" data-i18n="heroH1"></h1>
+      <p class="rise d3 text-[15px] md:text-[16px] text-base-content/70 leading-relaxed max-w-[30rem] mb-7" data-i18n="heroSub"></p>
+      <div class="rise d4 flex items-center gap-3">
+        <a href="/app.html" class="btn btn-primary normal-case rounded-xl px-5" data-i18n="ctaPrimary"></a>
+        <a href="#how" class="btn btn-ghost normal-case rounded-xl text-base-content/70" data-i18n="ctaSecondary"></a>
+      </div>
+      <div class="rise d5 mt-7 flex items-center gap-2 text-[12px] text-base-content/50">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="flex-shrink-0"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+        <span data-i18n="heroTrust"></span>
+      </div>
     </div>
-  </div>
 
-  <!-- Upload card -->
-  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
-    <div class="card-body p-5">
-      <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="casePhoto"></h3>
-      <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center cursor-pointer relative text-center p-6 transition-colors hover:border-primary hover:bg-primary/5">
-        <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-        <div id="uploadPrompt">
-          <div class="opacity-25 mb-2 flex justify-center">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect x="3" y="7" width="26" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="11" cy="15" r="3" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M3 22l7-5 5 4 5-6 9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M21 4v7M18.5 6.5L21 4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
+    <div class="rise d3">
+      <div class="bg-base-100 rounded-2xl border border-base-300 shadow-[0_24px_60px_-24px_rgba(13,61,34,0.28)] overflow-hidden">
+        <div class="px-4 h-9 flex items-center gap-1.5 border-b border-base-300 bg-base-200/50">
+          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
+          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
+          <span class="ml-2 text-[11px] text-base-content/45 mono" data-i18n="briefLabel"></span>
+        </div>
+        <div class="p-5 text-left min-h-[300px]">
+          <div class="brief-row cr1 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bAssess"></div>
+          <div class="brief-row cr2 bg-base-200 rounded-lg p-3 mb-3">
+            <div class="flex items-center gap-2 flex-wrap mb-1">
+              <span class="text-[14px] font-medium" data-i18n="bDx"></span>
+              <span class="mono text-[10.5px] bg-base-100 border border-base-300 rounded px-1.5 py-0.5">ICD-10 · L40.0</span>
+            </div>
+            <div class="text-[12.5px] text-base-content/70 leading-snug" data-i18n="bRationale"></div>
           </div>
-          <div class="text-[14px] text-base-content/70 leading-relaxed" data-i18n="uploadText"></div>
-          <div class="text-[12px] text-base-content/50 mt-1" data-i18n="uploadSub"></div>
-        </div>
-        <div id="uploadLoading" style="display:none;" class="items-center gap-2.5 text-base-content/70 text-[13px]">
-          <span class="loading loading-spinner loading-sm text-primary"></span>
-          <span data-i18n="optimizing"></span>
-        </div>
-        <div id="uploadPreview" style="display:none;">
-          <div class="relative inline-block">
-            <img id="previewImg" class="max-h-[195px] max-w-full rounded-md block" src="" alt="">
-            <button id="clearBtn" type="button" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-base-100 border border-base-300 text-base-content/60 text-xs hover:bg-error/10 hover:text-error">✕</button>
+          <div class="brief-row cr3 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bTx"></div>
+          <div class="brief-row cr4 grid grid-cols-2 gap-2 mb-3">
+            <div class="bg-base-200 rounded-lg p-2.5">
+              <div class="flex items-center justify-between mb-1"><span class="text-[12.5px] font-medium">Adalimumab</span><span class="evpill ev-strong">RCT</span></div>
+              <div class="text-[11px] text-base-content/60 leading-snug" data-i18n="bOpt1"></div>
+            </div>
+            <div class="bg-base-200 rounded-lg p-2.5">
+              <div class="flex items-center justify-between mb-1"><span class="text-[12.5px] font-medium">Deucravacitinib</span><span class="evpill ev-strong">RCT</span></div>
+              <div class="text-[11px] text-base-content/60 leading-snug" data-i18n="bOpt2"></div>
+            </div>
+          </div>
+          <div class="brief-row cr5 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bLit"></div>
+          <div class="brief-row cr6">
+            <span class="evpill ev-strong" data-i18n="bGuideline"></span>
+            <div class="text-[12.5px] font-medium mt-1.5">AAD-NPF Guidelines: Topical & Systemic Psoriasis</div>
+            <div class="text-[11px] text-primary mono mt-1">JAAD 2021 — doi.org/10.1016/j.jaad.2020<span class="caret"></span></div>
           </div>
         </div>
       </div>
     </div>
   </div>
+</header>
 
-  <!-- Patient context card -->
-  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
-    <div class="card-body p-5">
-      <div class="flex items-center justify-between mb-3"><h3 class="text-[12px] font-medium text-base-content/70" data-i18n="patientContext"></h3><button type="button" id="sampleBtn" class="text-[11.5px] text-primary hover:underline" data-i18n="trySample"></button></div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="age"></span></label>
-          <input type="number" id="age" data-i18n-placeholder="agePh" min="0" max="120" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="sex"></span></label>
-          <select id="sex" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
-            <option value="" data-i18n="sexSelect"></option>
-            <option value="Male" data-i18n="sexMale"></option>
-            <option value="Female" data-i18n="sexFemale"></option>
-            <option value="Other" data-i18n="sexOther"></option>
-          </select>
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="area"></span></label>
-          <input type="text" id="area" data-i18n-placeholder="areaPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="duration"></span></label>
-          <input type="text" id="duration" data-i18n-placeholder="durationPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="reportLang"></span></label>
-          <select id="lang" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
-            <option value="ko">한국어</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-        <div class="form-control sm:col-span-2">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="notes"></span></label>
-          <textarea id="notes" data-i18n-placeholder="notesPh" class="textarea textarea-bordered textarea-sm w-full bg-base-200 text-[14px] min-h-[58px]"></textarea>
-        </div>
+<section class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
+  <div class="reveal text-[12px] font-medium text-primary mb-3 mono" data-i18n="pillarsEyebrow"></div>
+  <h2 class="reveal display text-[26px] md:text-[32px] font-medium mb-12 max-w-[34rem]" data-i18n="pillarsH2"></h2>
+  <div class="grid md:grid-cols-3 gap-4">
+    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 7v5l3 2" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="#1A6640" stroke-width="1.6"/></svg>
+      </div>
+      <h3 class="text-[16px] font-medium mb-2" data-i18n="p1h"></h3>
+      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p1b"></p>
+    </div>
+    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6" style="transition-delay:.08s">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round"/></svg>
+      </div>
+      <h3 class="text-[16px] font-medium mb-2" data-i18n="p2h"></h3>
+      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p2b"></p>
+    </div>
+    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6" style="transition-delay:.16s">
+      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#1A6640" stroke-width="1.6"/><path d="M8 9h6M8 13h8M8 16h4" stroke="#1A6640" stroke-width="1.6" stroke-linecap="round"/></svg>
+      </div>
+      <h3 class="text-[16px] font-medium mb-2" data-i18n="p3h"></h3>
+      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p3b"></p>
+    </div>
+  </div>
+</section>
+
+<section id="how" class="bg-secondary text-primary-content">
+  <div class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
+    <div class="reveal text-[12px] font-medium text-primary-content/60 mb-3 mono" data-i18n="howEyebrow"></div>
+    <h2 class="reveal display text-[26px] md:text-[32px] font-medium mb-12" data-i18n="howH2"></h2>
+    <div class="grid md:grid-cols-3 gap-8 md:gap-6">
+      <div class="reveal">
+        <div class="mono text-[13px] text-primary-content/45 mb-3">01</div>
+        <h3 class="text-[17px] font-medium mb-2" data-i18n="s1h"></h3>
+        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s1b"></p>
+      </div>
+      <div class="reveal" style="transition-delay:.1s">
+        <div class="mono text-[13px] text-primary-content/45 mb-3">02</div>
+        <h3 class="text-[17px] font-medium mb-2" data-i18n="s2h"></h3>
+        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s2b"></p>
+      </div>
+      <div class="reveal" style="transition-delay:.2s">
+        <div class="mono text-[13px] text-primary-content/45 mb-3">03</div>
+        <h3 class="text-[17px] font-medium mb-2" data-i18n="s3h"></h3>
+        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s3b"></p>
       </div>
     </div>
   </div>
+</section>
 
-  <button class="btn btn-primary w-full normal-case mt-2" id="analyzeBtn" disabled data-i18n="analyzeBtn"></button>
+<section class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
+  <div class="grid md:grid-cols-2 gap-10 items-center">
+    <div>
+      <h2 class="reveal display text-[24px] md:text-[28px] font-medium mb-4" data-i18n="trustH2"></h2>
+      <p class="reveal text-[14px] text-base-content/65 leading-relaxed mb-6" data-i18n="trustB"></p>
+      <div class="reveal flex items-start gap-2.5 text-[13px] text-base-content/70 bg-base-100 border border-base-300 rounded-xl p-4">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="flex-shrink-0 mt-0.5"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="#1A6640" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        <span data-i18n="trustPrivacy"></span>
+      </div>
+    </div>
+    <div class="reveal">
+      <div class="text-[11px] font-medium text-base-content/45 mb-4 mono" data-i18n="sourcesLabel"></div>
+      <div class="grid grid-cols-2 gap-2.5">
+        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">PubMed</div>
+        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">JAAD</div>
+        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">NEJM</div>
+        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">AAD</div>
+        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium col-span-2">Cochrane</div>
+      </div>
+    </div>
+  </div>
+</section>
 
-  <div id="outputArea"></div>
+<section class="max-w-[1100px] mx-auto px-5 pb-20">
+  <div class="reveal bg-primary text-primary-content rounded-3xl px-8 py-14 md:py-16 text-center overflow-hidden relative">
+    <div class="absolute inset-0 grid-bg opacity-40 pointer-events-none"></div>
+    <h2 class="relative display text-[26px] md:text-[34px] font-medium mb-3" data-i18n="finalH2"></h2>
+    <p class="relative text-[14px] text-primary-content/75 mb-7 max-w-[28rem] mx-auto" data-i18n="finalB"></p>
+    <a href="/app.html" class="relative inline-flex btn bg-base-100 text-primary hover:bg-base-200 border-0 normal-case rounded-xl px-6" data-i18n="finalCta"></a>
+  </div>
+</section>
 
-  <div id="historyArea" class="mt-3"></div>
-
-  <div class="text-[11.5px] text-base-content/50 leading-relaxed mt-3 px-3" data-i18n="disclaimer"></div>
-
-</div>
+<footer class="border-t border-base-300">
+  <div class="max-w-[1100px] mx-auto px-5 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+    <div class="flex items-center gap-2.5">
+      <span class="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
+        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="text-[13px] font-medium">DermCase Assistant</span>
+    </div>
+    <p class="text-[11px] text-base-content/45 leading-relaxed max-w-[34rem]" data-i18n="footDisc"></p>
+  </div>
+</footer>
 
 <script>
 const I18N = {
   ko: {
-    subtitle: '피부과 증례를 위한 AI 감별진단 및 문헌 가이드.',
-    casePhoto: '증례 사진',
-    trySample: '예시 증례 불러오기',
-    sampleLoaded: '예시 정보 입력됨 — 사진을 추가하고 분석하세요',
-    uploadText: '사진을 여기에 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
-    uploadSub: 'JPG, PNG — 저장되지 않습니다',
-    patientContext: '환자 정보',
-    age: '나이', agePh: '예: 42',
-    sex: '성별', sexSelect: '선택', sexMale: '남성', sexFemale: '여성', sexOther: '기타 / 미지정',
-    area: '발생 부위', areaPh: '예: 왼쪽 팔뚝, 두피',
-    duration: '기간', durationPh: '예: 3주, 6개월',
-    reportLang: '보고서 언어',
-    notes: '추가 메모 (선택사항)', notesPh: '증상, 이전 치료, 피츠패트릭 유형, 관련 병력…',
-    analyzeBtn: '증례 분석',
-    disclaimer: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
-    analyzing: '증례 분석 중',
-    optimizing: '이미지 처리 중…',
-    copyChart: '차트에 복사', copied: '복사됨!',
-    shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
-    newCase: '새 증례',
-    saveCase: '증례 저장', caseSaved: '저장됨!',
-    savedCases: '저장된 증례', noCases: '저장된 증례 없음',
-    clearAll: '전체 삭제', deleteCase: '삭제',
-    storageNote: '증례는 이 기기에만 저장됩니다. 서버로 전송되지 않습니다.',
-    confirmClear: '저장된 모든 증례를 삭제하시겠습니까?',
-    sectionAssessment: '임상 평가',
-    sectionLit: '관련 문헌',
-    sectionTreatment: '치료 옵션',
-    txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항',
-    txDisclaimer: '의사 검토용 문헌 기반 옵션 — 처방 권고가 아닙니다.',
-    evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
-    errStrong: '오류',
+    navHow: '작동 방식', navAbout: '소개', navOpen: '증례 분석',
+    eyebrow: '현직 피부과 전문의를 위한 임상 문헌 도구',
+    heroH1: '눈앞의 증례에 맞춘 문헌 검토.',
+    heroSub: '증례 사진과 환자 정보를 집중된 임상 브리프로 — 잠정 평가, 검토할 만한 치료 옵션, 그리고 그 근거 문헌까지. 비전형적이고 근거가 중요한 증례를 위해 설계되었습니다.',
+    ctaPrimary: '증례 분석 시작', ctaSecondary: '작동 방식 보기',
+    heroTrust: '증례 사진은 분석에만 사용되며 저장되지 않습니다',
+    briefLabel: '임상 브리프',
+    bAssess: '임상 평가', bDx: '건선 (판상형)',
+    bRationale: '경계가 뚜렷한 비늘성 홍반판은 판상 건선의 전형적 소견이며, 만성 경과와 일치합니다.',
+    bTx: '치료 옵션',
+    bOpt1: '중등도-중증에서 PASI75 약 70%', bOpt2: '경구제, 주사 불필요',
+    bLit: '관련 문헌', bGuideline: '가이드라인',
+    pillarsEyebrow: 'DermCase가 다른 이유',
+    pillarsH2: '검색 결과 나열이 아니라, 결정에 도움이 되는 합성.',
+    p1h: '최신성이 곧 기능', p1b: '고정된 교과서가 아니라, 최신 가이드라인 변화와 새로운 생물학적제제 데이터를 반영합니다.',
+    p2h: '피부과 특화 깊이', p2b: '일반 Q&A 상자가 아니라, 형태학·근거 수준·치료 경로를 중심으로 구성됩니다.',
+    p3h: '증례 중심 합성', p3b: '검색 히트 목록이 아니라, 당신의 증례와 결정을 중심으로 정리된 브리프입니다.',
+    howEyebrow: '작동 방식', howH2: '입력에서 실행 가능한 브리프까지, 세 단계.',
+    s1h: '증례 입력', s1b: '증례 사진과 환자 정보(나이, 부위, 기간, 메모)를 입력합니다.',
+    s2h: '문헌 검색', s2b: '모델이 유력 진단을 도출하고, 그 진단에 맞춰 최신 문헌을 검색합니다.',
+    s3h: '브리프로 실행', s3b: 'ICD-10, 근거 태그가 달린 문헌, 검토할 치료 옵션이 담긴 브리프를 받습니다.',
+    trustH2: '신뢰를 전제로 설계.',
+    trustB: '현직 피부과 전문의와 함께 개발하고 있습니다. 모든 근거는 실제 출처에 연결되며, 근거 수준(가이드라인·RCT·증례 보고 등)이 명시됩니다.',
+    trustPrivacy: '증례 사진은 분석을 위해 처리될 뿐, 서버에 저장되지 않습니다.',
+    sourcesLabel: '근거 출처',
+    finalH2: '실제 증례로 사용해 보세요.', finalB: '비전형적이거나 치료 저항성 증례에서 가장 큰 가치를 발휘합니다.',
+    finalCta: '증례 분석 시작',
+    footDisc: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
   },
   en: {
-    subtitle: 'AI-assisted differential diagnosis and literature guidance for dermatology cases.',
-    casePhoto: 'Case photo',
-    trySample: 'Load sample case',
-    sampleLoaded: 'Sample context filled — add a photo and analyze',
-    uploadText: 'Drop case photo here or <span class="text-primary">browse</span>',
-    uploadSub: 'JPG, PNG — not stored anywhere',
-    patientContext: 'Patient context',
-    age: 'Age', agePh: 'e.g. 42',
-    sex: 'Sex', sexSelect: 'Select', sexMale: 'Male', sexFemale: 'Female', sexOther: 'Other / Not specified',
-    area: 'Affected area', areaPh: 'e.g. left forearm, scalp',
-    duration: 'Duration', durationPh: 'e.g. 3 weeks, 6 months',
-    reportLang: 'Report language',
-    notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, Fitzpatrick type, relevant history…',
-    analyzeBtn: 'Analyze case',
-    disclaimer: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
-    analyzing: 'Running case analysis',
-    optimizing: 'Optimizing image…',
-    copyChart: 'Copy for chart', copied: 'Copied!',
-    shareReport: 'Share report', linkCopied: 'Link copied!',
-    newCase: 'New case',
-    saveCase: 'Save case', caseSaved: 'Saved!',
-    savedCases: 'Saved cases', noCases: 'No saved cases yet',
-    clearAll: 'Clear all', deleteCase: 'Delete',
-    storageNote: 'Cases are stored only on this device. Nothing is sent to a server.',
-    confirmClear: 'Delete all saved cases?',
-    sectionAssessment: 'Clinical assessment',
-    sectionLit: 'Literature',
-    sectionTreatment: 'Treatment options',
-    txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration',
-    txDisclaimer: 'Literature-derived options for physician consideration — not a prescribing recommendation.',
-    evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
-    errStrong: 'Error',
+    navHow: 'How it works', navAbout: 'About', navOpen: 'Open app',
+    eyebrow: 'A clinical literature tool for practicing dermatologists',
+    heroH1: 'The literature, shaped to the case in front of you.',
+    heroSub: 'DermCase turns a case photo and patient context into a focused clinical brief — a working assessment, the treatment options worth weighing, and the references behind them. Built for the after-hours, evidence-sensitive cases.',
+    ctaPrimary: 'Open the app', ctaSecondary: 'See how it works',
+    heroTrust: 'Case photos are processed for analysis, never stored',
+    briefLabel: 'clinical brief',
+    bAssess: 'CLINICAL ASSESSMENT', bDx: 'Plaque psoriasis',
+    bRationale: 'Well-demarcated scaly erythematous plaques are characteristic of plaque psoriasis and consistent with the chronic course.',
+    bTx: 'TREATMENT OPTIONS',
+    bOpt1: 'PASI75 ~70% in moderate–severe', bOpt2: 'Oral, no injection required',
+    bLit: 'LITERATURE', bGuideline: 'Guideline',
+    pillarsEyebrow: 'Why DermCase',
+    pillarsH2: 'Synthesis that informs a decision — not a list of search hits.',
+    p1h: 'Recency as a feature', p1b: 'Surfaces the latest guideline changes and emerging biologic data, not a static textbook.',
+    p2h: 'Dermatology-native depth', p2b: 'Structured around morphology, evidence strength, and treatment pathways — not a general Q&A box.',
+    p3h: 'Case-shaped synthesis', p3b: 'A brief organized around your case and the decision in front of you, not a pile of search results.',
+    howEyebrow: 'How it works', howH2: 'From input to an actionable brief, in three steps.',
+    s1h: 'Add the case', s1b: 'Upload a photo and the patient context — age, area, duration, and notes.',
+    s2h: 'Literature search', s2b: 'The model identifies the likely diagnosis and searches current literature anchored to it.',
+    s3h: 'Act on the brief', s3b: 'Get an assessment with ICD-10, evidence-tagged references, and treatment options to weigh.',
+    trustH2: 'Designed to be trusted.',
+    trustB: 'Built with practicing dermatologists. Every claim links to a real source, tagged with its evidence level — guideline, RCT, case report, and so on.',
+    trustPrivacy: 'Case photos are processed for analysis and never stored on our servers.',
+    sourcesLabel: 'EVIDENCE SOURCES',
+    finalH2: 'Try it on a real case.', finalB: 'It earns its keep most on the uncommon and treatment-resistant cases.',
+    finalCta: 'Open the app',
+    footDisc: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
   }
 };
 
-const SAMPLE_CASE = {
-  age: '47', sex: 'Female', area: 'Bilateral shins and elbows',
-  duration: '8 months, worsening',
-  notes: 'Well-demarcated erythematous plaques with thick silvery scale. Failed 3 months of high-potency topical corticosteroids and vitamin D analog. History of mild hypertension. Patient asks about systemic options. Fitzpatrick III.'
-};
-let currentLang = 'ko';
-function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
-function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.innerHTML = t(el.getAttribute('data-i18n'));
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
-  });
-  const sex = document.getElementById('sex');
-  if (sex) {
-    const keys = ['sexSelect','sexMale','sexFemale','sexOther'];
-    Array.from(sex.options).forEach((opt, i) => { if (keys[i]) opt.text = t(keys[i]); });
-  }
+let lang = (navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'ko';
+function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
+function applyI18n(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
+  document.getElementById('langBtn').textContent = lang === 'ko' ? 'EN' : '한국어';
 }
+document.getElementById('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; applyI18n(); });
+applyI18n();
 
-let imageBase64 = null, imageMimeType = 'image/jpeg';
-const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),uploadLoading=document.getElementById('uploadLoading'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
-
-function loadImage(file){
-  if(!file||!file.type.startsWith('image/'))return;
-  imageMimeType='image/jpeg';
-  uploadPrompt.style.display='none';
-  uploadPreview.style.display='none';
-  uploadLoading.style.display='flex';
-  const img=new Image();
-  const objectUrl=URL.createObjectURL(file);
-  img.onload=()=>{
-    setTimeout(()=>{
-      URL.revokeObjectURL(objectUrl);
-      const MAX=1200;
-      let w=img.width,h=img.height;
-      if(w>MAX||h>MAX){const s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}
-      const canvas=document.createElement('canvas');
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const dataUrl=canvas.toDataURL('image/jpeg',0.82);
-      imageBase64=dataUrl.split(',')[1];
-      previewImg.src=dataUrl;
-      uploadLoading.style.display='none';
-      uploadPreview.style.display='block';
-      updateBtn();
-    },0);
-  };
-  img.onerror=()=>{
-    URL.revokeObjectURL(objectUrl);
-    uploadLoading.style.display='none';
-    uploadPrompt.style.display='block';
-  };
-  img.src=objectUrl;
-}
-function updateBtn(){analyzeBtn.disabled=!imageBase64;}
-
-document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
-document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); });
-document.getElementById('sampleBtn').addEventListener('click', () => {
-  document.getElementById('age').value = SAMPLE_CASE.age;
-  document.getElementById('sex').value = SAMPLE_CASE.sex;
-  document.getElementById('area').value = SAMPLE_CASE.area;
-  document.getElementById('duration').value = SAMPLE_CASE.duration;
-  document.getElementById('notes').value = SAMPLE_CASE.notes;
-  const b = document.getElementById('sampleBtn');
-  const orig = t('trySample');
-  b.textContent = t('sampleLoaded');
-  setTimeout(() => { b.textContent = orig; }, 2600);
-});
-fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
-dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('border-primary','bg-primary/5'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('border-primary','bg-primary/5');loadImage(e.dataTransfer.files[0]);});
-clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';uploadLoading.style.display='none';outputArea.innerHTML='';updateBtn();});
-analyzeBtn.addEventListener('click',runAnalysis);
-
-function showProgress(){
-  outputArea.innerHTML=`<div class="alert bg-base-100 border border-base-300 mt-3 py-3.5 rounded-2xl"><span class="loading loading-spinner loading-sm text-primary"></span><span class="text-[13px] text-base-content/70">${t('analyzing')}</span></div>`;
-}
-
-async function runAnalysis(){
-  const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
-  const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
-  const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, rationale, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
-  analyzeBtn.disabled=true;showProgress();
-  const sys=`You are a clinical literature assistant for practicing dermatologists. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
-
-${langInstruction}
-
-{
-  "assessment": [
-    { "diagnosis": "Diagnosis name", "icd10": "L40.0", "rationale": "1-2 sentence clinical rationale based on visible morphology and patient context" }
-  ],
-  "references": [
-    { "title": "Paper or guideline title", "relevance": "1-2 sentences on direct applicability to this specific case", "source": "Journal, year — DOI or URL", "evidence_level": "guideline" }
-  ],
-  "treatment_comparison": {
-    "rationale": "1 sentence on why these specific options are in contention for THIS patient",
-    "options": [
-      { "name": "Treatment name", "evidence_level": "rct", "efficacy": "What the literature shows for this indication", "onset": "Expected time to meaningful response", "monitoring": "Required labs / monitoring burden", "key_consideration": "The single most decision-relevant factor for THIS patient", "source": "Journal, year — DOI" }
-    ]
-  }
-}
-
-Rules:
-- assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
-- treatment_comparison: OPTIONAL. Include ONLY when the case genuinely has 2-4 competing viable treatment paths where the choice is non-obvious (treatment-resistant, off-label question, comorbidity complicating first-line, or biologic selection). If one standard path is clearly correct for a routine case, OMIT this field entirely — do not force a comparison. When included: 2-4 options, each grounded in a real recent citation. Reason step by step internally — confirm the diagnosis, search per-treatment evidence, then synthesize trade-offs. Present options with trade-offs; NEVER rank a single 'best'. This is decision support for physician consideration, not a prescribing recommendation.
-- references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
-- evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
-  try{
-    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
-    let data;
-    const contentType=resp.headers.get('content-type')||'';
-    if(contentType.includes('application/json')){data=await resp.json();}
-    else{const txt=await resp.text();throw new Error(txt.slice(0,300));}
-    if(!resp.ok||data.error)throw new Error(JSON.stringify(data.error||data,null,2));
-    let raw='';
-    for(const b of(data.content||[])){if(b.type==='text')raw+=b.text;}
-    if(!raw)throw new Error('No text in response.\n\n'+JSON.stringify(data,null,2));
-    let clean=raw.trim();
-    const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
-    if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
-    clean=clean.replace(/[\r\n]/g,' ');
-    let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
-    renderOutput(parsed);
-  }catch(err){
-    outputArea.innerHTML=`<div class="alert alert-error mt-3 rounded-2xl"><div><strong class="text-[13px]">${t('errStrong')}</strong><pre class="text-[11px] font-mono-dm whitespace-pre-wrap break-all opacity-80 mt-1">${err.message}</pre></div></div>`;
-    analyzeBtn.disabled=false;
-  }
-}
-
-function renderOutput(d){
-  const assessment=d.assessment||[],refs=d.references||[];
-  const assessHtml=assessment.map((item,i)=>`<div class="bg-base-200 rounded-lg p-3.5 mb-2 last:mb-0"><div class="flex items-center gap-2 flex-wrap mb-1.5"><span class="text-[14px] font-medium">${item.diagnosis}</span>${item.icd10?`<span class="badge badge-sm font-mono-dm text-[11px] bg-base-100 border-base-300">ICD-10 · ${item.icd10}</span>`:''}</div><div class="text-[13px] text-base-content/70 leading-relaxed">${item.rationale}</div></div>`).join('');
-  const evMap={'guideline':{variant:'success',key:'evGuideline'},'meta-analysis':{variant:'success',key:'evMetaAnalysis'},'rct':{variant:'success',key:'evRct'},'cohort':{variant:'info',key:'evCohort'},'review':{variant:'info',key:'evReview'},'case-report':{variant:'warning',key:'evCaseReport'}};
-  const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="badge badge-${ev.variant} badge-sm text-[10.5px] mb-1.5">${t(ev.key)}</div>`:'';return `<div class="border-b border-base-300 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">${pill}<div class="text-[13px] font-medium">${r.title}</div><div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${r.relevance}</div><div class="text-[11.5px] text-primary font-mono-dm mt-1.5">${r.source}</div></div>`;}).join('');
-  const tc=d.treatment_comparison;
-  let txHtml='';
-  if(tc&&Array.isArray(tc.options)&&tc.options.length){
-    const axes=[['efficacy','txEfficacy'],['onset','txOnset'],['monitoring','txMonitoring'],['key_consideration','txConsideration']];
-    const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="badge badge-${ev.variant} badge-sm text-[10px]">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="text-[11px] text-primary font-mono-dm mt-2">${o.source}</div>`:''}</div>`;}).join('');
-    txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
-  }
-  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
-  analyzeBtn.disabled=false;
-  document.getElementById('shareBtn').addEventListener('click',()=>{
-    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
-    const payload=btoa(JSON.stringify({result:d,meta}));
-    const url=window.location.origin+'/report.html#'+payload;
-    navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
-  });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
-  document.getElementById('saveBtn').addEventListener('click',()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};saveCase(d,meta);const btn=document.getElementById('saveBtn');btn.textContent=t('caseSaved');setTimeout(()=>btn.textContent=t('saveCase'),2000);});
-  document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
-}
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+document.querySelectorAll('.reveal').forEach(el => io.observe(el));
 </script>
 </body>
 </html>

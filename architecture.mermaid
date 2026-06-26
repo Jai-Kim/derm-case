@@ -1,0 +1,47 @@
+flowchart TB
+    subgraph V1["● v1 — LIVE TODAY (single-file app)"]
+        direction TB
+        U[Dermatologist]
+        B["index.html<br/>UI · i18n · image resize · render<br/>Tailwind/DaisyUI via CDN, no build step"]
+        RPT["report.html<br/>shareable read-only view"]
+        LS[("localStorage<br/>case history — device only")]
+        PROXY["api/analyze.js<br/>Vercel serverless proxy"]
+        CLAUDE["Anthropic API<br/>Claude Sonnet 4 + web_search<br/>diagnosis + search + synthesis in one call"]
+
+        U -->|image + patient context| B
+        B -->|POST /api/analyze| PROXY
+        PROXY -->|x-api-key| CLAUDE
+        CLAUDE -->|structured JSON:<br/>assessment · ICD-10 · treatment comparison · references| PROXY
+        PROXY --> B
+        B -->|render brief| U
+        B -.->|save / reopen| LS
+        B -.->|share via URL hash| RPT
+    end
+
+    subgraph P2["○ Phase 2 — gated on validation (multi-route, still no backend)"]
+        direction TB
+        LAND[/" / landing"/]
+        APP2[/" /app — analysis"/]
+        LIB2[/" /library — history"/]
+        ABT[/" /about — methodology + privacy"/]
+        BUILD["Vite build · shared components"]
+        LAND --- APP2 --- LIB2 --- ABT
+        APP2 -.reuses.-> PROXY
+    end
+
+    subgraph P3["○ Phase 3 — gated on compliance review (backend + accounts)"]
+        direction TB
+        AUTH["Auth provider"]
+        API3["API layer · case CRUD"]
+        DB[("Postgres<br/>structured result + context<br/>NEVER the raw image")]
+        AUTH --> DB
+        API3 --> DB
+    end
+
+    V1 ==>|"when premise validates"| P2
+    P2 ==>|"when retention proven + compliance cleared"| P3
+
+    classDef live fill:#1A6640,stroke:#0D3D22,color:#fff;
+    classDef planned fill:#F5F4F0,stroke:#C5C2B8,color:#68655C,stroke-dasharray: 4 3;
+    class U,B,RPT,LS,PROXY,CLAUDE live;
+    class LAND,APP2,LIB2,ABT,BUILD,AUTH,API3,DB planned;
