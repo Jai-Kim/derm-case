@@ -145,6 +145,9 @@ const I18N = {
     newCase: '새 증례',
     sectionAssessment: '임상 평가',
     sectionLit: '관련 문헌',
+    sectionTreatment: '치료 옵션',
+    txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항',
+    txDisclaimer: '의사 검토용 문헌 기반 옵션 — 처방 권고가 아닙니다.',
     evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
     errStrong: '오류',
   },
@@ -169,6 +172,9 @@ const I18N = {
     newCase: 'New case',
     sectionAssessment: 'Clinical assessment',
     sectionLit: 'Literature',
+    sectionTreatment: 'Treatment options',
+    txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration',
+    txDisclaimer: 'Literature-derived options for physician consideration — not a prescribing recommendation.',
     evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
     errStrong: 'Error',
   }
@@ -255,15 +261,22 @@ ${langInstruction}
   ],
   "references": [
     { "title": "Paper or guideline title", "relevance": "1-2 sentences on direct applicability to this specific case", "source": "Journal, year — DOI or URL", "evidence_level": "guideline" }
-  ]
+  ],
+  "treatment_comparison": {
+    "rationale": "1 sentence on why these specific options are in contention for THIS patient",
+    "options": [
+      { "name": "Treatment name", "evidence_level": "rct", "efficacy": "What the literature shows for this indication", "onset": "Expected time to meaningful response", "monitoring": "Required labs / monitoring burden", "key_consideration": "The single most decision-relevant factor for THIS patient", "source": "Journal, year — DOI" }
+    ]
+  }
 }
 
 Rules:
 - assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
+- treatment_comparison: OPTIONAL. Include ONLY when the case genuinely has 2-4 competing viable treatment paths where the choice is non-obvious (treatment-resistant, off-label question, comorbidity complicating first-line, or biologic selection). If one standard path is clearly correct for a routine case, OMIT this field entirely — do not force a comparison. When included: 2-4 options, each grounded in a real recent citation. Reason step by step internally — confirm the diagnosis, search per-treatment evidence, then synthesize trade-offs. Present options with trade-offs; NEVER rank a single 'best'. This is decision support for physician consideration, not a prescribing recommendation.
 - references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
 - evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
   try{
-    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:1800,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-20250514',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
     let data;
     const contentType=resp.headers.get('content-type')||'';
     if(contentType.includes('application/json')){data=await resp.json();}
@@ -289,7 +302,14 @@ function renderOutput(d){
   const assessHtml=assessment.map((item,i)=>`<div class="bg-base-200 rounded-lg p-3.5 mb-2 last:mb-0"><div class="flex items-center gap-2 flex-wrap mb-1.5"><span class="text-[14px] font-medium">${item.diagnosis}</span>${item.icd10?`<span class="badge badge-sm font-mono-dm text-[11px] bg-base-100 border-base-300">ICD-10 · ${item.icd10}</span>`:''}</div><div class="text-[13px] text-base-content/70 leading-relaxed">${item.rationale}</div></div>`).join('');
   const evMap={'guideline':{variant:'success',key:'evGuideline'},'meta-analysis':{variant:'success',key:'evMetaAnalysis'},'rct':{variant:'success',key:'evRct'},'cohort':{variant:'info',key:'evCohort'},'review':{variant:'info',key:'evReview'},'case-report':{variant:'warning',key:'evCaseReport'}};
   const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="badge badge-${ev.variant} badge-sm text-[10.5px] mb-1.5">${t(ev.key)}</div>`:'';return `<div class="border-b border-base-300 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">${pill}<div class="text-[13px] font-medium">${r.title}</div><div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${r.relevance}</div><div class="text-[11.5px] text-primary font-mono-dm mt-1.5">${r.source}</div></div>`;}).join('');
-  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
+  const tc=d.treatment_comparison;
+  let txHtml='';
+  if(tc&&Array.isArray(tc.options)&&tc.options.length){
+    const axes=[['efficacy','txEfficacy'],['onset','txOnset'],['monitoring','txMonitoring'],['key_consideration','txConsideration']];
+    const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="badge badge-${ev.variant} badge-sm text-[10px]">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="text-[11px] text-primary font-mono-dm mt-2">${o.source}</div>`:''}</div>`;}).join('');
+    txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
+  }
+  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
@@ -297,7 +317,7 @@ function renderOutput(d){
     const url=window.location.origin+'/report.html#'+payload;
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
