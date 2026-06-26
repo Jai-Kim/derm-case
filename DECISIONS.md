@@ -84,3 +84,21 @@ This log exists because the small, day-to-day calls compound into the product's 
 - Wait until after 2 conversations to define the criterion
 
 **Reasoning:** The Mixed dermatologist's feedback ("test whether it changes management decisions or merely summarizes what I already know") is the killer test. Vague criteria produce vague signal. Three binary questions per conversation give a tally we can actually decide on after 5 sessions. Adding the "non-trivial case" qualifier prevents wasted conversations on routine cases that don't test the hypothesis.
+
+---
+
+## D-006 — Adopt ClickUp for roadmap, epics, and architecture (reverses D-002)
+**Date:** June 2026
+**Flagged by:** User
+
+**Decision:** Stand up a ClickUp workspace (General space → "DermCase Assistant" folder) as the canonical home for the roadmap (Now/Next/Later lists), future epics, and architecture docs. ROADMAP.md remains in-repo as a lightweight pointer next to the code.
+
+**This reverses D-002**, which chose ROADMAP.md over external tools. Honest reasoning for the change:
+- The project has grown past what a single markdown file serves well: 13 epics across 3 phases, a current+target architecture, and a "beyond one-page app" evolution to plan.
+- Future epics and architecture diagrams want a real planning surface — phases as lists, epics as tasks with status/priority, diagrams in docs.
+- ClickUp is already connected and in active use elsewhere in the workspace (Sprints, Market Research, User Interviews).
+- D-002's rationale (avoid overhead at 5 hrs/week for a handful of work items) was correct *at the time*. The scope has outgrown it.
+
+**What stays true from D-002:** the heaviest tracking burden is still the dermatologist conversation log (CONVERSATIONS.md), and the in-repo docs remain the source of truth for decisions and conversation signal. ClickUp is for forward planning, not for replacing the validation discipline.
+
+**Guard against the obvious risk:** adopting a planning tool can become a way to *feel* productive without validating. The roadmap explicitly gates all Phase 2/3 epics on Phase 1 signal. ClickUp organizes the plan; it does not authorize building ahead of validation.

@@ -1,5 +1,8 @@
 # DermCase Assistant — Roadmap
 
+> **Canonical roadmap now lives in ClickUp** (General → DermCase Assistant → Now/Next/Later + Architecture doc). This file remains as an in-repo quick reference. See DECISIONS.md D-006.
+
+
 _Last updated: May 2026_
 
 ---
