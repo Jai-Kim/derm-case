@@ -4,7 +4,59 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Darae DermCase Assistant</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.tailwindcss.com">
+// ── Local case history (localStorage only, never leaves device) ──
+const HKEY = 'dermcase_history';
+function loadHistory(){ try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch(e){ return []; } }
+function saveHistory(arr){ try { localStorage.setItem(HKEY, JSON.stringify(arr)); } catch(e){} }
+function saveCase(result, meta){
+  const arr = loadHistory();
+  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '—';
+  arr.unshift({ id: Date.now(), savedAt: new Date().toISOString(), dx, meta, result });
+  saveHistory(arr.slice(0, 50));
+  renderHistory();
+}
+function deleteCase(id){
+  saveHistory(loadHistory().filter(x => x.id !== id));
+  renderHistory();
+}
+function clearAllCases(){
+  if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); }
+}
+function renderHistory(){
+  const arr = loadHistory();
+  const el = document.getElementById('historyArea');
+  if (!el) return;
+  if (!arr.length){ el.innerHTML = ''; return; }
+  const rows = arr.map(x => {
+    const d = new Date(x.savedAt);
+    const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
+    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area].filter(Boolean).join(' · ');
+    return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
+      <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
+        <div class="text-[13px] font-medium truncate">${x.dx}</div>
+        <div class="text-[11.5px] text-base-content/55 truncate">${ctx ? ctx + ' · ' : ''}${dateStr}</div>
+      </button>
+      <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
+    </div>`;
+  }).join('');
+  el.innerHTML = `<div class="card bg-base-100 shadow-sm rounded-2xl"><div class="card-body p-5">
+    <div class="flex items-center justify-between mb-1">
+      <h3 class="text-[12px] font-medium text-base-content/70">${t('savedCases')}</h3>
+      <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
+    </div>
+    <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
+    ${rows}
+  </div></div>`;
+}
+function reopenCase(id){
+  const x = loadHistory().find(c => c.id === id);
+  if (!x) return;
+  renderOutput(x.result);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+document.addEventListener('DOMContentLoaded', renderHistory);
+</script>
 <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -76,7 +128,7 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
   <!-- Patient context card -->
   <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
     <div class="card-body p-5">
-      <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="patientContext"></h3>
+      <div class="flex items-center justify-between mb-3"><h3 class="text-[12px] font-medium text-base-content/70" data-i18n="patientContext"></h3><button type="button" id="sampleBtn" class="text-[11.5px] text-primary hover:underline" data-i18n="trySample"></button></div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <div class="form-control">
           <label class="label py-1"><span class="label-text text-[12px]" data-i18n="age"></span></label>
@@ -118,6 +170,8 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
 
   <div id="outputArea"></div>
 
+  <div id="historyArea" class="mt-3"></div>
+
   <div class="text-[11.5px] text-base-content/50 leading-relaxed mt-3 px-3" data-i18n="disclaimer"></div>
 
 </div>
@@ -127,6 +181,8 @@ const I18N = {
   ko: {
     subtitle: '피부과 증례를 위한 AI 감별진단 및 문헌 가이드.',
     casePhoto: '증례 사진',
+    trySample: '예시 증례 불러오기',
+    sampleLoaded: '예시 정보 입력됨 — 사진을 추가하고 분석하세요',
     uploadText: '사진을 여기에 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
     uploadSub: 'JPG, PNG — 저장되지 않습니다',
     patientContext: '환자 정보',
@@ -143,6 +199,11 @@ const I18N = {
     copyChart: '차트에 복사', copied: '복사됨!',
     shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
     newCase: '새 증례',
+    saveCase: '증례 저장', caseSaved: '저장됨!',
+    savedCases: '저장된 증례', noCases: '저장된 증례 없음',
+    clearAll: '전체 삭제', deleteCase: '삭제',
+    storageNote: '증례는 이 기기에만 저장됩니다. 서버로 전송되지 않습니다.',
+    confirmClear: '저장된 모든 증례를 삭제하시겠습니까?',
     sectionAssessment: '임상 평가',
     sectionLit: '관련 문헌',
     sectionTreatment: '치료 옵션',
@@ -154,6 +215,8 @@ const I18N = {
   en: {
     subtitle: 'AI-assisted differential diagnosis and literature guidance for dermatology cases.',
     casePhoto: 'Case photo',
+    trySample: 'Load sample case',
+    sampleLoaded: 'Sample context filled — add a photo and analyze',
     uploadText: 'Drop case photo here or <span class="text-primary">browse</span>',
     uploadSub: 'JPG, PNG — not stored anywhere',
     patientContext: 'Patient context',
@@ -170,6 +233,11 @@ const I18N = {
     copyChart: 'Copy for chart', copied: 'Copied!',
     shareReport: 'Share report', linkCopied: 'Link copied!',
     newCase: 'New case',
+    saveCase: 'Save case', caseSaved: 'Saved!',
+    savedCases: 'Saved cases', noCases: 'No saved cases yet',
+    clearAll: 'Clear all', deleteCase: 'Delete',
+    storageNote: 'Cases are stored only on this device. Nothing is sent to a server.',
+    confirmClear: 'Delete all saved cases?',
     sectionAssessment: 'Clinical assessment',
     sectionLit: 'Literature',
     sectionTreatment: 'Treatment options',
@@ -180,6 +248,11 @@ const I18N = {
   }
 };
 
+const SAMPLE_CASE = {
+  age: '47', sex: 'Female', area: 'Bilateral shins and elbows',
+  duration: '8 months, worsening',
+  notes: 'Well-demarcated erythematous plaques with thick silvery scale. Failed 3 months of high-potency topical corticosteroids and vitamin D analog. History of mild hypertension. Patient asks about systemic options. Fitzpatrick III.'
+};
 let currentLang = 'ko';
 function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
 function applyI18n() {
@@ -235,6 +308,17 @@ function updateBtn(){analyzeBtn.disabled=!imageBase64;}
 
 document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
 document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); });
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  document.getElementById('age').value = SAMPLE_CASE.age;
+  document.getElementById('sex').value = SAMPLE_CASE.sex;
+  document.getElementById('area').value = SAMPLE_CASE.area;
+  document.getElementById('duration').value = SAMPLE_CASE.duration;
+  document.getElementById('notes').value = SAMPLE_CASE.notes;
+  const b = document.getElementById('sampleBtn');
+  const orig = t('trySample');
+  b.textContent = t('sampleLoaded');
+  setTimeout(() => { b.textContent = orig; }, 2600);
+});
 fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('border-primary','bg-primary/5'));
@@ -309,7 +393,7 @@ function renderOutput(d){
     const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="badge badge-${ev.variant} badge-sm text-[10px]">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="text-[11px] text-primary font-mono-dm mt-2">${o.source}</div>`:''}</div>`;}).join('');
     txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
   }
-  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
+  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
@@ -318,6 +402,7 @@ function renderOutput(d){
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('saveBtn').addEventListener('click',()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};saveCase(d,meta);const btn=document.getElementById('saveBtn');btn.textContent=t('caseSaved');setTimeout(()=>btn.textContent=t('saveCase'),2000);});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
