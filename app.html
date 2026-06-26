@@ -5,6 +5,9 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Darae DermCase Assistant</title>
 <script src="https://cdn.tailwindcss.com"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script>
+<script src="/dermcase-cloud.js"></script>
 <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
 <link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&family=DM+Mono:wght@400&display=swap" rel="stylesheet">
 <style>
@@ -40,6 +43,7 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
       <span class="text-[14px] font-medium tracking-tight">DermCase</span>
     </a>
     <div class="flex items-center gap-1 text-[13px]">
+      <span id="authSlot" class="flex items-center gap-1"></span>
       <a href="/about.html" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navAbout"></a>
       <a href="/" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navHome"></a>
     </div>
@@ -167,6 +171,7 @@ const I18N = {
     copyChart: '차트에 복사', copied: '복사됨!',
     shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
     newCase: '새 증례',
+    navSignIn: '로그인', navLibrary: '내 증례', navSignOut: '로그아웃', savedCloud: '저장됨 (클라우드)',
     saveCase: '증례 저장', caseSaved: '저장됨!',
     savedCases: '저장된 증례', noCases: '저장된 증례 없음',
     clearAll: '전체 삭제', deleteCase: '삭제',
@@ -202,6 +207,7 @@ const I18N = {
     copyChart: 'Copy for chart', copied: 'Copied!',
     shareReport: 'Share report', linkCopied: 'Link copied!',
     newCase: 'New case',
+    navSignIn: 'Sign in', navLibrary: 'My cases', navSignOut: 'Sign out', savedCloud: 'Saved to library',
     saveCase: 'Save case', caseSaved: 'Saved!',
     savedCases: 'Saved cases', noCases: 'No saved cases yet',
     clearAll: 'Clear all', deleteCase: 'Delete',
@@ -276,7 +282,7 @@ function loadImage(file){
 function updateBtn(){analyzeBtn.disabled=!imageBase64;}
 
 document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
-document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); });
+document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); if(window.__renderAuth) window.__renderAuth(); });
 document.getElementById('sampleBtn').addEventListener('click', () => {
   document.getElementById('age').value = SAMPLE_CASE.age;
   document.getElementById('sex').value = SAMPLE_CASE.sex;
@@ -371,7 +377,7 @@ function renderOutput(d){
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
-  document.getElementById('saveBtn').addEventListener('click',()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};saveCase(d,meta);const btn=document.getElementById('saveBtn');btn.textContent=t('caseSaved');setTimeout(()=>btn.textContent=t('saveCase'),2000);});
+  document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
   document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
 }
 </script>
@@ -427,6 +433,36 @@ function reopenCase(id){
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 document.addEventListener('DOMContentLoaded', renderHistory);
+</script>
+<script>
+// Cloud auth wiring (additive — anonymous/local path is untouched).
+(function(){
+  let cloudUser = null;
+  const slot = document.getElementById('authSlot');
+  function link(href,label){ return '<a href="'+href+'" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition">'+label+'</a>'; }
+  function renderAuth(){
+    if(!slot) return;
+    if(cloudUser){
+      slot.innerHTML = link('/library.html', t('navLibrary')) + '<button id="navSignOut" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition">'+t('navSignOut')+'</button>';
+      const so = document.getElementById('navSignOut');
+      if(so) so.addEventListener('click', async()=>{ try{ await DermCaseCloud.signOut(); }catch(e){} window.location.reload(); });
+    } else {
+      slot.innerHTML = link('/login.html', t('navSignIn'));
+    }
+  }
+  window.__renderAuth = renderAuth;
+  window.__getCloudUser = function(){ return cloudUser; };
+  (async function(){
+    try{
+      if(window.DermCaseCloud && DermCaseCloud.enabled()){
+        cloudUser = await DermCaseCloud.user();
+        renderAuth();
+        DermCaseCloud.onAuthChange(function(u){ cloudUser = u; renderAuth(); });
+      }
+      // If cloud isn't configured, authSlot stays empty (clean degradation).
+    }catch(e){ /* leave anonymous */ }
+  })();
+})();
 </script>
 </body>
 </html>

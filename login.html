@@ -1,0 +1,168 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Sign in — DermCase Assistant</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+[data-theme="dermcase"] {
+  --color-primary: #1A6640; --color-primary-content: #FFFFFF; --color-secondary: #0D3D22;
+  --color-base-100: #FFFFFF; --color-base-200: #F5F4F0; --color-base-300: #E0DDD5; --color-base-content: #18170F;
+  --color-success: #0F6E56; --color-info: #0C447C; --color-warning: #854F0B; --color-error: #7A1A1A;
+}
+body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; color: #18170F; -webkit-font-smoothing: antialiased; }
+.mono { font-family: 'DM Mono', monospace; }
+.display { letter-spacing: -0.025em; }
+.grid-bg {
+  background-image: linear-gradient(rgba(26,102,64,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26,102,64,0.05) 1px, transparent 1px);
+  background-size: 28px 28px;
+  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%);
+}
+@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
+.rise { animation: rise .55s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
+</style>
+</head>
+<body data-theme="dermcase">
+
+<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
+  <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 group">
+      <span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-[8deg]">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="text-[14px] font-medium tracking-tight">DermCase</span>
+    </a>
+    <div class="flex items-center gap-1 text-[13px]">
+      <a href="/app.html" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navApp"></a>
+      <button id="langBtn" class="px-2.5 py-1.5 rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-300/60 transition mono text-[12px]">EN</button>
+    </div>
+  </div>
+</nav>
+
+<div class="relative min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-5 py-12 overflow-hidden">
+  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
+  <div class="relative w-full max-w-[400px] rise">
+    <div class="text-center mb-7">
+      <h1 class="display text-[26px] font-medium mb-1.5" id="title"></h1>
+      <p class="text-[13.5px] text-base-content/60" id="subtitle"></p>
+    </div>
+
+    <div class="card bg-base-100 shadow-sm rounded-2xl border border-base-300">
+      <div class="card-body p-6">
+        <div id="formArea">
+          <div class="form-control mb-3">
+            <label class="label py-1"><span class="label-text text-[12.5px]" data-i18n="email"></span></label>
+            <input type="email" id="email" autocomplete="email" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" placeholder="you@clinic.com">
+          </div>
+          <div class="form-control mb-4">
+            <label class="label py-1"><span class="label-text text-[12.5px]" data-i18n="password"></span></label>
+            <input type="password" id="password" autocomplete="current-password" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" placeholder="••••••••">
+          </div>
+          <button id="submitBtn" class="btn btn-primary btn-sm w-full normal-case"></button>
+          <div id="msg" class="text-[12.5px] mt-3 leading-relaxed"></div>
+        </div>
+
+        <div class="text-center mt-4 pt-4 border-t border-base-300">
+          <button id="toggleMode" class="text-[12.5px] text-primary hover:underline"></button>
+        </div>
+      </div>
+    </div>
+
+    <p class="text-[11.5px] text-base-content/50 leading-relaxed mt-5 text-center px-2" data-i18n="privacy"></p>
+    <p class="text-center mt-3">
+      <a href="/app.html" class="text-[12.5px] text-base-content/50 hover:text-base-content" data-i18n="skip"></a>
+    </p>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script>
+<script src="/dermcase-cloud.js"></script>
+<script>
+const I18N = {
+  ko: {
+    navApp: '앱으로',
+    signInTitle: '다시 오신 것을 환영합니다', signUpTitle: '계정 만들기',
+    signInSub: '저장한 증례를 모든 기기에서 동기화하세요', signUpSub: '증례를 클라우드에 안전하게 보관하세요',
+    email: '이메일', password: '비밀번호',
+    signInBtn: '로그인', signUpBtn: '가입하기',
+    toSignUp: '계정이 없으신가요? 가입하기', toSignIn: '이미 계정이 있으신가요? 로그인',
+    privacy: '증례 사진은 저장되지 않습니다. 클라우드에는 구조화된 증례 정보만 보관되며, 본인만 접근할 수 있습니다.',
+    skip: '로그인 없이 계속 →',
+    checkEmail: '확인 이메일을 보냈습니다. 메일함을 확인해 주세요.',
+    notConfigured: '클라우드 계정이 아직 설정되지 않았습니다. 로그인 없이 앱을 사용할 수 있습니다.',
+    working: '처리 중…',
+  },
+  en: {
+    navApp: 'Open app',
+    signInTitle: 'Welcome back', signUpTitle: 'Create your account',
+    signInSub: 'Sync your saved cases across devices', signUpSub: 'Keep your cases safely in the cloud',
+    email: 'Email', password: 'Password',
+    signInBtn: 'Sign in', signUpBtn: 'Create account',
+    toSignUp: "Don't have an account? Sign up", toSignIn: 'Already have an account? Sign in',
+    privacy: 'Case photos are never stored. The cloud holds only the structured case, accessible to you alone.',
+    skip: 'Continue without an account →',
+    checkEmail: 'Check your email to confirm your account.',
+    notConfigured: 'Cloud accounts aren\u2019t set up yet. You can use the app without signing in.',
+    working: 'Working…',
+  }
+};
+let lang = (navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'ko';
+let mode = 'signin';
+function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
+const $ = id => document.getElementById(id);
+
+function render(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
+  $('langBtn').textContent = lang === 'ko' ? 'EN' : '한국어';
+  $('title').textContent = mode === 'signin' ? t('signInTitle') : t('signUpTitle');
+  $('subtitle').textContent = mode === 'signin' ? t('signInSub') : t('signUpSub');
+  $('submitBtn').textContent = mode === 'signin' ? t('signInBtn') : t('signUpBtn');
+  $('toggleMode').textContent = mode === 'signin' ? t('toSignUp') : t('toSignIn');
+  $('password').autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+}
+function setMsg(text, kind){
+  const el = $('msg');
+  el.textContent = text || '';
+  el.className = 'text-[12.5px] mt-3 leading-relaxed ' + (kind === 'error' ? 'text-error' : kind === 'ok' ? 'text-success' : 'text-base-content/60');
+}
+
+$('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); });
+$('toggleMode').addEventListener('click', () => { mode = mode === 'signin' ? 'signup' : 'signin'; setMsg(''); render(); });
+
+$('submitBtn').addEventListener('click', async () => {
+  setMsg('');
+  if (!window.DermCaseCloud || !DermCaseCloud.enabled()) { setMsg(t('notConfigured'), 'error'); return; }
+  const email = $('email').value.trim(), pw = $('password').value;
+  if (!email || !pw) return;
+  $('submitBtn').disabled = true; const orig = $('submitBtn').textContent; $('submitBtn').textContent = t('working');
+  try {
+    if (mode === 'signin') {
+      await DermCaseCloud.signIn(email, pw);
+      window.location.href = '/app.html';
+    } else {
+      const data = await DermCaseCloud.signUp(email, pw);
+      if (data && data.session) { window.location.href = '/app.html'; }
+      else { setMsg(t('checkEmail'), 'ok'); }
+    }
+  } catch (e) {
+    setMsg(e.message || String(e), 'error');
+  } finally {
+    $('submitBtn').disabled = false; $('submitBtn').textContent = orig;
+  }
+});
+
+// If already signed in, go straight to the app.
+(async () => {
+  try { if (window.DermCaseCloud && DermCaseCloud.enabled()) { const u = await DermCaseCloud.user(); if (u) window.location.href = '/app.html'; } } catch(e){}
+})();
+
+render();
+</script>
+</body>
+</html>

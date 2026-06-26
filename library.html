@@ -1,0 +1,134 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>My cases — DermCase Assistant</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+[data-theme="dermcase"] {
+  --color-primary: #1A6640; --color-primary-content: #FFFFFF; --color-secondary: #0D3D22;
+  --color-base-100: #FFFFFF; --color-base-200: #F5F4F0; --color-base-300: #E0DDD5; --color-base-content: #18170F;
+  --color-success: #0F6E56; --color-info: #0C447C; --color-warning: #854F0B; --color-error: #7A1A1A;
+}
+body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; color: #18170F; -webkit-font-smoothing: antialiased; }
+.mono { font-family: 'DM Mono', monospace; }
+.display { letter-spacing: -0.025em; }
+@keyframes rise { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
+.page-enter { animation: rise .5s cubic-bezier(.22,1,.36,1) both; }
+@media (prefers-reduced-motion: reduce) { .page-enter { animation: none; } }
+</style>
+</head>
+<body data-theme="dermcase">
+
+<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
+  <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
+    <a href="/" class="flex items-center gap-2.5 group">
+      <span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-[8deg]">
+        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </span>
+      <span class="text-[14px] font-medium tracking-tight">DermCase</span>
+    </a>
+    <div class="flex items-center gap-1 text-[13px]">
+      <a href="/app.html" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navApp"></a>
+      <button id="signOutBtn" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition hidden" data-i18n="signOut"></button>
+      <button id="langBtn" class="px-2.5 py-1.5 rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-300/60 transition mono text-[12px]">EN</button>
+    </div>
+  </div>
+</nav>
+
+<main class="max-w-[760px] mx-auto px-5 py-10 page-enter">
+  <div class="flex items-end justify-between mb-6">
+    <div>
+      <h1 class="display text-[26px] font-medium" data-i18n="h1"></h1>
+      <p id="accountLine" class="text-[12.5px] text-base-content/55 mt-1 mono"></p>
+    </div>
+  </div>
+  <div id="state" class="text-[13.5px] text-base-content/60"></div>
+  <div id="list" class="space-y-2.5"></div>
+</main>
+
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<script src="/config.js"></script>
+<script src="/dermcase-cloud.js"></script>
+<script>
+const I18N = {
+  ko: {
+    navApp: '앱으로', signOut: '로그아웃',
+    h1: '내 증례', loading: '불러오는 중…',
+    needLogin: '저장된 증례를 보려면 로그인하세요.', signInLink: '로그인 →',
+    notConfigured: '클라우드가 아직 설정되지 않았습니다. 저장된 증례는 기기에만 보관됩니다.',
+    empty: '아직 저장된 증례가 없습니다. 앱에서 증례를 분석한 뒤 저장해 보세요.',
+    deleteBtn: '삭제', confirmDelete: '이 증례를 삭제하시겠습니까?',
+    loadErr: '증례를 불러오지 못했습니다.',
+  },
+  en: {
+    navApp: 'Open app', signOut: 'Sign out',
+    h1: 'My cases', loading: 'Loading…',
+    needLogin: 'Sign in to see your saved cases.', signInLink: 'Sign in →',
+    notConfigured: 'Cloud isn\u2019t set up yet. Saved cases live on your device only.',
+    empty: 'No saved cases yet. Analyze a case in the app, then save it.',
+    deleteBtn: 'Delete', confirmDelete: 'Delete this case?',
+    loadErr: 'Could not load your cases.',
+  }
+};
+let lang = (navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'ko';
+function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
+const $ = id => document.getElementById(id);
+
+function applyStatic(){
+  document.documentElement.lang = lang;
+  document.querySelectorAll('[data-i18n]').forEach(el => el.textContent = t(el.getAttribute('data-i18n')));
+  $('langBtn').textContent = lang === 'ko' ? 'EN' : '한국어';
+}
+function esc(s){ return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c])); }
+
+function renderCases(rows){
+  $('state').textContent = '';
+  if (!rows.length){ $('state').textContent = t('empty'); $('list').innerHTML = ''; return; }
+  $('list').innerHTML = rows.map(r => {
+    const m = r.meta || {};
+    const ctx = [m.age && (m.age + 'y'), m.sex, m.area].filter(Boolean).join(' · ');
+    const d = new Date(r.created_at);
+    const date = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+    return `<div class="card bg-base-100 border border-base-300 rounded-xl">
+      <div class="card-body p-4 flex-row items-center justify-between gap-3">
+        <div class="min-w-0">
+          <div class="text-[14px] font-medium truncate">${esc(r.dx) || '—'}</div>
+          <div class="text-[12px] text-base-content/55 truncate">${ctx ? esc(ctx) + ' · ' : ''}${esc(date)}</div>
+        </div>
+        <button class="btn btn-ghost btn-xs normal-case text-base-content/50 hover:text-error" data-del="${esc(r.id)}">${t('deleteBtn')}</button>
+      </div>
+    </div>`;
+  }).join('');
+  document.querySelectorAll('[data-del]').forEach(btn => btn.addEventListener('click', async () => {
+    if (!confirm(t('confirmDelete'))) return;
+    try { await DermCaseCloud.deleteCase(btn.getAttribute('data-del')); load(); } catch(e){ alert(e.message || e); }
+  }));
+}
+
+async function load(){
+  applyStatic();
+  if (!window.DermCaseCloud || !DermCaseCloud.enabled()){
+    $('state').textContent = t('notConfigured'); return;
+  }
+  const u = await DermCaseCloud.user();
+  if (!u){
+    $('state').innerHTML = `${t('needLogin')} <a href="/login.html" class="text-primary hover:underline">${t('signInLink')}</a>`;
+    return;
+  }
+  $('accountLine').textContent = u.email || '';
+  $('signOutBtn').classList.remove('hidden');
+  $('state').textContent = t('loading');
+  try { renderCases(await DermCaseCloud.listCases()); }
+  catch(e){ $('state').textContent = t('loadErr') + ' ' + (e.message || ''); }
+}
+
+$('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; load(); });
+$('signOutBtn').addEventListener('click', async () => { await DermCaseCloud.signOut(); window.location.href = '/'; });
+load();
+</script>
+</body>
+</html>
