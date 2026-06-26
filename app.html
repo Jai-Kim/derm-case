@@ -35,6 +35,9 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
 .evp-s{background:#E1F5EE;color:#0F6E56}
 .evp-m{background:#E7EFFA;color:#2A5C95}
 .evp-w{background:#F7ECDA;color:#9A5B12}
+.fitz-chip{position:relative;width:40px;height:34px;border-radius:9px;border:1.5px solid var(--color-base-300);font-family:'DM Mono',monospace;font-size:12px;font-weight:500;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s,border-color .15s,box-shadow .15s}
+.fitz-chip:hover{transform:translateY(-1px)}
+.fitz-chip.sel{border-color:var(--color-primary);box-shadow:0 0 0 2px rgba(26,102,64,.28)}
 </style>
 </head>
 <body data-theme="dermcase">
@@ -134,6 +137,18 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
           </select>
         </div>
         <div class="form-control sm:col-span-2">
+          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="fitzLabel"></span></label>
+          <div id="fitzPicker" class="flex gap-1.5 flex-wrap items-center">
+            <button type="button" class="fitz-chip" data-fitz="I"   style="background:#F5D6C6;color:#3a2a22">I</button>
+            <button type="button" class="fitz-chip" data-fitz="II"  style="background:#E8B99B;color:#3a2a22">II</button>
+            <button type="button" class="fitz-chip" data-fitz="III" style="background:#D2A077;color:#2e1f14">III</button>
+            <button type="button" class="fitz-chip" data-fitz="IV"  style="background:#B07B53;color:#fff">IV</button>
+            <button type="button" class="fitz-chip" data-fitz="V"   style="background:#8D5524;color:#fff">V</button>
+            <button type="button" class="fitz-chip" data-fitz="VI"  style="background:#5C3317;color:#fff">VI</button>
+          </div>
+          <div id="fitzDesc" class="text-[11px] text-base-content/55 mt-1.5 min-h-[15px]"></div>
+        </div>
+        <div class="form-control sm:col-span-2">
           <label class="label py-1"><span class="label-text text-[12px]" data-i18n="notes"></span></label>
           <textarea id="notes" data-i18n-placeholder="notesPh" class="textarea textarea-bordered textarea-sm w-full bg-base-200 text-[14px] min-h-[58px]"></textarea>
         </div>
@@ -165,9 +180,12 @@ const I18N = {
     age: '나이', agePh: '예: 42',
     sex: '성별', sexSelect: '선택', sexMale: '남성', sexFemale: '여성', sexOther: '기타 / 미지정',
     area: '발생 부위', areaPh: '예: 왼쪽 팔뚝, 두피',
+    fitzLabel: '피부 유형 (Fitzpatrick · 선택)',
+    fitzI: '항상 화상, 태닝되지 않음', fitzII: '대개 화상, 약간 태닝', fitzIII: '때때로 화상, 고르게 태닝',
+    fitzIV: '거의 화상 없음, 쉽게 태닝', fitzV: '매우 드물게 화상, 짙게 태닝', fitzVI: '화상 없음, 짙은 색소',
     duration: '기간', durationPh: '예: 3주, 6개월',
     reportLang: '보고서 언어',
-    notes: '추가 메모 (선택사항)', notesPh: '증상, 이전 치료, 피츠패트릭 유형, 관련 병력…',
+    notes: '추가 메모 (선택사항)', notesPh: '증상, 이전 치료, 관련 병력…',
     analyzeBtn: '증례 분석',
     disclaimer: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
     analyzing: '증례 분석 중',
@@ -201,9 +219,12 @@ const I18N = {
     age: 'Age', agePh: 'e.g. 42',
     sex: 'Sex', sexSelect: 'Select', sexMale: 'Male', sexFemale: 'Female', sexOther: 'Other / Not specified',
     area: 'Affected area', areaPh: 'e.g. left forearm, scalp',
+    fitzLabel: 'Skin type (Fitzpatrick · optional)',
+    fitzI: 'Always burns, never tans', fitzII: 'Usually burns, tans minimally', fitzIII: 'Sometimes burns, tans evenly',
+    fitzIV: 'Rarely burns, tans easily', fitzV: 'Very rarely burns, tans darkly', fitzVI: 'Never burns, deeply pigmented',
     duration: 'Duration', durationPh: 'e.g. 3 weeks, 6 months',
     reportLang: 'Report language',
-    notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, Fitzpatrick type, relevant history…',
+    notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, relevant history…',
     analyzeBtn: 'Analyze case',
     disclaimer: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
     analyzing: 'Running case analysis',
@@ -229,7 +250,7 @@ const I18N = {
 
 const SAMPLE_CASE = {
   age: '47', sex: 'Female', area: 'Bilateral shins and elbows',
-  duration: '8 months, worsening',
+  duration: '8 months, worsening', fitz: 'III',
   notes: 'Well-demarcated erythematous plaques with thick silvery scale. Failed 3 months of high-potency topical corticosteroids and vitamin D analog. History of mild hypertension. Patient asks about systemic options. Fitzpatrick III.'
 };
 let currentLang = 'ko';
@@ -286,17 +307,34 @@ function loadImage(file){
 function updateBtn(){analyzeBtn.disabled=!imageBase64;}
 
 document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
-document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); if(window.__renderAuth) window.__renderAuth(); });
+document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); });
 document.getElementById('sampleBtn').addEventListener('click', () => {
   document.getElementById('age').value = SAMPLE_CASE.age;
   document.getElementById('sex').value = SAMPLE_CASE.sex;
   document.getElementById('area').value = SAMPLE_CASE.area;
   document.getElementById('duration').value = SAMPLE_CASE.duration;
   document.getElementById('notes').value = SAMPLE_CASE.notes;
+  fitz = SAMPLE_CASE.fitz || ''; renderFitz();
   const b = document.getElementById('sampleBtn');
   const orig = t('trySample');
   b.textContent = t('sampleLoaded');
   setTimeout(() => { b.textContent = orig; }, 2600);
+});
+
+// Fitzpatrick skin-type picker
+let fitz = '';
+const fitzDescEl = document.getElementById('fitzDesc');
+function renderFitz(){
+  document.querySelectorAll('.fitz-chip').forEach(function(ch){ ch.classList.toggle('sel', ch.getAttribute('data-fitz') === fitz); });
+  if(fitzDescEl) fitzDescEl.textContent = fitz ? (fitz + ' · ' + t('fitz'+fitz)) : '';
+}
+function setFitz(v){ fitz = (fitz === v ? '' : v); renderFitz(); }
+window.__renderFitz = renderFitz;
+document.querySelectorAll('.fitz-chip').forEach(function(ch){
+  var v = ch.getAttribute('data-fitz');
+  ch.addEventListener('click', function(){ setFitz(v); });
+  ch.addEventListener('mouseenter', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = v + ' · ' + t('fitz'+v); });
+  ch.addEventListener('mouseleave', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = ''; });
 });
 fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
@@ -311,7 +349,7 @@ function showProgress(){
 
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
-  const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
+  const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,fitz&&`Fitzpatrick skin type: ${fitz}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
   const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, rationale, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
   analyzeBtn.disabled=true;showProgress();
   const sys=`You are a clinical literature assistant for practicing dermatologists. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
@@ -375,14 +413,14 @@ function renderOutput(d){
   outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
-    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),sharedAt:new Date().toISOString()};
+    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
     const payload=btoa(JSON.stringify({result:d,meta}));
     const url=window.location.origin+'/report.html#'+payload;
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
-  document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim()};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
-  document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';});
+  document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
+  document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';fitz='';if(window.__renderFitz)window.__renderFitz();});
 }
 </script>
 <script>
@@ -412,7 +450,7 @@ function renderHistory(){
   const rows = arr.map(x => {
     const d = new Date(x.savedAt);
     const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area].filter(Boolean).join(' · ');
+    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area, x.meta && x.meta.fitz && ('Fitz '+x.meta.fitz)].filter(Boolean).join(' · ');
     return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
       <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
         <div class="text-[13px] font-medium truncate">${x.dx}</div>
