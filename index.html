@@ -3,311 +3,483 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DermCase Assistant — 증례에 맞춘 문헌 검토</title>
+<title>DermCase Assistant — 증례에 맞춘 문헌</title>
 <meta name="description" content="증례 사진과 환자 정보를 집중된 임상 문헌 브리프로. 현직 피부과 전문의를 위한 근거 기반 도구.">
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
 <style>
-[data-theme="dermcase"] {
-  --color-primary: #1A6640;
-  --color-primary-content: #FFFFFF;
-  --color-secondary: #0D3D22;
-  --color-base-100: #FFFFFF;
-  --color-base-200: #F5F4F0;
-  --color-base-300: #E0DDD5;
-  --color-base-content: #18170F;
-  --color-success: #0F6E56;
-  --color-info: #0C447C;
-  --color-warning: #854F0B;
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --ink:#14130D; --ink-2:#5C5A50; --ink-3:#8A887E;
+  --paper:#F4F2EC; --paper-2:#FBFAF6;
+  --forest:#0A2E1E; --forest-2:#0F3D29; --forest-line:rgba(180,220,196,.14);
+  --green:#1A6640; --green-2:#21814F; --sage:#4E9E73; --mist:#CFE3D7;
+  --border:#E3E0D8; --border-2:#D2CEC3;
+  --strong:#0F6E56; --strong-bg:#E1F5EE; --mid:#2A5C95; --mid-bg:#E7EFFA; --weak:#9A5B12; --weak-bg:#F7ECDA;
+  --r:16px; --r-sm:10px; --maxw:1140px;
 }
-html { scroll-behavior: smooth; }
-body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; color: #18170F; -webkit-font-smoothing: antialiased; }
-.mono { font-family: 'DM Mono', monospace; }
-.display { letter-spacing: -0.025em; line-height: 1.04; }
-.grid-bg {
-  background-image: linear-gradient(rgba(26,102,64,0.05) 1px, transparent 1px),
-                    linear-gradient(90deg, rgba(26,102,64,0.05) 1px, transparent 1px);
-  background-size: 28px 28px;
-  -webkit-mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
-          mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, #000 30%, transparent 75%);
+html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
+body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.mono{font-family:'DM Mono',monospace}
+.wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
+.display{letter-spacing:-.028em;line-height:1.02;font-weight:600}
+h1,h2,h3{font-weight:600;letter-spacing:-.02em}
+a{color:inherit;text-decoration:none}
+img,svg{display:block;max-width:100%}
+
+/* progress bar */
+#prog{position:fixed;top:0;left:0;height:2.5px;width:0;background:linear-gradient(90deg,var(--sage),var(--green));z-index:60;transition:width .08s linear}
+
+/* nav */
+nav{position:sticky;top:0;z-index:50;backdrop-filter:blur(12px);background:rgba(244,242,236,.72);border-bottom:1px solid var(--border)}
+nav.on-dark{background:rgba(10,46,30,.55);border-bottom-color:var(--forest-line)}
+.navin{height:60px;display:flex;align-items:center;justify-content:space-between}
+.brand{display:flex;align-items:center;gap:10px;font-weight:600;font-size:15px;letter-spacing:-.01em}
+.logo{width:30px;height:30px;border-radius:9px;background:var(--green);display:grid;place-items:center;transition:transform .3s,background .3s}
+.brand:hover .logo{transform:rotate(8deg)}
+nav.on-dark .brand{color:#fff} nav.on-dark .logo{background:var(--sage)}
+.navlinks{display:flex;align-items:center;gap:4px;font-size:13.5px}
+.navlinks a,.navlinks button{padding:7px 13px;border-radius:9px;color:var(--ink-2);background:none;border:none;font:inherit;font-size:13.5px;cursor:pointer;transition:background .15s,color .15s}
+.navlinks a:hover,.navlinks button:hover{color:var(--ink);background:rgba(0,0,0,.05)}
+nav.on-dark .navlinks a,nav.on-dark .navlinks button{color:rgba(255,255,255,.66)}
+nav.on-dark .navlinks a:hover,nav.on-dark .navlinks button:hover{color:#fff;background:rgba(255,255,255,.1)}
+.btn{display:inline-flex;align-items:center;gap:7px;padding:9px 17px;border-radius:11px;font-weight:500;font-size:14px;cursor:pointer;border:none;transition:transform .12s,opacity .15s,background .15s}
+.btn:active{transform:scale(.98)}
+.btn-pri{background:var(--green);color:#fff}.btn-pri:hover{background:var(--green-2)}
+.btn-light{background:var(--paper-2);color:var(--green)}.btn-light:hover{background:#fff}
+.btn-ghost{background:transparent;color:var(--ink-2)}.btn-ghost:hover{color:var(--ink)}
+.navlinks .btn-pri{color:#fff;padding:8px 15px;font-size:13.5px}
+.navlinks .btn-pri:hover{background:var(--green-2)}
+
+/* sections */
+section{position:relative}
+.dark{background:var(--forest);color:#fff}
+.dark h1,.dark h2,.dark h3{color:#fff}
+.eyebrow{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);display:inline-flex;align-items:center;gap:9px}
+.dark .eyebrow{color:var(--sage)}
+.eyebrow::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
+.act-no{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink-3);letter-spacing:.04em}
+.dark .act-no{color:rgba(255,255,255,.4)}
+
+/* grid texture */
+.grid-tex{position:absolute;inset:0;pointer-events:none;
+  background-image:linear-gradient(var(--forest-line) 1px,transparent 1px),linear-gradient(90deg,var(--forest-line) 1px,transparent 1px);
+  background-size:30px 30px;-webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 35%,#000 25%,transparent 78%);mask-image:radial-gradient(ellipse 75% 70% at 50% 35%,#000 25%,transparent 78%)}
+
+/* HERO */
+.hero{padding:70px 0 90px;overflow:hidden}
+.hero-grid{display:grid;grid-template-columns:1.05fr .95fr;gap:48px;align-items:center}
+.hero h1{font-size:clamp(34px,5.4vw,58px);margin:18px 0 20px;color:#fff}
+.hero p.sub{font-size:clamp(15px,1.6vw,17px);color:rgba(255,255,255,.72);max-width:30rem;margin-bottom:30px;line-height:1.62}
+.hero .cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
+.hero .meta{margin-top:30px;display:flex;align-items:center;gap:9px;font-size:12.5px;color:rgba(255,255,255,.5)}
+.scrollcue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.scrollcue .line{width:1px;height:30px;background:linear-gradient(rgba(255,255,255,.4),transparent);animation:cuemove 1.8s ease-in-out infinite}
+@keyframes cuemove{0%,100%{transform:scaleY(.5);opacity:.3;transform-origin:top}50%{transform:scaleY(1);opacity:.8;transform-origin:top}}
+
+/* lesion motif */
+.motif{position:absolute;right:-60px;top:-40px;width:340px;height:340px;opacity:.5;pointer-events:none}
+.motif .ring{transform-origin:center;animation:spin 50s linear infinite}
+.motif .ring.r2{animation-duration:38s;animation-direction:reverse}
+.motif .ring.r3{animation-duration:60s}
+@keyframes spin{to{transform:rotate(360deg)}}
+
+/* brief card (shared visual) */
+.brief{background:#fff;border-radius:18px;border:1px solid var(--border);box-shadow:0 30px 70px -30px rgba(10,46,30,.5);overflow:hidden}
+.brief .bar{height:38px;display:flex;align-items:center;gap:7px;padding:0 16px;border-bottom:1px solid var(--border);background:#FAF9F5}
+.brief .dot{width:9px;height:9px;border-radius:50%;background:var(--border-2)}
+.brief .barlbl{margin-left:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-3)}
+.brief .body{padding:20px}
+.blabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.brow{background:var(--paper);border-radius:11px;padding:13px;margin-bottom:11px}
+.dxline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
+.dxname{font-size:15px;font-weight:600}
+.icd{font-family:'DM Mono',monospace;font-size:11px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 7px}
+.rationale{font-size:12.5px;color:var(--ink-2);line-height:1.55}
+.opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px}
+.opt{background:var(--paper);border-radius:10px;padding:11px}
+.opt .top{display:flex;align-items:center;justify-content:space-between;margin-bottom:5px}
+.opt .nm{font-size:13px;font-weight:600}
+.pill{font-size:10px;font-weight:600;padding:2px 8px;border-radius:99px}
+.pill.s{background:var(--strong-bg);color:var(--strong)} .pill.m{background:var(--mid-bg);color:var(--mid)} .pill.w{background:var(--weak-bg);color:var(--weak)}
+.opt .det{font-size:11px;color:var(--ink-2);line-height:1.45}
+.ref .rt{font-size:12.5px;font-weight:600;margin:3px 0}
+.ref .rs{font-family:'DM Mono',monospace;font-size:11px;color:var(--green)}
+
+/* reveal */
+.reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
+.reveal.in{opacity:1;transform:none}
+.rise{opacity:0;transform:translateY(16px);animation:rise .8s cubic-bezier(.22,1,.36,1) forwards}
+@keyframes rise{to{opacity:1;transform:none}}
+.d1{animation-delay:.05s}.d2{animation-delay:.16s}.d3{animation-delay:.28s}.d4{animation-delay:.4s}.d5{animation-delay:.52s}
+
+/* ACT 01 problem */
+.act{padding:96px 0}
+.act-head{max-width:40rem;margin-bottom:48px}
+.act-head h2{font-size:clamp(26px,3.4vw,38px);margin:14px 0 16px}
+.act-head p{font-size:16px;color:var(--ink-2);line-height:1.62}
+.dark .act-head p{color:rgba(255,255,255,.66)}
+.problem-grid{display:grid;grid-template-columns:1fr 1fr;gap:40px;align-items:center}
+.chaos{position:relative;height:300px}
+.tabcard{position:absolute;background:#fff;border:1px solid var(--border);border-radius:10px;padding:12px 14px;width:200px;box-shadow:0 10px 24px -12px rgba(20,19,13,.18)}
+.tabcard .h{height:7px;width:60%;background:var(--border-2);border-radius:99px;margin-bottom:8px}
+.tabcard .l{height:5px;background:#EBE8E0;border-radius:99px;margin-bottom:5px}
+.tabcard .l.s{width:80%}.tabcard .l.t{width:55%}
+.tabcard .q{position:absolute;top:-9px;right:-9px;width:22px;height:22px;border-radius:50%;background:var(--weak-bg);color:var(--weak);display:grid;place-items:center;font-size:12px;font-weight:700}
+.t1{top:8px;left:0;transform:rotate(-5deg)} .t2{top:60px;left:120px;transform:rotate(4deg);z-index:2} .t3{top:140px;left:24px;transform:rotate(-2deg)} .t4{top:170px;left:150px;transform:rotate(6deg)}
+.stat{font-family:'DM Mono',monospace}
+.stat .big{font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--green)}
+.stat .lbl{font-size:13px;color:var(--ink-2);margin-top:2px}
+
+/* ACT 02 pinned compose */
+.compose-sec{height:280vh;position:relative}
+.compose-sticky{position:sticky;top:0;height:100vh;display:flex;align-items:center;overflow:hidden}
+.compose-inner{width:100%}
+.compose-grid{display:grid;grid-template-columns:1fr 1fr;gap:48px;align-items:center}
+.compose-copy h2{font-size:clamp(26px,3.4vw,40px);margin:14px 0 16px}
+.compose-copy p{font-size:16px;color:rgba(255,255,255,.66);line-height:1.62;max-width:26rem}
+.steps{margin-top:26px;display:flex;flex-direction:column;gap:2px}
+.step{display:flex;gap:13px;padding:11px 0;opacity:.32;transition:opacity .4s}
+.step.on{opacity:1}
+.step .sn{font-family:'DM Mono',monospace;font-size:12px;color:var(--sage);width:22px;flex-shrink:0;padding-top:1px}
+.step .st{font-size:14px;font-weight:500;color:#fff}
+.step .sd{font-size:12.5px;color:rgba(255,255,255,.55);margin-top:2px;line-height:1.5}
+.cbrief-rows>*{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
+.cbrief-rows.s1 .cr1,.cbrief-rows.s2 .cr1,.cbrief-rows.s2 .cr2,.cbrief-rows.s3 .cr1,.cbrief-rows.s3 .cr2,.cbrief-rows.s3 .cr3,.cbrief-rows.s4 .cr1,.cbrief-rows.s4 .cr2,.cbrief-rows.s4 .cr3,.cbrief-rows.s4 .cr4{opacity:1;transform:none}
+
+/* ACT 03 pillars */
+.pillars{display:grid;grid-template-columns:repeat(3,1fr);gap:18px}
+.pillar{background:var(--paper-2);border:1px solid var(--border);border-radius:var(--r);padding:28px 24px;transition:transform .25s,box-shadow .25s}
+.pillar:hover{transform:translateY(-4px);box-shadow:0 18px 40px -22px rgba(10,46,30,.28)}
+.pillar .ic{width:46px;height:46px;border-radius:13px;background:linear-gradient(145deg,var(--mist),#EAF4EE);display:grid;place-items:center;margin-bottom:18px}
+.pillar h3{font-size:18px;margin-bottom:9px}
+.pillar p{font-size:14px;color:var(--ink-2);line-height:1.6}
+
+/* ACT 04 trust */
+.trust-grid{display:grid;grid-template-columns:1.1fr .9fr;gap:48px;align-items:center}
+.trust-copy h2{font-size:clamp(24px,3vw,34px);margin:14px 0 16px}
+.trust-copy p{font-size:15px;color:rgba(255,255,255,.66);line-height:1.62;margin-bottom:22px}
+.privacy{display:flex;gap:12px;align-items:flex-start;background:rgba(255,255,255,.05);border:1px solid var(--forest-line);border-radius:14px;padding:16px;font-size:13.5px;color:rgba(255,255,255,.8);line-height:1.55}
+.sources{display:grid;grid-template-columns:1fr 1fr;gap:10px}
+.src{background:rgba(255,255,255,.05);border:1px solid var(--forest-line);border-radius:12px;padding:14px 16px;font-size:14px;font-weight:500;color:#fff;display:flex;align-items:center;gap:10px}
+.src .d{width:6px;height:6px;border-radius:50%;background:var(--sage)}
+.src.full{grid-column:1/-1}
+
+/* finale */
+.finale{padding:100px 0}
+.finale-card{position:relative;background:linear-gradient(135deg,var(--green),var(--forest-2));border-radius:30px;padding:72px 32px;text-align:center;overflow:hidden;color:#fff}
+.finale-card h2{font-size:clamp(28px,4vw,46px);color:#fff;margin-bottom:14px}
+.finale-card p{font-size:16px;color:rgba(255,255,255,.78);max-width:30rem;margin:0 auto 30px}
+
+/* footer */
+footer{border-top:1px solid var(--border);padding:34px 0}
+.footin{display:flex;align-items:center;justify-content:space-between;gap:20px;flex-wrap:wrap}
+.footin .disc{font-size:11.5px;color:var(--ink-3);line-height:1.6;max-width:36rem}
+
+@media (max-width:860px){
+  .hero-grid,.problem-grid,.compose-grid,.trust-grid{grid-template-columns:1fr;gap:36px}
+  .pillars{grid-template-columns:1fr}
+  .motif{display:none}
+  .compose-sec{height:auto}.compose-sticky{position:static;height:auto;padding:80px 0}
+  .navlinks a.hide-sm{display:none}
 }
-@keyframes rise { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: translateY(0); } }
-.rise { opacity: 0; animation: rise .7s cubic-bezier(.22,1,.36,1) forwards; }
-.d1 { animation-delay: .05s } .d2 { animation-delay: .15s } .d3 { animation-delay: .25s }
-.d4 { animation-delay: .35s } .d5 { animation-delay: .45s }
-@keyframes compose { from { opacity: 0; transform: translateY(8px); filter: blur(2px); } to { opacity: 1; transform: translateY(0); filter: blur(0); } }
-.brief-row { opacity: 0; animation: compose .55s cubic-bezier(.22,1,.36,1) forwards; }
-.cr1{animation-delay:.55s}.cr2{animation-delay:.8s}.cr3{animation-delay:1.05s}.cr4{animation-delay:1.35s}.cr5{animation-delay:1.6s}.cr6{animation-delay:1.9s}
-.caret { display:inline-block; width:7px; height:15px; background:#1A6640; margin-left:2px; vertical-align:-2px; animation: blink 1s steps(1) infinite; }
-@keyframes blink { 50% { opacity: 0; } }
-.reveal { opacity: 0; transform: translateY(20px); transition: opacity .7s cubic-bezier(.22,1,.36,1), transform .7s cubic-bezier(.22,1,.36,1); }
-.reveal.in { opacity: 1; transform: translateY(0); }
-.lift { transition: transform .25s cubic-bezier(.22,1,.36,1), box-shadow .25s; }
-.lift:hover { transform: translateY(-3px); box-shadow: 0 12px 30px -12px rgba(13,61,34,.22); }
-.evpill { font-size: 10.5px; font-weight: 500; padding: 2px 9px; border-radius: 99px; }
-.ev-strong { background:#E1F5EE; color:#0F6E56; } .ev-mid { background:#E6F1FB; color:#0C447C; }
-@media (prefers-reduced-motion: reduce) {
-  html { scroll-behavior: auto; }
-  .rise, .brief-row { animation: none; opacity: 1; }
-  .reveal { opacity: 1; transform: none; transition: none; }
-  .caret { animation: none; }
+@media (prefers-reduced-motion:reduce){
+  html{scroll-behavior:auto}
+  .reveal{opacity:1;transform:none;transition:none}
+  .rise{opacity:1;transform:none;animation:none}
+  .ring,.line{animation:none!important}
+  .cbrief-rows>*{opacity:1!important;transform:none!important}
+  .step{opacity:1}
 }
 </style>
 </head>
-<body data-theme="dermcase">
+<body>
+<div id="prog"></div>
 
-<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
-  <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2.5 group">
-      <span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-[8deg]">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      </span>
-      <span class="text-[14px] font-medium tracking-tight">DermCase</span>
-    </a>
-    <div class="flex items-center gap-1 text-[13px]">
-      <a href="#how" class="hidden sm:block px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navHow"></a>
-      <a href="/about.html" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navAbout"></a>
-      <button id="langBtn" class="px-2.5 py-1.5 rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-300/60 transition mono text-[12px]">EN</button>
-      <a href="/app.html" class="ml-1 btn btn-primary btn-sm normal-case rounded-lg" data-i18n="navOpen"></a>
+<nav id="nav" class="on-dark">
+  <div class="wrap navin">
+    <a href="/" class="brand"><span class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase</a>
+    <div class="navlinks">
+      <a href="#how" class="hide-sm" data-i18n="navHow"></a>
+      <a href="/about.html" data-i18n="navAbout"></a>
+      <button id="langBtn" class="mono" style="font-size:12px">EN</button>
+      <a href="/app.html" class="btn btn-pri" data-i18n="navOpen"></a>
     </div>
   </div>
 </nav>
 
-<header class="relative overflow-hidden">
-  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
-  <div class="relative max-w-[1100px] mx-auto px-5 pt-16 pb-14 md:pt-24 md:pb-20 grid md:grid-cols-2 gap-10 md:gap-8 items-center">
+<!-- HERO -->
+<section class="dark hero" id="hero">
+  <div class="grid-tex"></div>
+  <svg class="motif" viewBox="0 0 200 200" fill="none">
+    <g class="ring r1"><circle cx="100" cy="100" r="78" stroke="#4E9E73" stroke-width="1" stroke-dasharray="3 7" opacity=".7"/></g>
+    <g class="ring r2"><path d="M100 38c34 0 62 28 62 62s-28 62-62 62" stroke="#4E9E73" stroke-width="1.5" opacity=".6"/><path d="M100 162c-34 0-62-28-62-62" stroke="#CFE3D7" stroke-width="1" opacity=".4"/></g>
+    <g class="ring r3"><circle cx="100" cy="100" r="50" stroke="#4E9E73" stroke-width="1" opacity=".5"/><circle cx="100" cy="100" r="30" stroke="#CFE3D7" stroke-width="1.2" opacity=".5"/></g>
+    <circle cx="100" cy="100" r="13" fill="#4E9E73" opacity=".25"/>
+    <circle cx="100" cy="100" r="5" fill="#CFE3D7" opacity=".8"/>
+  </svg>
+  <div class="wrap hero-grid">
     <div>
-      <div class="rise d1 inline-flex items-center gap-2 text-[12px] text-base-content/60 mb-5">
-        <span class="w-1.5 h-1.5 rounded-full bg-primary"></span>
-        <span data-i18n="eyebrow"></span>
+      <span class="eyebrow rise d1" data-i18n="eyebrow"></span>
+      <h1 class="rise d2" data-i18n="heroH1"></h1>
+      <p class="sub rise d3" data-i18n="heroSub"></p>
+      <div class="cta-row rise d4">
+        <a href="/app.html" class="btn btn-light" data-i18n="ctaPrimary"></a>
+        <a href="#act1" class="btn btn-ghost" style="color:rgba(255,255,255,.7)" data-i18n="ctaSecondary"></a>
       </div>
-      <h1 class="rise d2 display text-[34px] md:text-[46px] font-medium mb-5" data-i18n="heroH1"></h1>
-      <p class="rise d3 text-[15px] md:text-[16px] text-base-content/70 leading-relaxed max-w-[30rem] mb-7" data-i18n="heroSub"></p>
-      <div class="rise d4 flex items-center gap-3">
-        <a href="/app.html" class="btn btn-primary normal-case rounded-xl px-5" data-i18n="ctaPrimary"></a>
-        <a href="#how" class="btn btn-ghost normal-case rounded-xl text-base-content/70" data-i18n="ctaSecondary"></a>
-      </div>
-      <div class="rise d5 mt-7 flex items-center gap-2 text-[12px] text-base-content/50">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="none" class="flex-shrink-0"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
+      <div class="meta rise d5">
+        <svg width="13" height="13" viewBox="0 0 24 24" fill="none"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg>
         <span data-i18n="heroTrust"></span>
       </div>
     </div>
-
     <div class="rise d3">
-      <div class="bg-base-100 rounded-2xl border border-base-300 shadow-[0_24px_60px_-24px_rgba(13,61,34,0.28)] overflow-hidden">
-        <div class="px-4 h-9 flex items-center gap-1.5 border-b border-base-300 bg-base-200/50">
-          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
-          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
-          <span class="w-2.5 h-2.5 rounded-full bg-base-300"></span>
-          <span class="ml-2 text-[11px] text-base-content/45 mono" data-i18n="briefLabel"></span>
-        </div>
-        <div class="p-5 text-left min-h-[300px]">
-          <div class="brief-row cr1 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bAssess"></div>
-          <div class="brief-row cr2 bg-base-200 rounded-lg p-3 mb-3">
-            <div class="flex items-center gap-2 flex-wrap mb-1">
-              <span class="text-[14px] font-medium" data-i18n="bDx"></span>
-              <span class="mono text-[10.5px] bg-base-100 border border-base-300 rounded px-1.5 py-0.5">ICD-10 · L40.0</span>
-            </div>
-            <div class="text-[12.5px] text-base-content/70 leading-snug" data-i18n="bRationale"></div>
+      <div class="brief">
+        <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="barlbl" data-i18n="briefLabel"></span></div>
+        <div class="body">
+          <div class="blabel" data-i18n="bAssess"></div>
+          <div class="brow"><div class="dxline"><span class="dxname" data-i18n="bDx"></span><span class="icd">ICD-10 · L40.0</span></div><div class="rationale" data-i18n="bRationale"></div></div>
+          <div class="blabel" data-i18n="bTx"></div>
+          <div class="opts">
+            <div class="opt"><div class="top"><span class="nm">Adalimumab</span><span class="pill s">RCT</span></div><div class="det" data-i18n="bOpt1"></div></div>
+            <div class="opt"><div class="top"><span class="nm">Deucravacitinib</span><span class="pill s">RCT</span></div><div class="det" data-i18n="bOpt2"></div></div>
           </div>
-          <div class="brief-row cr3 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bTx"></div>
-          <div class="brief-row cr4 grid grid-cols-2 gap-2 mb-3">
-            <div class="bg-base-200 rounded-lg p-2.5">
-              <div class="flex items-center justify-between mb-1"><span class="text-[12.5px] font-medium">Adalimumab</span><span class="evpill ev-strong">RCT</span></div>
-              <div class="text-[11px] text-base-content/60 leading-snug" data-i18n="bOpt1"></div>
-            </div>
-            <div class="bg-base-200 rounded-lg p-2.5">
-              <div class="flex items-center justify-between mb-1"><span class="text-[12.5px] font-medium">Deucravacitinib</span><span class="evpill ev-strong">RCT</span></div>
-              <div class="text-[11px] text-base-content/60 leading-snug" data-i18n="bOpt2"></div>
-            </div>
-          </div>
-          <div class="brief-row cr5 text-[10.5px] font-medium text-base-content/45 mb-2" data-i18n="bLit"></div>
-          <div class="brief-row cr6">
-            <span class="evpill ev-strong" data-i18n="bGuideline"></span>
-            <div class="text-[12.5px] font-medium mt-1.5">AAD-NPF Guidelines: Topical & Systemic Psoriasis</div>
-            <div class="text-[11px] text-primary mono mt-1">JAAD 2021 — doi.org/10.1016/j.jaad.2020<span class="caret"></span></div>
-          </div>
+          <div class="blabel" data-i18n="bLit"></div>
+          <div class="ref"><span class="pill s" data-i18n="bGuideline"></span><div class="rt">AAD-NPF Guidelines: Systemic Psoriasis</div><div class="rs">JAAD 2021 · doi.org/10.1016/j.jaad.2020</div></div>
         </div>
       </div>
     </div>
   </div>
-</header>
-
-<section class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
-  <div class="reveal text-[12px] font-medium text-primary mb-3 mono" data-i18n="pillarsEyebrow"></div>
-  <h2 class="reveal display text-[26px] md:text-[32px] font-medium mb-12 max-w-[34rem]" data-i18n="pillarsH2"></h2>
-  <div class="grid md:grid-cols-3 gap-4">
-    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6">
-      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M12 7v5l3 2" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="12" cy="12" r="9" stroke="#1A6640" stroke-width="1.6"/></svg>
-      </div>
-      <h3 class="text-[16px] font-medium mb-2" data-i18n="p1h"></h3>
-      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p1b"></p>
-    </div>
-    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6" style="transition-delay:.08s">
-      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 7h16M4 12h16M4 17h10" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round"/></svg>
-      </div>
-      <h3 class="text-[16px] font-medium mb-2" data-i18n="p2h"></h3>
-      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p2b"></p>
-    </div>
-    <div class="reveal lift bg-base-100 rounded-2xl border border-base-300 p-6" style="transition-delay:.16s">
-      <div class="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-4">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3" stroke="#1A6640" stroke-width="1.6"/><path d="M8 9h6M8 13h8M8 16h4" stroke="#1A6640" stroke-width="1.6" stroke-linecap="round"/></svg>
-      </div>
-      <h3 class="text-[16px] font-medium mb-2" data-i18n="p3h"></h3>
-      <p class="text-[13.5px] text-base-content/65 leading-relaxed" data-i18n="p3b"></p>
-    </div>
-  </div>
+  <div class="scrollcue"><span data-i18n="scrollCue"></span><span class="line"></span></div>
 </section>
 
-<section id="how" class="bg-secondary text-primary-content">
-  <div class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
-    <div class="reveal text-[12px] font-medium text-primary-content/60 mb-3 mono" data-i18n="howEyebrow"></div>
-    <h2 class="reveal display text-[26px] md:text-[32px] font-medium mb-12" data-i18n="howH2"></h2>
-    <div class="grid md:grid-cols-3 gap-8 md:gap-6">
+<!-- ACT 01 — the problem -->
+<section class="act" id="act1">
+  <div class="wrap">
+    <div class="act-head reveal">
+      <span class="act-no">01</span>
+      <h2 data-i18n="a1h"></h2>
+      <p data-i18n="a1p"></p>
+    </div>
+    <div class="problem-grid">
+      <div class="chaos reveal">
+        <div class="tabcard t1"><span class="q">?</span><div class="h"></div><div class="l s"></div><div class="l t"></div></div>
+        <div class="tabcard t2"><span class="q">?</span><div class="h"></div><div class="l"></div><div class="l s"></div></div>
+        <div class="tabcard t3"><span class="q">?</span><div class="h"></div><div class="l t"></div></div>
+        <div class="tabcard t4"><span class="q">?</span><div class="h"></div><div class="l s"></div><div class="l t"></div></div>
+      </div>
       <div class="reveal">
-        <div class="mono text-[13px] text-primary-content/45 mb-3">01</div>
-        <h3 class="text-[17px] font-medium mb-2" data-i18n="s1h"></h3>
-        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s1b"></p>
-      </div>
-      <div class="reveal" style="transition-delay:.1s">
-        <div class="mono text-[13px] text-primary-content/45 mb-3">02</div>
-        <h3 class="text-[17px] font-medium mb-2" data-i18n="s2h"></h3>
-        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s2b"></p>
-      </div>
-      <div class="reveal" style="transition-delay:.2s">
-        <div class="mono text-[13px] text-primary-content/45 mb-3">03</div>
-        <h3 class="text-[17px] font-medium mb-2" data-i18n="s3h"></h3>
-        <p class="text-[13.5px] text-primary-content/70 leading-relaxed" data-i18n="s3b"></p>
+        <div class="stat" style="margin-bottom:26px"><div class="big" data-i18n="a1s1n"></div><div class="lbl" data-i18n="a1s1l"></div></div>
+        <div class="stat"><div class="big" data-i18n="a1s2n"></div><div class="lbl" data-i18n="a1s2l"></div></div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="max-w-[1100px] mx-auto px-5 py-16 md:py-20">
-  <div class="grid md:grid-cols-2 gap-10 items-center">
-    <div>
-      <h2 class="reveal display text-[24px] md:text-[28px] font-medium mb-4" data-i18n="trustH2"></h2>
-      <p class="reveal text-[14px] text-base-content/65 leading-relaxed mb-6" data-i18n="trustB"></p>
-      <div class="reveal flex items-start gap-2.5 text-[13px] text-base-content/70 bg-base-100 border border-base-300 rounded-xl p-4">
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" class="flex-shrink-0 mt-0.5"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="#1A6640" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-        <span data-i18n="trustPrivacy"></span>
-      </div>
-    </div>
-    <div class="reveal">
-      <div class="text-[11px] font-medium text-base-content/45 mb-4 mono" data-i18n="sourcesLabel"></div>
-      <div class="grid grid-cols-2 gap-2.5">
-        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">PubMed</div>
-        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">JAAD</div>
-        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">NEJM</div>
-        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium">AAD</div>
-        <div class="bg-base-100 border border-base-300 rounded-xl px-4 py-3 text-[13px] font-medium col-span-2">Cochrane</div>
+<!-- ACT 02 — the brief composes (pinned scroll) -->
+<section class="dark compose-sec" id="how">
+  <div class="grid-tex"></div>
+  <div class="compose-sticky">
+    <div class="compose-inner wrap">
+      <div class="compose-grid">
+        <div class="compose-copy">
+          <span class="act-no">02</span>
+          <h2 data-i18n="a2h"></h2>
+          <p data-i18n="a2p"></p>
+          <div class="steps" id="steps">
+            <div class="step" data-step="1"><span class="sn">01</span><div><div class="st" data-i18n="a2s1t"></div><div class="sd" data-i18n="a2s1d"></div></div></div>
+            <div class="step" data-step="2"><span class="sn">02</span><div><div class="st" data-i18n="a2s2t"></div><div class="sd" data-i18n="a2s2d"></div></div></div>
+            <div class="step" data-step="3"><span class="sn">03</span><div><div class="st" data-i18n="a2s3t"></div><div class="sd" data-i18n="a2s3d"></div></div></div>
+            <div class="step" data-step="4"><span class="sn">04</span><div><div class="st" data-i18n="a2s4t"></div><div class="sd" data-i18n="a2s4d"></div></div></div>
+          </div>
+        </div>
+        <div>
+          <div class="brief">
+            <div class="bar"><span class="dot"></span><span class="dot"></span><span class="dot"></span><span class="barlbl" data-i18n="briefLabel"></span></div>
+            <div class="body cbrief-rows" id="cbrief">
+              <div class="cr1"><div class="blabel" data-i18n="bAssess"></div><div class="brow"><div class="dxline"><span class="dxname" data-i18n="bDx"></span><span class="icd">ICD-10 · L40.0</span></div><div class="rationale" data-i18n="bRationale"></div></div></div>
+              <div class="cr2"><div class="blabel" data-i18n="bTx"></div><div class="opts"><div class="opt"><div class="top"><span class="nm">Adalimumab</span><span class="pill s">RCT</span></div><div class="det" data-i18n="bOpt1"></div></div><div class="opt"><div class="top"><span class="nm">Deucravacitinib</span><span class="pill s">RCT</span></div><div class="det" data-i18n="bOpt2"></div></div></div></div>
+              <div class="cr3"><div class="blabel" data-i18n="bLit"></div><div class="ref"><span class="pill s" data-i18n="bGuideline"></span><div class="rt">AAD-NPF Guidelines: Systemic Psoriasis</div><div class="rs">JAAD 2021 · doi.org/10.1016/j.jaad.2020</div></div></div>
+              <div class="cr4" style="margin-top:11px"><div class="ref"><span class="pill m" data-i18n="bReview"></span><div class="rt" data-i18n="bRef2t"></div><div class="rs">JAMA Dermatol 2023 · doi.org/10.1001/jamadermatol</div></div></div>
+            </div>
+          </div>
+        </div>
       </div>
     </div>
   </div>
 </section>
 
-<section class="max-w-[1100px] mx-auto px-5 pb-20">
-  <div class="reveal bg-primary text-primary-content rounded-3xl px-8 py-14 md:py-16 text-center overflow-hidden relative">
-    <div class="absolute inset-0 grid-bg opacity-40 pointer-events-none"></div>
-    <h2 class="relative display text-[26px] md:text-[34px] font-medium mb-3" data-i18n="finalH2"></h2>
-    <p class="relative text-[14px] text-primary-content/75 mb-7 max-w-[28rem] mx-auto" data-i18n="finalB"></p>
-    <a href="/app.html" class="relative inline-flex btn bg-base-100 text-primary hover:bg-base-200 border-0 normal-case rounded-xl px-6" data-i18n="finalCta"></a>
+<!-- ACT 03 — pillars -->
+<section class="act" id="why">
+  <div class="wrap">
+    <div class="act-head reveal">
+      <span class="act-no">03</span>
+      <h2 data-i18n="a3h"></h2>
+      <p data-i18n="a3p"></p>
+    </div>
+    <div class="pillars">
+      <div class="pillar reveal">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1A6640" stroke-width="1.6"/><path d="M12 7.5v5l3.2 2" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <h3 data-i18n="p1h"></h3><p data-i18n="p1b"></p>
+      </div>
+      <div class="pillar reveal" style="transition-delay:.08s">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 5-9 5-9-5 9-5z" stroke="#1A6640" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 13l9 5 9-5" stroke="#1A6640" stroke-width="1.5" stroke-linejoin="round" opacity=".55"/></svg></div>
+        <h3 data-i18n="p2h"></h3><p data-i18n="p2b"></p>
+      </div>
+      <div class="pillar reveal" style="transition-delay:.16s">
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3.5" stroke="#1A6640" stroke-width="1.5"/><path d="M8 9.5h6M8 13h8M8 16.5h4" stroke="#1A6640" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <h3 data-i18n="p3h"></h3><p data-i18n="p3b"></p>
+      </div>
+    </div>
   </div>
 </section>
 
-<footer class="border-t border-base-300">
-  <div class="max-w-[1100px] mx-auto px-5 py-8 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-    <div class="flex items-center gap-2.5">
-      <span class="w-6 h-6 rounded-md bg-primary flex items-center justify-center">
-        <svg width="12" height="12" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      </span>
-      <span class="text-[13px] font-medium">DermCase Assistant</span>
+<!-- ACT 04 — trust -->
+<section class="dark act" id="trust">
+  <div class="grid-tex"></div>
+  <div class="wrap">
+    <div class="trust-grid">
+      <div class="trust-copy reveal">
+        <span class="act-no">04</span>
+        <h2 data-i18n="a4h"></h2>
+        <p data-i18n="a4p"></p>
+        <div class="privacy">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="#4E9E73" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#4E9E73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <span data-i18n="a4priv"></span>
+        </div>
+      </div>
+      <div class="reveal">
+        <div class="blabel" style="color:rgba(255,255,255,.4);margin-bottom:14px" data-i18n="sourcesLabel"></div>
+        <div class="sources">
+          <div class="src"><span class="d"></span>PubMed</div>
+          <div class="src"><span class="d"></span>JAAD</div>
+          <div class="src"><span class="d"></span>NEJM</div>
+          <div class="src"><span class="d"></span>AAD</div>
+          <div class="src full"><span class="d"></span>Cochrane Library</div>
+        </div>
+      </div>
     </div>
-    <p class="text-[11px] text-base-content/45 leading-relaxed max-w-[34rem]" data-i18n="footDisc"></p>
+  </div>
+</section>
+
+<!-- FINALE -->
+<section class="finale">
+  <div class="wrap">
+    <div class="finale-card reveal">
+      <div class="grid-tex" style="opacity:.5"></div>
+      <h2 data-i18n="finH" style="position:relative"></h2>
+      <p data-i18n="finP" style="position:relative"></p>
+      <a href="/app.html" class="btn btn-light" style="position:relative;padding:12px 24px" data-i18n="finCta"></a>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="wrap footin">
+    <a href="/" class="brand" style="font-size:14px"><span class="logo" style="width:26px;height:26px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase Assistant</a>
+    <p class="disc" data-i18n="footDisc"></p>
   </div>
 </footer>
 
 <script>
-const I18N = {
-  ko: {
-    navHow: '작동 방식', navAbout: '소개', navOpen: '증례 분석',
-    eyebrow: '현직 피부과 전문의를 위한 임상 문헌 도구',
-    heroH1: '눈앞의 증례에 맞춘 문헌 검토.',
-    heroSub: '증례 사진과 환자 정보를 집중된 임상 브리프로 — 잠정 평가, 검토할 만한 치료 옵션, 그리고 그 근거 문헌까지. 비전형적이고 근거가 중요한 증례를 위해 설계되었습니다.',
-    ctaPrimary: '증례 분석 시작', ctaSecondary: '작동 방식 보기',
-    heroTrust: '증례 사진은 분석에만 사용되며 저장되지 않습니다',
-    briefLabel: '임상 브리프',
-    bAssess: '임상 평가', bDx: '건선 (판상형)',
-    bRationale: '경계가 뚜렷한 비늘성 홍반판은 판상 건선의 전형적 소견이며, 만성 경과와 일치합니다.',
-    bTx: '치료 옵션',
-    bOpt1: '중등도-중증에서 PASI75 약 70%', bOpt2: '경구제, 주사 불필요',
-    bLit: '관련 문헌', bGuideline: '가이드라인',
-    pillarsEyebrow: 'DermCase가 다른 이유',
-    pillarsH2: '검색 결과 나열이 아니라, 결정에 도움이 되는 합성.',
-    p1h: '최신성이 곧 기능', p1b: '고정된 교과서가 아니라, 최신 가이드라인 변화와 새로운 생물학적제제 데이터를 반영합니다.',
-    p2h: '피부과 특화 깊이', p2b: '일반 Q&A 상자가 아니라, 형태학·근거 수준·치료 경로를 중심으로 구성됩니다.',
-    p3h: '증례 중심 합성', p3b: '검색 히트 목록이 아니라, 당신의 증례와 결정을 중심으로 정리된 브리프입니다.',
-    howEyebrow: '작동 방식', howH2: '입력에서 실행 가능한 브리프까지, 세 단계.',
-    s1h: '증례 입력', s1b: '증례 사진과 환자 정보(나이, 부위, 기간, 메모)를 입력합니다.',
-    s2h: '문헌 검색', s2b: '모델이 유력 진단을 도출하고, 그 진단에 맞춰 최신 문헌을 검색합니다.',
-    s3h: '브리프로 실행', s3b: 'ICD-10, 근거 태그가 달린 문헌, 검토할 치료 옵션이 담긴 브리프를 받습니다.',
-    trustH2: '신뢰를 전제로 설계.',
-    trustB: '현직 피부과 전문의와 함께 개발하고 있습니다. 모든 근거는 실제 출처에 연결되며, 근거 수준(가이드라인·RCT·증례 보고 등)이 명시됩니다.',
-    trustPrivacy: '증례 사진은 분석을 위해 처리될 뿐, 서버에 저장되지 않습니다.',
-    sourcesLabel: '근거 출처',
-    finalH2: '실제 증례로 사용해 보세요.', finalB: '비전형적이거나 치료 저항성 증례에서 가장 큰 가치를 발휘합니다.',
-    finalCta: '증례 분석 시작',
-    footDisc: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
-  },
-  en: {
-    navHow: 'How it works', navAbout: 'About', navOpen: 'Open app',
-    eyebrow: 'A clinical literature tool for practicing dermatologists',
-    heroH1: 'The literature, shaped to the case in front of you.',
-    heroSub: 'DermCase turns a case photo and patient context into a focused clinical brief — a working assessment, the treatment options worth weighing, and the references behind them. Built for the after-hours, evidence-sensitive cases.',
-    ctaPrimary: 'Open the app', ctaSecondary: 'See how it works',
-    heroTrust: 'Case photos are processed for analysis, never stored',
-    briefLabel: 'clinical brief',
-    bAssess: 'CLINICAL ASSESSMENT', bDx: 'Plaque psoriasis',
-    bRationale: 'Well-demarcated scaly erythematous plaques are characteristic of plaque psoriasis and consistent with the chronic course.',
-    bTx: 'TREATMENT OPTIONS',
-    bOpt1: 'PASI75 ~70% in moderate–severe', bOpt2: 'Oral, no injection required',
-    bLit: 'LITERATURE', bGuideline: 'Guideline',
-    pillarsEyebrow: 'Why DermCase',
-    pillarsH2: 'Synthesis that informs a decision — not a list of search hits.',
-    p1h: 'Recency as a feature', p1b: 'Surfaces the latest guideline changes and emerging biologic data, not a static textbook.',
-    p2h: 'Dermatology-native depth', p2b: 'Structured around morphology, evidence strength, and treatment pathways — not a general Q&A box.',
-    p3h: 'Case-shaped synthesis', p3b: 'A brief organized around your case and the decision in front of you, not a pile of search results.',
-    howEyebrow: 'How it works', howH2: 'From input to an actionable brief, in three steps.',
-    s1h: 'Add the case', s1b: 'Upload a photo and the patient context — age, area, duration, and notes.',
-    s2h: 'Literature search', s2b: 'The model identifies the likely diagnosis and searches current literature anchored to it.',
-    s3h: 'Act on the brief', s3b: 'Get an assessment with ICD-10, evidence-tagged references, and treatment options to weigh.',
-    trustH2: 'Designed to be trusted.',
-    trustB: 'Built with practicing dermatologists. Every claim links to a real source, tagged with its evidence level — guideline, RCT, case report, and so on.',
-    trustPrivacy: 'Case photos are processed for analysis and never stored on our servers.',
-    sourcesLabel: 'EVIDENCE SOURCES',
-    finalH2: 'Try it on a real case.', finalB: 'It earns its keep most on the uncommon and treatment-resistant cases.',
-    finalCta: 'Open the app',
-    footDisc: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
-  }
-};
-
-let lang = (navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'ko';
-function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
-function applyI18n(){
-  document.documentElement.lang = lang;
-  document.querySelectorAll('[data-i18n]').forEach(el => { el.textContent = t(el.getAttribute('data-i18n')); });
-  document.getElementById('langBtn').textContent = lang === 'ko' ? 'EN' : '한국어';
-}
-document.getElementById('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; applyI18n(); });
+const I18N={
+ko:{
+ navHow:'작동 방식',navAbout:'소개',navOpen:'증례 분석',
+ eyebrow:'현직 피부과 전문의를 위한 임상 문헌 도구',
+ heroH1:'눈앞의 증례에 맞춘 문헌.',
+ heroSub:'증례 사진과 환자 정보를 집중된 임상 브리프로 — 잠정 평가, 검토할 만한 치료 옵션, 그리고 그 근거 문헌까지. 비전형적이고 근거가 중요한 증례를 위해.',
+ ctaPrimary:'증례 분석 시작',ctaSecondary:'이야기 따라가기',
+ heroTrust:'증례 사진은 분석에만 사용되며 저장되지 않습니다',
+ scrollCue:'스크롤',
+ briefLabel:'임상 브리프',bAssess:'임상 평가',bDx:'건선 (판상형)',
+ bRationale:'경계가 뚜렷한 비늘성 홍반판은 판상 건선의 전형적 소견이며, 만성 경과와 일치합니다.',
+ bTx:'치료 옵션',bOpt1:'중등도-중증에서 PASI75 약 70%',bOpt2:'경구제, 주사 불필요',
+ bLit:'관련 문헌',bGuideline:'가이드라인',bReview:'리뷰',bRef2t:'생물학적제제 1차 선택: 비교 검토',
+ a1h:'밤 9시 47분. 교과서에 없는 증례.',
+ a1p:'비전형적인 발현. 치료에 반응하지 않는 환자. 답은 어딘가의 문헌에 있지만, 열다섯 개의 탭 중 이 환자에 대한 것은 하나도 없습니다.',
+ a1s1n:'15+',a1s1l:'한 증례를 위해 뒤지는 탭과 출처',
+ a1s2n:'20분',a1s2l:'정작 환자 앞에서 쓸 수 없는 시간',
+ a2h:'증례를 넣으면, 브리프가 만들어집니다.',
+ a2p:'스크롤하며 따라가 보세요 — 모델이 유력 진단을 도출하고, 그 진단에 맞춰 문헌을 검색하고, 결정에 필요한 것만 추려 브리프로 정리합니다.',
+ a2s1t:'증례 입력',a2s1d:'사진과 환자 정보를 입력합니다.',
+ a2s2t:'진단 도출',a2s2d:'형태학과 맥락에서 유력 진단을 좁힙니다.',
+ a2s3t:'문헌 검색',a2s3d:'그 진단에 맞춰 최신 문헌을 검색합니다.',
+ a2s4t:'브리프 완성',a2s4d:'근거 태그와 함께 실행 가능한 형태로 정리합니다.',
+ a3h:'검색 결과 나열이 아니라, 결정에 도움이 되는 합성.',
+ a3p:'DermCase를 다르게 만드는 세 가지 축.',
+ p1h:'최신성이 곧 기능',p1b:'고정된 교과서가 아니라, 최신 가이드라인 변화와 새로운 생물학적제제 데이터를 반영합니다.',
+ p2h:'피부과 특화 깊이',p2b:'일반 Q&A 상자가 아니라, 형태학·근거 수준·치료 경로를 중심으로 구성됩니다.',
+ p3h:'증례 중심 합성',p3b:'검색 히트 목록이 아니라, 당신의 증례와 결정을 중심으로 정리된 브리프입니다.',
+ a4h:'신뢰를 전제로 설계.',
+ a4p:'현직 피부과 전문의와 함께 개발합니다. 모든 근거는 실제 출처에 연결되며, 근거 수준(가이드라인·RCT·증례 보고 등)이 명시됩니다.',
+ a4priv:'증례 사진은 분석을 위해 처리될 뿐, 서버에 저장되지 않습니다.',
+ sourcesLabel:'근거 출처',
+ finH:'다음 어려운 증례는 곧 옵니다.',finP:'비전형적이거나 치료 저항성 증례에서 가장 큰 가치를 발휘합니다.',finCta:'증례 분석 시작',
+ footDisc:'임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
+},
+en:{
+ navHow:'How it works',navAbout:'About',navOpen:'Open app',
+ eyebrow:'A clinical literature copilot for dermatologists',
+ heroH1:'The literature, shaped to the case.',
+ heroSub:'DermCase turns a case photo and patient context into a focused clinical brief — a working assessment, the treatment options worth weighing, and the references behind them. Built for the evidence-sensitive cases.',
+ ctaPrimary:'Open the app',ctaSecondary:'Follow the story',
+ heroTrust:'Case photos are processed for analysis, never stored',
+ scrollCue:'Scroll',
+ briefLabel:'clinical brief',bAssess:'Clinical assessment',bDx:'Plaque psoriasis',
+ bRationale:'Well-demarcated scaly erythematous plaques are characteristic of plaque psoriasis and consistent with the chronic course.',
+ bTx:'Treatment options',bOpt1:'PASI75 ~70% in moderate–severe',bOpt2:'Oral, no injection required',
+ bLit:'Literature',bGuideline:'Guideline',bReview:'Review',bRef2t:'First-line biologic selection: a comparison',
+ a1h:'9:47 PM. The case that doesn\u2019t fit the textbook.',
+ a1p:'An atypical presentation. A patient who isn\u2019t responding. The answer is in the literature somewhere — but none of your fifteen open tabs is about this patient.',
+ a1s1n:'15+',a1s1l:'tabs and sources for one case',
+ a1s2n:'20 min',a1s2l:'you can\u2019t spend at the bedside',
+ a2h:'Put the case in. The brief composes.',
+ a2p:'Scroll to follow it — the model identifies the likely diagnosis, searches the literature anchored to it, and keeps only what the decision needs.',
+ a2s1t:'Add the case',a2s1d:'A photo and the patient context.',
+ a2s2t:'Identify',a2s2d:'Narrows the likely diagnosis from morphology and context.',
+ a2s3t:'Search',a2s3d:'Searches current literature anchored to that diagnosis.',
+ a2s4t:'Compose',a2s4d:'Assembles it, evidence-tagged and ready to act on.',
+ a3h:'Synthesis that informs a decision — not a list of search hits.',
+ a3p:'Three axes that make DermCase different.',
+ p1h:'Recency as a feature',p1b:'Surfaces the latest guideline changes and emerging biologic data, not a static textbook.',
+ p2h:'Dermatology-native depth',p2b:'Structured around morphology, evidence strength, and treatment pathways — not a general Q&A box.',
+ p3h:'Case-shaped synthesis',p3b:'A brief organized around your case and the decision in front of you, not a pile of search results.',
+ a4h:'Designed to be trusted.',
+ a4p:'Built with practicing dermatologists. Every claim links to a real source, tagged with its evidence level — guideline, RCT, case report, and so on.',
+ a4priv:'Case photos are processed for analysis and never stored on our servers.',
+ sourcesLabel:'Evidence sources',
+ finH:'The next hard case is coming.',finP:'It earns its keep most on the uncommon and treatment-resistant cases.',finCta:'Open the app',
+ footDisc:'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
+}};
+let lang=(navigator.language||'').toLowerCase().startsWith('en')?'en':'ko';
+function t(k){return I18N[lang][k]||I18N.en[k]||k;}
+function applyI18n(){document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';}
+document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';applyI18n();});
 applyI18n();
 
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('in'); io.unobserve(e.target); } });
-}, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
-document.querySelectorAll('.reveal').forEach(el => io.observe(el));
+// progress bar
+var prog=document.getElementById('prog');
+function onScroll(){var h=document.documentElement.scrollHeight-window.innerHeight;var p=h>0?(window.scrollY/h)*100:0;prog.style.width=p+'%';
+  // nav theme toggle: dark over dark sections
+  var nav=document.getElementById('nav');var y=window.scrollY+60;var darkOn=false;
+  document.querySelectorAll('section.dark').forEach(function(s){if(y>=s.offsetTop&&y<s.offsetTop+s.offsetHeight)darkOn=true;});
+  nav.classList.toggle('on-dark',darkOn);
+}
+window.addEventListener('scroll',onScroll,{passive:true});onScroll();
+
+// reveals
+var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){e.target.classList.add('in');io.unobserve(e.target);}});},{threshold:.14,rootMargin:'0px 0px -50px 0px'});
+document.querySelectorAll('.reveal').forEach(function(el){io.observe(el);});
+
+// pinned compose: drive steps + brief rows by scroll progress through the section
+var sec=document.getElementById('how');var cbrief=document.getElementById('cbrief');var steps=document.querySelectorAll('#steps .step');
+function compose(){
+  if(!sec)return;
+  var rect=sec.getBoundingClientRect();var total=sec.offsetHeight-window.innerHeight;
+  var passed=Math.min(Math.max(-rect.top,0),total);var frac=total>0?passed/total:0;
+  var stage=Math.min(4,Math.floor(frac*4)+1);
+  cbrief.className='body cbrief-rows s'+stage;
+  steps.forEach(function(st){var n=parseInt(st.getAttribute('data-step'),10);st.classList.toggle('on',n<=stage);});
+}
+window.addEventListener('scroll',compose,{passive:true});compose();
 </script>
 </body>
 </html>
