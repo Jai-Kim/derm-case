@@ -75,9 +75,9 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
   <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
     <div class="card-body p-5">
       <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="casePhoto"></h3>
-      <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center cursor-pointer relative text-center p-6 transition-colors hover:border-primary hover:bg-primary/5">
-        <input type="file" id="fileInput" accept="image/*" class="absolute inset-0 opacity-0 cursor-pointer w-full h-full">
-        <div id="uploadPrompt">
+      <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center relative text-center p-5 transition-colors hover:border-primary hover:bg-primary/5">
+        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
+        <div id="uploadPrompt" class="cursor-pointer">
           <div class="opacity-25 mb-2 flex justify-center">
             <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
               <rect x="3" y="7" width="26" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
@@ -93,12 +93,7 @@ body { font-family: 'DM Sans', sans-serif; background: #F5F4F0; -webkit-font-smo
           <span class="loading loading-spinner loading-sm text-primary"></span>
           <span data-i18n="optimizing"></span>
         </div>
-        <div id="uploadPreview" style="display:none;">
-          <div class="relative inline-block">
-            <img id="previewImg" class="max-h-[195px] max-w-full rounded-md block" src="" alt="">
-            <button id="clearBtn" type="button" class="absolute -top-2 -right-2 w-6 h-6 rounded-full bg-base-100 border border-base-300 text-base-content/60 text-xs hover:bg-base-300 hover:text-base-content">✕</button>
-          </div>
-        </div>
+        <div id="thumbGrid" style="display:none;" class="w-full flex flex-wrap gap-2.5 justify-center"></div>
       </div>
     </div>
   </div>
@@ -174,8 +169,8 @@ const I18N = {
     casePhoto: '증례 사진',
     trySample: '예시 증례 불러오기',
     sampleLoaded: '예시 정보 입력됨 — 사진을 추가하고 분석하세요',
-    uploadText: '사진을 여기에 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
-    uploadSub: 'JPG, PNG — 저장되지 않습니다',
+    uploadText: '사진을 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
+    uploadSub: 'JPG · PNG · 최대 3장 — 저장되지 않습니다',
     patientContext: '환자 정보',
     age: '나이', agePh: '예: 42',
     sex: '성별', sexSelect: '선택', sexMale: '남성', sexFemale: '여성', sexOther: '기타 / 미지정',
@@ -211,11 +206,11 @@ const I18N = {
   en: {
     subtitle: 'AI-assisted differential diagnosis and literature guidance for dermatology cases.',
     navAbout: 'About', navHome: 'Home',
-    casePhoto: 'Case photo',
+    casePhoto: 'Case photos',
     trySample: 'Load sample case',
     sampleLoaded: 'Sample context filled — add a photo and analyze',
-    uploadText: 'Drop case photo here or <span class="text-primary">browse</span>',
-    uploadSub: 'JPG, PNG — not stored anywhere',
+    uploadText: 'Drop case photos here or <span class="text-primary">browse</span>',
+    uploadSub: 'JPG · PNG · up to 3 — not stored anywhere',
     patientContext: 'Patient context',
     age: 'Age', agePh: 'e.g. 42',
     sex: 'Sex', sexSelect: 'Select', sexMale: 'Male', sexFemale: 'Female', sexOther: 'Other / Not specified',
@@ -271,42 +266,39 @@ function applyI18n() {
   }
 }
 
-let imageBase64 = null, imageMimeType = 'image/jpeg';
-const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadPreview=document.getElementById('uploadPreview'),uploadLoading=document.getElementById('uploadLoading'),previewImg=document.getElementById('previewImg'),clearBtn=document.getElementById('clearBtn'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
+let images = []; const MAX_IMAGES = 3;
+const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadLoading=document.getElementById('uploadLoading'),thumbGrid=document.getElementById('thumbGrid'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
 
-function loadImage(file){
-  if(!file||!file.type.startsWith('image/'))return;
-  imageMimeType='image/jpeg';
-  uploadPrompt.style.display='none';
-  uploadPreview.style.display='none';
-  uploadLoading.style.display='flex';
-  const img=new Image();
-  const objectUrl=URL.createObjectURL(file);
-  img.onload=()=>{
-    setTimeout(()=>{
-      URL.revokeObjectURL(objectUrl);
-      const MAX=1200;
-      let w=img.width,h=img.height;
-      if(w>MAX||h>MAX){const s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}
-      const canvas=document.createElement('canvas');
-      canvas.width=w;canvas.height=h;
-      canvas.getContext('2d').drawImage(img,0,0,w,h);
-      const dataUrl=canvas.toDataURL('image/jpeg',0.82);
-      imageBase64=dataUrl.split(',')[1];
-      previewImg.src=dataUrl;
-      uploadLoading.style.display='none';
-      uploadPreview.style.display='block';
-      updateBtn();
-    },0);
-  };
-  img.onerror=()=>{
-    URL.revokeObjectURL(objectUrl);
-    uploadLoading.style.display='none';
-    uploadPrompt.style.display='block';
-  };
-  img.src=objectUrl;
+function processFile(file){
+  return new Promise((resolve,reject)=>{
+    if(!file||!file.type.startsWith('image/')){reject();return;}
+    const img=new Image();const url=URL.createObjectURL(file);
+    img.onload=()=>{URL.revokeObjectURL(url);const MAX=1200;let w=img.width,h=img.height;if(w>MAX||h>MAX){const s=Math.min(MAX/w,MAX/h);w=Math.round(w*s);h=Math.round(h*s);}const cv=document.createElement('canvas');cv.width=w;cv.height=h;cv.getContext('2d').drawImage(img,0,0,w,h);const dataUrl=cv.toDataURL('image/jpeg',0.82);resolve({base64:dataUrl.split(',')[1],mime:'image/jpeg',dataUrl});};
+    img.onerror=()=>{URL.revokeObjectURL(url);reject();};
+    img.src=url;
+  });
 }
-function updateBtn(){analyzeBtn.disabled=!imageBase64;}
+async function loadImages(fileList){
+  const files=Array.from(fileList||[]).filter(f=>f.type&&f.type.startsWith('image/'));
+  const room=MAX_IMAGES-images.length;
+  if(!files.length||room<=0)return;
+  uploadPrompt.style.display='none';thumbGrid.style.display='none';uploadLoading.style.display='flex';
+  for(const f of files.slice(0,room)){try{const im=await processFile(f);images.push(im);}catch(e){}}
+  uploadLoading.style.display='none';
+  renderThumbs();updateBtn();
+}
+function renderThumbs(){
+  if(!images.length){uploadPrompt.style.display='block';thumbGrid.style.display='none';thumbGrid.innerHTML='';return;}
+  uploadPrompt.style.display='none';thumbGrid.style.display='flex';
+  const tiles=images.map((im,i)=>`<div class="relative"><img src="${im.dataUrl}" class="w-[88px] h-[88px] object-cover rounded-lg border border-base-300"><button data-rm="${i}" type="button" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-100 border border-base-300 text-base-content/60 text-[10px] flex items-center justify-center hover:bg-base-300 hover:text-base-content">✕</button></div>`).join('');
+  const add=images.length<MAX_IMAGES?`<button id="addTile" type="button" class="w-[88px] h-[88px] rounded-lg border-[1.5px] border-dashed border-base-300 text-base-content/40 hover:border-primary hover:text-primary flex items-center justify-center text-2xl leading-none">+</button>`:'';
+  thumbGrid.innerHTML=tiles+add;
+  thumbGrid.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeImage(parseInt(b.getAttribute('data-rm'),10));}));
+  const at=document.getElementById('addTile');if(at)at.addEventListener('click',()=>fileInput.click());
+}
+function removeImage(i){images.splice(i,1);renderThumbs();updateBtn();}
+function resetImages(){images=[];fileInput.value='';renderThumbs();updateBtn();}
+function updateBtn(){analyzeBtn.disabled=images.length===0;}
 
 document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
 document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); });
@@ -338,11 +330,12 @@ document.querySelectorAll('.fitz-chip').forEach(function(ch){
   ch.addEventListener('mouseenter', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = v + ' · ' + t('fitz'+v); });
   ch.addEventListener('mouseleave', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = ''; });
 });
-fileInput.addEventListener('change',e=>loadImage(e.target.files[0]));
+uploadPrompt.addEventListener('click',()=>fileInput.click());
+fileInput.addEventListener('change',e=>{loadImages(e.target.files);fileInput.value='';});
 dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
 dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('border-primary','bg-primary/5'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('border-primary','bg-primary/5');loadImage(e.dataTransfer.files[0]);});
-clearBtn.addEventListener('click',e=>{e.stopPropagation();imageBase64=null;previewImg.src='';fileInput.value='';uploadPrompt.style.display='block';uploadPreview.style.display='none';uploadLoading.style.display='none';outputArea.innerHTML='';updateBtn();});
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('border-primary','bg-primary/5');loadImages(e.dataTransfer.files);});
+updateBtn();
 analyzeBtn.addEventListener('click',runAnalysis);
 
 function showProgress(){
@@ -376,13 +369,13 @@ ${langInstruction}
 }
 
 Rules:
-- RELEVANCE GATE (decide this FIRST): determine whether the image is a clinical photograph of human skin, hair, nails, or mucosa suitable for dermatologic assessment. If it is NOT — e.g. an unrelated object, scenery, an animal, a screenshot or document, a non-clinical photo, or an image too blurry/dark/cropped to assess — set "relevant": false, fill "rejection", and STOP: do NOT search the web and do NOT include assessment, references, or treatment_comparison. Only when the image is a valid clinical photograph, set "relevant": true, omit "rejection", and perform the full analysis below. When in doubt about a borderline but plausibly-clinical image, proceed with relevant:true but note the image-quality limitation in the rationale.
+- RELEVANCE GATE (decide this FIRST): one or more images may be provided. Determine whether AT LEAST ONE is a clinical photograph of human skin, hair, nails, or mucosa suitable for dermatologic assessment. If NONE are — e.g. unrelated objects, scenery, an animal, a screenshot or document, non-clinical photos, or images too blurry/dark/cropped to assess — set "relevant": false, fill "rejection", and STOP: do NOT search the web and do NOT include assessment, references, or treatment_comparison. If at least one image is a valid clinical photograph, set "relevant": true, omit "rejection", base the assessment on the clinical image(s) and disregard any non-clinical ones. When in doubt about borderline but plausibly-clinical images, proceed with relevant:true but note the image-quality limitation in the rationale.
 - assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
 - treatment_comparison: OPTIONAL. Include ONLY when the case genuinely has 2-4 competing viable treatment paths where the choice is non-obvious (treatment-resistant, off-label question, comorbidity complicating first-line, or biologic selection). If one standard path is clearly correct for a routine case, OMIT this field entirely — do not force a comparison. When included: 2-4 options, each grounded in a real recent citation. Reason step by step internally — confirm the diagnosis, search per-treatment evidence, then synthesize trade-offs. Present options with trade-offs; NEVER rank a single 'best'. This is decision support for physician consideration, not a prescribing recommendation.
 - references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
 - evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
   try{
-    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Assess this image as a dermatology case.\n\nPatient context:\n${ctx}\n\nFirst apply the relevance gate. If the image is a valid clinical photograph, search for the most relevant recent published literature and return the full analysis; otherwise return the rejection. Return only the structured JSON.`}]}]})});
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[...images.map(im=>({type:'image',source:{type:'base64',media_type:im.mime,data:im.base64}})),{type:'text',text:`Assess this dermatology case. One or more case images are provided.\n\nPatient context:\n${ctx}\n\nFirst apply the relevance gate. If at least one image is a valid clinical photograph, search for the most relevant recent published literature and return the full analysis; otherwise return the rejection. Return only the structured JSON.`}]}]})});
     let data;
     const contentType=resp.headers.get('content-type')||'';
     if(contentType.includes('application/json')){data=await resp.json();}
@@ -420,7 +413,7 @@ function renderRejection(rej){
     </div>
     <button class="btn btn-primary btn-sm normal-case mt-4" id="rejNewBtn">${t('rejTryAnother')}</button>
   </div></div>`;
-  const b=document.getElementById('rejNewBtn'); if(b) b.addEventListener('click',()=>{ clearBtn.click(); outputArea.innerHTML=''; });
+  const b=document.getElementById('rejNewBtn'); if(b) b.addEventListener('click',()=>{ resetImages(); outputArea.innerHTML=''; });
 }
 function renderOutput(d){
   const assessment=d.assessment||[],refs=d.references||[];
@@ -449,7 +442,7 @@ function renderOutput(d){
   });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
-  document.getElementById('newBtn').addEventListener('click',()=>{clearBtn.click();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';fitz='';if(window.__renderFitz)window.__renderFitz();});
+  document.getElementById('newBtn').addEventListener('click',()=>{resetImages();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';fitz='';if(window.__renderFitz)window.__renderFitz();});
 }
 </script>
 <script>
