@@ -15,7 +15,7 @@
   --color-primary: #1A6640;
   --color-primary-content: #FFFFFF;
   --color-secondary: #0A2E1E;
-  --color-base-100: #FFFFFF;
+  --color-base-100: #FBFAF6;
   --color-base-200: #F4F2EC;
   --color-base-300: #E3E0D8;
   --color-base-content: #14130D;
@@ -26,6 +26,7 @@
 }
 body { font-family: 'DM Sans', sans-serif; background: #F4F2EC; -webkit-font-smoothing: antialiased; }
 .font-mono-dm { font-family: 'DM Mono', monospace; }
+.eyebrow-app{font-family:'DM Mono',monospace;font-size:11px;font-weight:500;letter-spacing:.07em;text-transform:uppercase;color:var(--color-primary)}
 </style>
 <style>
 @keyframes pageEnter { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
@@ -73,9 +74,9 @@ body { font-family: 'DM Sans', sans-serif; background: #F4F2EC; -webkit-font-smo
   </div>
 
   <!-- Upload card -->
-  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
+  <div class="card bg-base-100 border border-base-300 rounded-2xl mb-3">
     <div class="card-body p-5">
-      <h3 class="text-[12px] font-medium text-base-content/70 mb-3" data-i18n="casePhoto"></h3>
+      <h3 class="eyebrow-app mb-3" data-i18n="casePhoto"></h3>
       <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center relative text-center p-5 transition-colors hover:border-primary hover:bg-primary/5">
         <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
         <div id="uploadPrompt" class="cursor-pointer">
@@ -100,9 +101,9 @@ body { font-family: 'DM Sans', sans-serif; background: #F4F2EC; -webkit-font-smo
   </div>
 
   <!-- Patient context card -->
-  <div class="card bg-base-100 shadow-sm rounded-2xl mb-3">
+  <div class="card bg-base-100 border border-base-300 rounded-2xl mb-3">
     <div class="card-body p-5">
-      <div class="flex items-center justify-between mb-3"><h3 class="text-[12px] font-medium text-base-content/70" data-i18n="patientContext"></h3><button type="button" id="sampleBtn" class="text-[11.5px] text-primary hover:underline" data-i18n="trySample"></button></div>
+      <div class="flex items-center justify-between mb-3"><h3 class="eyebrow-app" data-i18n="patientContext"></h3><button type="button" id="sampleBtn" class="text-[11.5px] text-primary hover:underline" data-i18n="trySample"></button></div>
       <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
         <div class="form-control">
           <label class="label py-1"><span class="label-text text-[12px]" data-i18n="age"></span></label>
@@ -426,9 +427,9 @@ function renderOutput(d){
   if(tc&&Array.isArray(tc.options)&&tc.options.length){
     const axes=[['efficacy','txEfficacy'],['onset','txOnset'],['monitoring','txMonitoring'],['key_consideration','txConsideration']];
     const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="evp evp-${ev.variant}">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="text-[11px] text-primary font-mono-dm mt-2">${o.source}</div>`:''}</div>`;}).join('');
-    txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
+    txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="eyebrow-app mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
   }
-  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex flex-wrap gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="pdfBtn">${t('exportPdf')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="newBtn">${t('newCase')}</button></div>`;
+  outputArea.innerHTML=`<div class="card bg-base-100 border border-base-300 rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="eyebrow-app mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="eyebrow-app mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex flex-wrap gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="pdfBtn">${t('exportPdf')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
@@ -482,9 +483,9 @@ function renderHistory(){
       <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
     </div>`;
   }).join('');
-  el.innerHTML = `<div class="card bg-base-100 shadow-sm rounded-2xl"><div class="card-body p-5">
+  el.innerHTML = `<div class="card bg-base-100 border border-base-300 rounded-2xl"><div class="card-body p-5">
     <div class="flex items-center justify-between mb-1">
-      <h3 class="text-[12px] font-medium text-base-content/70">${t('savedCases')}</h3>
+      <h3 class="eyebrow-app">${t('savedCases')}</h3>
       <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
     </div>
     <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
