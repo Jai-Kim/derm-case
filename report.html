@@ -8,8 +8,8 @@
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#18170F; --ink-2:#68655C; --ink-3:#9C9990;
-  --paper:#F5F4F0; --surface:#FFFFFF; --border:#E0DDD5; --border-2:#C9C6BC;
+  --ink:#14130D; --ink-2:#68655C; --ink-3:#9C9990;
+  --paper:#F4F2EC; --surface:#FFFFFF; --border:#E3E0D8; --border-2:#D2CEC3;
   --green:#1A6640; --forest:#0A2E1E;
   --r:14px; --r-sm:9px;
 }
@@ -87,7 +87,7 @@ body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:va
 <body>
 <div class="container">
   <div class="toolbar no-print">
-    <a class="back-link" href="/app.html">
+    <a class="back-link" href="/app">
       <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
       <span id="backTxt">Back to DermCase</span>
     </a>
@@ -190,7 +190,7 @@ function render(data, lang){
     if(new URLSearchParams(location.search).get('print')==='1'){ setTimeout(()=>window.print(), 450); }
   }catch(e){
     const t = L[lang] || L.en;
-    document.getElementById('content').innerHTML = `<div class="error">${t.invalid}<br><br><a class="back-link" href="/app.html">← ${t.back}</a></div>`;
+    document.getElementById('content').innerHTML = `<div class="error">${t.invalid}<br><br><a class="back-link" href="/app">← ${t.back}</a></div>`;
   }
 })();
 </script>
