@@ -126,6 +126,8 @@ const L = {
   }
 };
 function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+function safeUrl(u){u=(u||'').trim();return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';}
+function pubmed(title){return 'https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(String(title||'').replace(/[^\w\s().-]/g,' ').trim());}
 
 function render(data, lang){
   const t = L[lang] || L.en;
@@ -154,12 +156,12 @@ function render(data, lang){
     const axes = [['efficacy',t.axEff],['onset',t.axOns],['monitoring',t.axMon],['key_consideration',t.axKey]];
     const cards = tc.options.map(o=>{
       const rows = axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="axis"><div class="axis-label">${esc(lbl)}</div><div class="axis-val">${esc(o[k])}</div></div>`).join('');
-      return `<div class="opt"><div class="opt-top"><span class="opt-name">${esc(o.name)}</span>${pill(o.evidence_level)}</div>${rows}${o.source?`<div class="opt-source">${esc(o.source)}</div>`:''}</div>`;
+      return `<div class="opt"><div class="opt-top"><span class="opt-name">${esc(o.name)}</span>${pill(o.evidence_level)}</div>${rows}${o.source?`<div class="opt-source"><a href="${safeUrl(o.url)||pubmed(o.name+' '+o.source)}" target="_blank" rel="noopener noreferrer" style="color:var(--green);text-decoration:none">${esc(o.source)} ↗</a></div>`:''}</div>`;
     }).join('');
     txHtml = `<div class="section"><div class="section-title">${t.sTx}</div>${tc.rationale?`<div class="tx-rationale">${esc(tc.rationale)}</div>`:''}<div class="opts">${cards}</div><div class="tx-note">${t.txNote}</div></div>`;
   }
 
-  const refHtml = refs.map(r=>`<div class="ref">${pill(r.evidence_level)}<div class="ref-title">${esc(r.title)}</div><div class="ref-rel">${esc(r.relevance)}</div><div class="ref-source">${esc(r.source)}</div></div>`).join('');
+  const refHtml = refs.map(function(r){var direct=safeUrl(r.url);var href=direct||pubmed(r.title);var shown=direct||pubmed(r.title);return `<div class="ref">${pill(r.evidence_level)}<a class="ref-title" href="${href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${esc(r.title)} ↗</a><div class="ref-rel">${esc(r.relevance)}</div><div class="ref-source">${esc(r.source)} · <a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--green);word-break:break-all">${esc(shown)}</a></div></div>`;}).join('');
 
   const dateStr = new Date(meta.sharedAt || Date.now()).toLocaleDateString(lang==='ko'?'ko-KR':'en-US',{year:'numeric',month:'short',day:'numeric'});
 
