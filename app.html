@@ -191,10 +191,11 @@ const I18N = {
     analyzing: '증례 분석 중',
     optimizing: '이미지 처리 중…',
     copyChart: '차트에 복사', copied: '복사됨!',
-    shareReport: '보고서 공유', linkCopied: '링크 복사됨!',
+    shareReport: '보고서 공유', linkCopied: '링크 복사됨!', exportPdf: 'PDF 내보내기',
     newCase: '새 증례',
     navSignIn: '로그인', navLibrary: '내 증례', navSignOut: '로그아웃', savedCloud: '저장됨 (클라우드)',
     saveCase: '증례 저장', caseSaved: '저장됨!',
+    rejTitle: '이 이미지는 분석할 수 없습니다', rejBody: '임상 피부 사진으로 보이지 않습니다. 평가하려는 피부·손발톱·모발·점막 부위가 선명하게 보이는 사진을 올려 주세요.', rejDetected: '인식된 내용:', rejTryAnother: '다른 사진으로 시도',
     savedCases: '저장된 증례', noCases: '저장된 증례 없음',
     clearAll: '전체 삭제', deleteCase: '삭제',
     storageNote: '증례는 이 기기에만 저장됩니다. 서버로 전송되지 않습니다.',
@@ -230,10 +231,11 @@ const I18N = {
     analyzing: 'Running case analysis',
     optimizing: 'Optimizing image…',
     copyChart: 'Copy for chart', copied: 'Copied!',
-    shareReport: 'Share report', linkCopied: 'Link copied!',
+    shareReport: 'Share report', linkCopied: 'Link copied!', exportPdf: 'Export PDF',
     newCase: 'New case',
     navSignIn: 'Sign in', navLibrary: 'My cases', navSignOut: 'Sign out', savedCloud: 'Saved to library',
     saveCase: 'Save case', caseSaved: 'Saved!',
+    rejTitle: "This image can't be analyzed", rejBody: "It doesn't look like a clinical skin photo. Upload a clear photo of the skin, nail, hair, or mucosal finding you want assessed.", rejDetected: 'Appears to show:', rejTryAnother: 'Try another image',
     savedCases: 'Saved cases', noCases: 'No saved cases yet',
     clearAll: 'Clear all', deleteCase: 'Delete',
     storageNote: 'Cases are stored only on this device. Nothing is sent to a server.',
@@ -357,6 +359,8 @@ async function runAnalysis(){
 ${langInstruction}
 
 {
+  "relevant": true,
+  "rejection": { "reason": "If relevant is false: one friendly sentence on why this image cannot be assessed", "detected": "If relevant is false: a few words on what the image appears to show" },
   "assessment": [
     { "diagnosis": "Diagnosis name", "icd10": "L40.0", "rationale": "1-2 sentence clinical rationale based on visible morphology and patient context" }
   ],
@@ -372,12 +376,13 @@ ${langInstruction}
 }
 
 Rules:
+- RELEVANCE GATE (decide this FIRST): determine whether the image is a clinical photograph of human skin, hair, nails, or mucosa suitable for dermatologic assessment. If it is NOT — e.g. an unrelated object, scenery, an animal, a screenshot or document, a non-clinical photo, or an image too blurry/dark/cropped to assess — set "relevant": false, fill "rejection", and STOP: do NOT search the web and do NOT include assessment, references, or treatment_comparison. Only when the image is a valid clinical photograph, set "relevant": true, omit "rejection", and perform the full analysis below. When in doubt about a borderline but plausibly-clinical image, proceed with relevant:true but note the image-quality limitation in the rationale.
 - assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
 - treatment_comparison: OPTIONAL. Include ONLY when the case genuinely has 2-4 competing viable treatment paths where the choice is non-obvious (treatment-resistant, off-label question, comorbidity complicating first-line, or biologic selection). If one standard path is clearly correct for a routine case, OMIT this field entirely — do not force a comparison. When included: 2-4 options, each grounded in a real recent citation. Reason step by step internally — confirm the diagnosis, search per-treatment evidence, then synthesize trade-offs. Present options with trade-offs; NEVER rank a single 'best'. This is decision support for physician consideration, not a prescribing recommendation.
 - references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
 - evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
   try{
-    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Analyze this dermatology case.\n\nPatient context:\n${ctx}\n\nSearch for the most relevant recent published literature, then return your structured JSON.`}]}]})});
+    const resp=await fetch('/api/analyze',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[{type:'image',source:{type:'base64',media_type:imageMimeType,data:imageBase64}},{type:'text',text:`Assess this image as a dermatology case.\n\nPatient context:\n${ctx}\n\nFirst apply the relevance gate. If the image is a valid clinical photograph, search for the most relevant recent published literature and return the full analysis; otherwise return the rejection. Return only the structured JSON.`}]}]})});
     let data;
     const contentType=resp.headers.get('content-type')||'';
     if(contentType.includes('application/json')){data=await resp.json();}
@@ -391,6 +396,7 @@ Rules:
     if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
     clean=clean.replace(/[\r\n]/g,' ');
     let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
+    if(parsed && parsed.relevant===false){ renderRejection(parsed.rejection||{}); analyzeBtn.disabled=false; return; }
     renderOutput(parsed);
   }catch(err){
     outputArea.innerHTML=`<div class="mt-3 rounded-2xl border p-4" style="background:#F6EBE7;border-color:#E6D5CE;color:#8A3324"><strong class="text-[13px]">${t('errStrong')}</strong><pre class="text-[11px] font-mono-dm whitespace-pre-wrap break-all opacity-80 mt-1">${err.message}</pre></div>`;
@@ -398,6 +404,24 @@ Rules:
   }
 }
 
+function renderRejection(rej){
+  const detected = rej && rej.detected ? `<div class="text-[12px] text-base-content/55 mt-2"><span class="font-medium">${t('rejDetected')}</span> ${rej.detected}</div>` : '';
+  const reason = (rej && rej.reason) ? rej.reason : t('rejBody');
+  outputArea.innerHTML = `<div class="card bg-base-100 border border-base-300 rounded-2xl mt-3"><div class="card-body p-5 items-start">
+    <div class="flex items-start gap-3">
+      <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#F7ECDA">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5l16 14M21 6.5V17a2 2 0 0 1-2 2H7m-3-1V7a2 2 0 0 1 2-2h11" stroke="#9A5B12" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.6" fill="#9A5B12"/></svg>
+      </span>
+      <div>
+        <div class="text-[14px] font-medium">${t('rejTitle')}</div>
+        <div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${reason}</div>
+        ${detected}
+      </div>
+    </div>
+    <button class="btn btn-primary btn-sm normal-case mt-4" id="rejNewBtn">${t('rejTryAnother')}</button>
+  </div></div>`;
+  const b=document.getElementById('rejNewBtn'); if(b) b.addEventListener('click',()=>{ clearBtn.click(); outputArea.innerHTML=''; });
+}
 function renderOutput(d){
   const assessment=d.assessment||[],refs=d.references||[];
   const assessHtml=assessment.map((item,i)=>`<div class="bg-base-200 rounded-lg p-3.5 mb-2 last:mb-0"><div class="flex items-center gap-2 flex-wrap mb-1.5"><span class="text-[14px] font-medium">${item.diagnosis}</span>${item.icd10?`<span class="badge badge-sm font-mono-dm text-[11px] bg-base-100 border-base-300">ICD-10 · ${item.icd10}</span>`:''}</div><div class="text-[13px] text-base-content/70 leading-relaxed">${item.rationale}</div></div>`).join('');
@@ -410,13 +434,18 @@ function renderOutput(d){
     const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="evp evp-${ev.variant}">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="text-[11px] text-primary font-mono-dm mt-2">${o.source}</div>`:''}</div>`;}).join('');
     txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
   }
-  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 normal-case" id="newBtn">${t('newCase')}</button></div>`;
+  outputArea.innerHTML=`<div class="card bg-base-100 shadow-sm rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="text-[12px] font-medium text-base-content/70 mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex flex-wrap gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="pdfBtn">${t('exportPdf')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="newBtn">${t('newCase')}</button></div>`;
   analyzeBtn.disabled=false;
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
-    const payload=btoa(JSON.stringify({result:d,meta}));
+    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({result:d,meta,lang:currentLang}))));
     const url=window.location.origin+'/report.html#'+payload;
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
+  });
+  document.getElementById('pdfBtn').addEventListener('click',()=>{
+    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
+    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({result:d,meta,lang:currentLang}))));
+    window.open('/report.html?print=1#'+payload,'_blank');
   });
   document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}]`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
