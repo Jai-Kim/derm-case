@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>About — DermCase Assistant</title>
 <meta name="description" content="DermCase가 어떻게 작동하고, 무엇을 저장하지 않는가. 투명하게 설계된 임상 문헌 도구.">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#14130D; --ink-2:#5C5A50; --ink-3:#8A887E;
-  --paper:#F4F2EC; --paper-2:#FBFAF6;
-  --forest:#0A2E1E; --forest-2:#0F3D29; --forest-line:rgba(180,220,196,.14);
-  --green:#1A6640; --green-2:#21814F; --sage:#4E9E73; --mist:#CFE3D7;
-  --border:#E3E0D8; --border-2:#D2CEC3;
-  --strong:#0F6E56; --strong-bg:#E1F5EE; --mid:#2A5C95; --mid-bg:#E7EFFA; --weak:#9A5B12; --weak-bg:#F7ECDA;
+  --ink:#17180F; --ink-2:#5C5A50; --ink-3:#8A887E;
+  --paper:#F2EFE6; --paper-2:#FBFAF4;
+  --forest:#0E2A1C; --forest-2:#0F3D29; --forest-line:rgba(180,220,196,.14);
+  --green:#1C6B45; --green-2:#25824F; --sage:#5BA07A; --mist:#CFE3D7;
+  --border:#E4E0D3; --border-2:#D2CEC3;
+  --strong:#0F6E56; --strong-bg:#E1F5EE; --mid:#38566B; --mid-bg:#E7EFFA; --weak:#8A6417; --weak-bg:#F7ECDA;
   --r:16px; --r-sm:10px; --maxw:1100px;
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.mono{font-family:'DM Mono',monospace}
+body{font-family:'Pretendard',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.mono{font-family:'Pretendard',monospace}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 .display{letter-spacing:-.028em;line-height:1.03;font-weight:600}
 h1,h2,h3{font-weight:600;letter-spacing:-.02em}
@@ -49,7 +53,7 @@ nav.on-dark .navlinks a:hover,nav.on-dark .navlinks button:hover{color:#fff;back
 section{position:relative}
 .dark{background:var(--forest);color:#fff}
 .dark h1,.dark h2,.dark h3{color:#fff}
-.eyebrow{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);display:inline-flex;align-items:center;gap:9px}
+.eyebrow{font-family:'Pretendard',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);display:inline-flex;align-items:center;gap:9px}
 .dark .eyebrow{color:var(--sage)}
 .eyebrow::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
 .grid-tex{position:absolute;inset:0;pointer-events:none;background-image:linear-gradient(var(--forest-line) 1px,transparent 1px),linear-gradient(90deg,var(--forest-line) 1px,transparent 1px);background-size:30px 30px;-webkit-mask-image:radial-gradient(ellipse 75% 70% at 50% 35%,#000 25%,transparent 78%);mask-image:radial-gradient(ellipse 75% 70% at 50% 35%,#000 25%,transparent 78%)}
@@ -69,7 +73,7 @@ section{position:relative}
 .orbit .ring{transform-origin:center;animation:spin 60s linear infinite}
 .orbit .ring.r2{animation-duration:44s;animation-direction:reverse}
 @keyframes spin{to{transform:rotate(360deg)}}
-.scrollcue{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);display:flex;flex-direction:column;align-items:center;gap:7px}
+.scrollcue{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);font-family:'Pretendard',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4);display:flex;flex-direction:column;align-items:center;gap:7px}
 .scrollcue .ln{width:1px;height:30px;background:linear-gradient(rgba(255,255,255,.4),transparent);animation:cue 1.8s ease-in-out infinite}
 @keyframes cue{0%,100%{transform:scaleY(.5);opacity:.3;transform-origin:top}50%{transform:scaleY(1);opacity:.8;transform-origin:top}}
 
@@ -93,7 +97,7 @@ section{position:relative}
 .stage-detail{max-width:560px;margin:0 auto;min-height:120px;position:relative}
 .stage{position:absolute;inset:0;opacity:0;transform:translateY(10px);transition:opacity .45s,transform .45s;text-align:center;pointer-events:none}
 .stage.on{opacity:1;transform:none;pointer-events:auto}
-.stage .sn{font-family:'DM Mono',monospace;font-size:12px;color:var(--sage);letter-spacing:.08em}
+.stage .sn{font-family:'Pretendard',monospace;font-size:12px;color:var(--sage);letter-spacing:.08em}
 .stage h3{font-size:21px;margin:8px 0 8px;color:#fff}
 .stage p{font-size:14.5px;color:rgba(255,255,255,.68);line-height:1.62;max-width:30rem;margin:0 auto}
 
@@ -112,7 +116,7 @@ section{position:relative}
 .evp.s{background:var(--strong-bg);color:var(--strong)}.evp.m{background:var(--mid-bg);color:var(--mid)}.evp.w{background:var(--weak-bg);color:var(--weak)}
 .tier h3{font-size:15px;margin-bottom:6px}
 .tier p{font-size:13px;color:var(--ink-2);line-height:1.55}
-.tier .ex{font-family:'DM Mono',monospace;font-size:11.5px;color:var(--ink-3);margin-top:9px}
+.tier .ex{font-family:'Pretendard',monospace;font-size:11.5px;color:var(--ink-3);margin-top:9px}
 .tier-note{margin-top:20px;font-size:13px;color:var(--ink-3);line-height:1.6;max-width:42rem}
 
 /* privacy experiential */
@@ -125,7 +129,7 @@ section{position:relative}
 .priv-photo .ghost{transition:opacity 1s ease,filter 1s ease;opacity:1}
 .priv-card.in .priv-photo-ghost,.priv-photo.diss .ghost{opacity:.12;filter:blur(3px)}
 .priv-keep .ic{background:rgba(78,158,115,.18)}
-.tag{display:inline-block;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.05em;padding:3px 9px;border-radius:99px;margin-top:13px}
+.tag{display:inline-block;font-family:'Pretendard',monospace;font-size:10.5px;letter-spacing:.05em;padding:3px 9px;border-radius:99px;margin-top:13px}
 .tag.gone{background:rgba(154,91,18,.2);color:#E8C99A}
 .tag.kept{background:rgba(78,158,115,.2);color:var(--mist)}
 @keyframes dissolve{0%{opacity:1;filter:blur(0)}60%{opacity:1}100%{opacity:.1;filter:blur(4px)}}
@@ -136,13 +140,13 @@ section{position:relative}
 .lims{display:flex;flex-direction:column;gap:2px;max-width:46rem}
 .lim{display:flex;gap:15px;padding:18px 0;border-top:1px solid var(--border)}
 .lim:first-child{border-top:none}
-.lim .n{font-family:'DM Mono',monospace;font-size:12px;color:var(--green);padding-top:2px;flex-shrink:0}
+.lim .n{font-family:'Pretendard',monospace;font-size:12px;color:var(--green);padding-top:2px;flex-shrink:0}
 .lim h3{font-size:16px;margin-bottom:4px}
 .lim p{font-size:14px;color:var(--ink-2);line-height:1.6}
 
 /* stats strip */
 .stats{display:flex;gap:48px;flex-wrap:wrap;margin-top:8px}
-.stat .big{font-family:'DM Mono',monospace;font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--green)}
+.stat .big{font-family:'Pretendard',monospace;font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--green)}
 .dark .stat .big{color:var(--sage)}
 .stat .lbl{font-size:13px;color:var(--ink-2);margin-top:2px}
 .dark .stat .lbl{color:rgba(255,255,255,.6)}
@@ -173,13 +177,14 @@ footer{border-top:1px solid var(--border);padding:34px 0}
   .stage{position:static;opacity:1;transform:none;margin-bottom:18px}.conn{display:none}
 }
 </style>
+<style>.brand{font-family:'Bricolage Grotesque','Pretendard',sans-serif;font-weight:600;letter-spacing:-.01em}</style>
 </head>
 <body>
 <div id="prog"></div>
 
 <nav id="nav" class="on-dark">
   <div class="wrap navin">
-    <a href="/" class="brand"><span class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase</a>
+    <a href="/" class="brand"><img src="/assets/darae-ink.svg" alt="Darae" style="width:26px;height:26px;vertical-align:middle">DermCase</a>
     <div class="navlinks">
       <a href="/" class="hide-sm" data-i18n="navHome"></a>
       <button id="langBtn" class="mono" style="font-size:12px">EN</button>
@@ -192,9 +197,9 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 <section class="dark hero" id="hero">
   <div class="grid-tex"></div>
   <svg class="orbit" viewBox="0 0 200 200" fill="none">
-    <g class="ring r1"><circle cx="100" cy="100" r="86" stroke="#4E9E73" stroke-width=".8" stroke-dasharray="2 8" opacity=".7"/></g>
+    <g class="ring r1"><circle cx="100" cy="100" r="86" stroke="#5BA07A" stroke-width=".8" stroke-dasharray="2 8" opacity=".7"/></g>
     <g class="ring r2"><circle cx="100" cy="100" r="62" stroke="#CFE3D7" stroke-width=".8" opacity=".4"/></g>
-    <g class="ring r1"><circle cx="100" cy="100" r="38" stroke="#4E9E73" stroke-width=".8" opacity=".5"/></g>
+    <g class="ring r1"><circle cx="100" cy="100" r="38" stroke="#5BA07A" stroke-width=".8" opacity=".5"/></g>
   </svg>
   <div class="wrap" style="position:relative">
     <span class="eyebrow rise d1" data-i18n="eyebrow"></span>
@@ -310,7 +315,7 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 
 <footer>
   <div class="wrap footin">
-    <a href="/" class="brand" style="font-size:14px"><span class="logo" style="width:26px;height:26px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase Assistant</a>
+    <a href="/" class="brand" style="font-size:14px"><img src="/assets/darae-ink.svg" alt="Darae" style="width:26px;height:26px;vertical-align:middle">DermCase Assistant</a>
     <p class="disc" data-i18n="footDisc"></p>
   </div>
 </footer>

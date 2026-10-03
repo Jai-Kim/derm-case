@@ -5,21 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>DermCase Assistant — 증례에 맞춘 문헌</title>
 <meta name="description" content="증례 사진과 환자 정보를 집중된 임상 문헌 브리프로. 현직 피부과 전문의를 위한 근거 기반 도구.">
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600;9..40,700&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
 <style>
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
 :root{
-  --ink:#14130D; --ink-2:#5C5A50; --ink-3:#8A887E;
-  --paper:#F4F2EC; --paper-2:#FBFAF6;
-  --forest:#0A2E1E; --forest-2:#0F3D29; --forest-line:rgba(180,220,196,.14);
-  --green:#1A6640; --green-2:#21814F; --sage:#4E9E73; --mist:#CFE3D7;
-  --border:#E3E0D8; --border-2:#D2CEC3;
-  --strong:#0F6E56; --strong-bg:#E1F5EE; --mid:#2A5C95; --mid-bg:#E7EFFA; --weak:#9A5B12; --weak-bg:#F7ECDA;
+  --ink:#17180F; --ink-2:#5C5A50; --ink-3:#8A887E;
+  --paper:#F2EFE6; --paper-2:#FBFAF4;
+  --forest:#0E2A1C; --forest-2:#0F3D29; --forest-line:rgba(180,220,196,.14);
+  --green:#1C6B45; --green-2:#25824F; --sage:#5BA07A; --mist:#CFE3D7;
+  --border:#E4E0D3; --border-2:#D2CEC3;
+  --strong:#0F6E56; --strong-bg:#E1F5EE; --mid:#38566B; --mid-bg:#E7EFFA; --weak:#8A6417; --weak-bg:#F7ECDA;
   --r:16px; --r-sm:10px; --maxw:1140px;
 }
 html{scroll-behavior:smooth;-webkit-text-size-adjust:100%}
-body{font-family:'DM Sans',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
-.mono{font-family:'DM Mono',monospace}
+body{font-family:'Pretendard',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;overflow-x:hidden}
+.mono{font-family:'Pretendard',monospace}
 .wrap{max-width:var(--maxw);margin:0 auto;padding:0 24px}
 .display{letter-spacing:-.028em;line-height:1.02;font-weight:600}
 h1,h2,h3{font-weight:600;letter-spacing:-.02em}
@@ -54,10 +58,10 @@ nav.on-dark .navlinks a:hover,nav.on-dark .navlinks button:hover{color:#fff;back
 section{position:relative}
 .dark{background:var(--forest);color:#fff}
 .dark h1,.dark h2,.dark h3{color:#fff}
-.eyebrow{font-family:'DM Mono',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);display:inline-flex;align-items:center;gap:9px}
+.eyebrow{font-family:'Pretendard',monospace;font-size:12px;letter-spacing:.06em;text-transform:uppercase;color:var(--green);display:inline-flex;align-items:center;gap:9px}
 .dark .eyebrow{color:var(--sage)}
 .eyebrow::before{content:"";width:22px;height:1px;background:currentColor;opacity:.6}
-.act-no{font-family:'DM Mono',monospace;font-size:13px;color:var(--ink-3);letter-spacing:.04em}
+.act-no{font-family:'Pretendard',monospace;font-size:13px;color:var(--ink-3);letter-spacing:.04em}
 .dark .act-no{color:rgba(255,255,255,.4)}
 
 /* grid texture */
@@ -72,7 +76,7 @@ section{position:relative}
 .hero p.sub{font-size:clamp(15px,1.6vw,17px);color:rgba(255,255,255,.72);max-width:30rem;margin-bottom:30px;line-height:1.62}
 .hero .cta-row{display:flex;gap:12px;align-items:center;flex-wrap:wrap}
 .hero .meta{margin-top:30px;display:flex;align-items:center;gap:9px;font-size:12.5px;color:rgba(255,255,255,.5)}
-.scrollcue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;font-family:'DM Mono',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4)}
+.scrollcue{position:absolute;left:50%;bottom:22px;transform:translateX(-50%);display:flex;flex-direction:column;align-items:center;gap:7px;font-family:'Pretendard',monospace;font-size:10.5px;letter-spacing:.14em;text-transform:uppercase;color:rgba(255,255,255,.4)}
 .scrollcue .line{width:1px;height:30px;background:linear-gradient(rgba(255,255,255,.4),transparent);animation:cuemove 1.8s ease-in-out infinite}
 @keyframes cuemove{0%,100%{transform:scaleY(.5);opacity:.3;transform-origin:top}50%{transform:scaleY(1);opacity:.8;transform-origin:top}}
 
@@ -87,13 +91,13 @@ section{position:relative}
 .brief{background:#fff;border-radius:18px;border:1px solid var(--border);box-shadow:0 30px 70px -30px rgba(10,46,30,.5);overflow:hidden}
 .brief .bar{height:38px;display:flex;align-items:center;gap:7px;padding:0 16px;border-bottom:1px solid var(--border);background:#FAF9F5}
 .brief .dot{width:9px;height:9px;border-radius:50%;background:var(--border-2)}
-.brief .barlbl{margin-left:8px;font-family:'DM Mono',monospace;font-size:11px;color:var(--ink-3)}
+.brief .barlbl{margin-left:8px;font-family:'Pretendard',monospace;font-size:11px;color:var(--ink-3)}
 .brief .body{padding:20px}
-.blabel{font-family:'DM Mono',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
+.blabel{font-family:'Pretendard',monospace;font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3);margin-bottom:9px}
 .brow{background:var(--paper);border-radius:11px;padding:13px;margin-bottom:11px}
 .dxline{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
 .dxname{font-size:15px;font-weight:600}
-.icd{font-family:'DM Mono',monospace;font-size:11px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 7px}
+.icd{font-family:'Pretendard',monospace;font-size:11px;background:#fff;border:1px solid var(--border);border-radius:5px;padding:2px 7px}
 .rationale{font-size:12.5px;color:var(--ink-2);line-height:1.55}
 .opts{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:11px}
 .opt{background:var(--paper);border-radius:10px;padding:11px}
@@ -103,7 +107,7 @@ section{position:relative}
 .pill.s{background:var(--strong-bg);color:var(--strong)} .pill.m{background:var(--mid-bg);color:var(--mid)} .pill.w{background:var(--weak-bg);color:var(--weak)}
 .opt .det{font-size:11px;color:var(--ink-2);line-height:1.45}
 .ref .rt{font-size:12.5px;font-weight:600;margin:3px 0}
-.ref .rs{font-family:'DM Mono',monospace;font-size:11px;color:var(--green)}
+.ref .rs{font-family:'Pretendard',monospace;font-size:11px;color:var(--green)}
 
 /* reveal */
 .reveal{opacity:0;transform:translateY(24px);transition:opacity .8s cubic-bezier(.22,1,.36,1),transform .8s cubic-bezier(.22,1,.36,1)}
@@ -131,7 +135,7 @@ section{position:relative}
 .chaos.scattered .t2{opacity:1;transform:rotate(4deg);transition-delay:.16s}
 .chaos.scattered .t3{opacity:1;transform:rotate(-2deg);transition-delay:.27s}
 .chaos.scattered .t4{opacity:1;transform:rotate(6deg);transition-delay:.38s}
-.stat{font-family:'DM Mono',monospace}
+.stat{font-family:'Pretendard',monospace}
 .stat .big{font-size:40px;font-weight:500;letter-spacing:-.02em;color:var(--green)}
 .stat .lbl{font-size:13px;color:var(--ink-2);margin-top:2px}
 
@@ -145,7 +149,7 @@ section{position:relative}
 .steps{margin-top:26px;display:flex;flex-direction:column;gap:2px}
 .step{display:flex;gap:13px;padding:11px 0;opacity:.32;transition:opacity .4s}
 .step.on{opacity:1}
-.step .sn{font-family:'DM Mono',monospace;font-size:12px;color:var(--sage);width:22px;flex-shrink:0;padding-top:1px}
+.step .sn{font-family:'Pretendard',monospace;font-size:12px;color:var(--sage);width:22px;flex-shrink:0;padding-top:1px}
 .step .st{font-size:14px;font-weight:500;color:#fff}
 .step .sd{font-size:12.5px;color:rgba(255,255,255,.55);margin-top:2px;line-height:1.5}
 .cbrief-rows>*{opacity:0;transform:translateY(10px);transition:opacity .5s,transform .5s}
@@ -198,13 +202,14 @@ footer{border-top:1px solid var(--border);padding:34px 0}
   [data-px]{transform:none!important}
 }
 </style>
+<style>.brand{font-family:'Bricolage Grotesque','Pretendard',sans-serif;font-weight:600;letter-spacing:-.01em}</style>
 </head>
 <body>
 <div id="prog"></div>
 
 <nav id="nav" class="on-dark">
   <div class="wrap navin">
-    <a href="/" class="brand"><span class="logo"><svg width="15" height="15" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase</a>
+    <a href="/" class="brand"><img src="/assets/darae-ink.svg" alt="Darae" style="width:26px;height:26px;vertical-align:middle">DermCase</a>
     <div class="navlinks">
       <a href="#how" class="hide-sm" data-i18n="navHow"></a>
       <a href="/about" data-i18n="navAbout"></a>
@@ -218,10 +223,10 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 <section class="dark hero" id="hero">
   <div class="grid-tex" data-px="0.12"></div>
   <svg class="motif" data-px="0.22" viewBox="0 0 200 200" fill="none">
-    <g class="ring r1"><circle cx="100" cy="100" r="78" stroke="#4E9E73" stroke-width="1" stroke-dasharray="3 7" opacity=".7"/></g>
-    <g class="ring r2"><path d="M100 38c34 0 62 28 62 62s-28 62-62 62" stroke="#4E9E73" stroke-width="1.5" opacity=".6"/><path d="M100 162c-34 0-62-28-62-62" stroke="#CFE3D7" stroke-width="1" opacity=".4"/></g>
-    <g class="ring r3"><circle cx="100" cy="100" r="50" stroke="#4E9E73" stroke-width="1" opacity=".5"/><circle cx="100" cy="100" r="30" stroke="#CFE3D7" stroke-width="1.2" opacity=".5"/></g>
-    <circle cx="100" cy="100" r="13" fill="#4E9E73" opacity=".25"/>
+    <g class="ring r1"><circle cx="100" cy="100" r="78" stroke="#5BA07A" stroke-width="1" stroke-dasharray="3 7" opacity=".7"/></g>
+    <g class="ring r2"><path d="M100 38c34 0 62 28 62 62s-28 62-62 62" stroke="#5BA07A" stroke-width="1.5" opacity=".6"/><path d="M100 162c-34 0-62-28-62-62" stroke="#CFE3D7" stroke-width="1" opacity=".4"/></g>
+    <g class="ring r3"><circle cx="100" cy="100" r="50" stroke="#5BA07A" stroke-width="1" opacity=".5"/><circle cx="100" cy="100" r="30" stroke="#CFE3D7" stroke-width="1.2" opacity=".5"/></g>
+    <circle cx="100" cy="100" r="13" fill="#5BA07A" opacity=".25"/>
     <circle cx="100" cy="100" r="5" fill="#CFE3D7" opacity=".8"/>
   </svg>
   <div class="wrap hero-grid">
@@ -324,15 +329,15 @@ footer{border-top:1px solid var(--border);padding:34px 0}
     </div>
     <div class="pillars">
       <div class="pillar reveal">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1A6640" stroke-width="1.6"/><path d="M12 7.5v5l3.2 2" stroke="#1A6640" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="9" stroke="#1C6B45" stroke-width="1.6"/><path d="M12 7.5v5l3.2 2" stroke="#1C6B45" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg></div>
         <h3 data-i18n="p1h"></h3><p data-i18n="p1b"></p>
       </div>
       <div class="pillar reveal" style="transition-delay:.08s">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 5-9 5-9-5 9-5z" stroke="#1A6640" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 13l9 5 9-5" stroke="#1A6640" stroke-width="1.5" stroke-linejoin="round" opacity=".55"/></svg></div>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><path d="M12 3l9 5-9 5-9-5 9-5z" stroke="#1C6B45" stroke-width="1.5" stroke-linejoin="round"/><path d="M3 13l9 5 9-5" stroke="#1C6B45" stroke-width="1.5" stroke-linejoin="round" opacity=".55"/></svg></div>
         <h3 data-i18n="p2h"></h3><p data-i18n="p2b"></p>
       </div>
       <div class="pillar reveal" style="transition-delay:.16s">
-        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3.5" stroke="#1A6640" stroke-width="1.5"/><path d="M8 9.5h6M8 13h8M8 16.5h4" stroke="#1A6640" stroke-width="1.6" stroke-linecap="round"/></svg></div>
+        <div class="ic"><svg width="22" height="22" viewBox="0 0 24 24" fill="none"><rect x="4" y="4" width="16" height="16" rx="3.5" stroke="#1C6B45" stroke-width="1.5"/><path d="M8 9.5h6M8 13h8M8 16.5h4" stroke="#1C6B45" stroke-width="1.6" stroke-linecap="round"/></svg></div>
         <h3 data-i18n="p3h"></h3><p data-i18n="p3b"></p>
       </div>
     </div>
@@ -349,7 +354,7 @@ footer{border-top:1px solid var(--border);padding:34px 0}
         <h2 data-i18n="a4h"></h2>
         <p data-i18n="a4p"></p>
         <div class="privacy">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="#4E9E73" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#4E9E73" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" style="flex-shrink:0"><path d="M12 2l8 4v6c0 5-3.5 8-8 10-4.5-2-8-5-8-10V6l8-4z" stroke="#5BA07A" stroke-width="1.6" stroke-linejoin="round"/><path d="M9 12l2 2 4-4" stroke="#5BA07A" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
           <span data-i18n="a4priv"></span>
         </div>
       </div>
@@ -381,7 +386,7 @@ footer{border-top:1px solid var(--border);padding:34px 0}
 
 <footer>
   <div class="wrap footin">
-    <a href="/" class="brand" style="font-size:14px"><span class="logo" style="width:26px;height:26px"><svg width="13" height="13" viewBox="0 0 16 16" fill="none"><path d="M8 2.3L13.2 5v6L8 13.7 2.8 11V5L8 2.3z" stroke="#fff" stroke-width="1.3" stroke-linejoin="round"/></svg></span>DermCase Assistant</a>
+    <a href="/" class="brand" style="font-size:14px"><img src="/assets/darae-ink.svg" alt="Darae" style="width:26px;height:26px;vertical-align:middle">DermCase Assistant</a>
     <p class="disc" data-i18n="footDisc"></p>
   </div>
 </footer>

@@ -6,35 +6,39 @@
 <title>Sign in — DermCase Assistant</title>
 <script src="https://cdn.tailwindcss.com"></script>
 <link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-<link href="https://fonts.googleapis.com/css2?family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&family=DM+Mono:wght@400;500&display=swap" rel="stylesheet">
+<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
 <style>
 [data-theme="dermcase"] {
-    --p: 150 59% 25%;
+    --p: 151 59% 26%;
   --pc: 0 0% 100%;
-  --s: 153 64% 11%;
+  --s: 150 50% 11%;
   --sc: 144 26% 85%;
-  --a: 148 34% 46%;
+  --a: 148 31% 49%;
   --ac: 153 64% 11%;
   --n: 51 21% 6%;
   --nc: 48 38% 97%;
-  --b1: 48 38% 97%;
-  --b2: 45 27% 94%;
-  --b3: 44 16% 87%;
+  --b1: 48 30% 97%;
+  --b2: 45 30% 93%;
+  --b3: 46 24% 86%;
   --bc: 51 21% 6%;
-  --su: 165 76% 25%;
+  --su: 151 58% 26%;
   --suc: 0 0% 100%;
-  --in: 212 56% 37%;
+  --in: 205 31% 32%;
   --inc: 0 0% 100%;
-  --wa: 32 79% 34%;
+  --wa: 40 71% 32%;
   --wac: 0 0% 100%;
   --er: 0 65% 29%;
   --erc: 0 0% 100%;
---color-primary: #1A6640; --color-primary-content: #FFFFFF; --color-secondary: #0A2E1E;
-  --color-base-100: #FFFFFF; --color-base-200: #F4F2EC; --color-base-300: #E3E0D8; --color-base-content: #14130D;
-  --color-success: #0F6E56; --color-info: #2A5C95; --color-warning: #9A5B12; --color-error: #7A1A1A;
+--color-primary: #1C6B45; --color-primary-content: #FFFFFF; --color-secondary: #0E2A1C;
+  --color-base-100: #FFFFFF; --color-base-200: #F2EFE6; --color-base-300: #E4E0D3; --color-base-content: #17180F;
+  --color-success: #0F6E56; --color-info: #38566B; --color-warning: #8A6417; --color-error: #7A1A1A;
 }
-body { font-family: 'DM Sans', sans-serif; background: #F4F2EC; color: #18170F; -webkit-font-smoothing: antialiased; }
-.mono { font-family: 'DM Mono', monospace; }
+body { font-family: 'Pretendard', sans-serif; background: #F2EFE6; color: #18170F; -webkit-font-smoothing: antialiased; }
+.mono { font-family: 'Pretendard', monospace; }
 .display { letter-spacing: -0.025em; }
 .grid-bg {
   background-image: linear-gradient(rgba(26,102,64,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26,102,64,0.05) 1px, transparent 1px);
@@ -45,16 +49,15 @@ body { font-family: 'DM Sans', sans-serif; background: #F4F2EC; color: #18170F; 
 .rise { animation: rise .55s cubic-bezier(.22,1,.36,1) both; }
 @media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
 </style>
+<style>.brand{font-family:'Bricolage Grotesque','Pretendard',sans-serif;font-weight:600;letter-spacing:-.01em}</style>
 </head>
 <body data-theme="dermcase">
-<div class="green-accent-bar" style="height:3px;background:linear-gradient(90deg,#4E9E73,#1A6640,#0A2E1E)"></div>
+<div class="green-accent-bar" style="height:3px;background:linear-gradient(90deg,#5BA07A,#1C6B45,#0E2A1C)"></div>
 
 <nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
   <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
     <a href="/" class="flex items-center gap-2.5 group">
-      <span class="w-7 h-7 rounded-lg bg-primary flex items-center justify-center transition-transform group-hover:rotate-[8deg]">
-        <svg width="14" height="14" viewBox="0 0 16 16" fill="none"><path d="M8 2.5L13 5v6l-5 2.5L3 11V5l5-2.5z" stroke="white" stroke-width="1.3" stroke-linejoin="round"/></svg>
-      </span>
+      <img src="/assets/darae-ink.svg" alt="Darae" style="width:24px;height:24px;vertical-align:middle">
       <span class="text-[14px] font-medium tracking-tight">DermCase</span>
     </a>
     <div class="flex items-center gap-1 text-[13px]">
