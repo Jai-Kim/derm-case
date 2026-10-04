@@ -1,111 +1,50 @@
 <!DOCTYPE html>
-<html lang="ko">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Sign in — DermCase Assistant</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
+<title>DermCase | Sign in</title>
+<meta name="theme-color" content="#F4F5F3">
 <link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
 <link rel="apple-touch-icon" href="/assets/favicon-180.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
-<style>
-[data-theme="dermcase"] {
-    --p: 151 59% 26%;
-  --pc: 0 0% 100%;
-  --s: 150 50% 11%;
-  --sc: 144 26% 85%;
-  --a: 148 31% 49%;
-  --ac: 153 64% 11%;
-  --n: 51 21% 6%;
-  --nc: 48 38% 97%;
-  --b1: 48 30% 97%;
-  --b2: 45 30% 93%;
-  --b3: 46 24% 86%;
-  --bc: 51 21% 6%;
-  --su: 151 58% 26%;
-  --suc: 0 0% 100%;
-  --in: 205 31% 32%;
-  --inc: 0 0% 100%;
-  --wa: 40 71% 32%;
-  --wac: 0 0% 100%;
-  --er: 0 65% 29%;
-  --erc: 0 0% 100%;
---color-primary: #1C6B45; --color-primary-content: #FFFFFF; --color-secondary: #0E2A1C;
-  --color-base-100: #FFFFFF; --color-base-200: #F2EFE6; --color-base-300: #E4E0D3; --color-base-content: #17180F;
-  --color-success: #0F6E56; --color-info: #38566B; --color-warning: #8A6417; --color-error: #7A1A1A;
-}
-body { font-family: 'Pretendard', sans-serif; background: #F2EFE6; color: #18170F; -webkit-font-smoothing: antialiased; }
-.mono { font-family: 'Pretendard', monospace; }
-.display { letter-spacing: -0.025em; }
-.grid-bg {
-  background-image: linear-gradient(rgba(26,102,64,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(26,102,64,0.05) 1px, transparent 1px);
-  background-size: 28px 28px;
-  -webkit-mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%); mask-image: radial-gradient(ellipse 70% 60% at 50% 0%, #000 30%, transparent 75%);
-}
-@keyframes rise { from { opacity: 0; transform: translateY(12px); } to { opacity: 1; transform: translateY(0); } }
-.rise { animation: rise .55s cubic-bezier(.22,1,.36,1) both; }
-@media (prefers-reduced-motion: reduce) { .rise { animation: none; } }
-</style>
-<style>.brand{font-family:'Bricolage Grotesque','Pretendard',sans-serif;font-weight:600;letter-spacing:-.01em}</style>
-</head>
-<body data-theme="dermcase">
-<div class="green-accent-bar" style="height:3px;background:linear-gradient(90deg,#5BA07A,#1C6B45,#0E2A1C)"></div>
-
-<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
-  <div class="max-w-[1100px] mx-auto px-5 h-14 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2.5 group">
-      <img src="/assets/darae-ink.svg" alt="Darae" style="width:24px;height:24px;vertical-align:middle">
-      <span class="text-[14px] font-medium tracking-tight">DermCase</span>
-    </a>
-    <div class="flex items-center gap-1 text-[13px]">
-      <a href="/app" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navApp"></a>
-      <button id="langBtn" class="px-2.5 py-1.5 rounded-lg text-base-content/60 hover:text-base-content hover:bg-base-300/60 transition mono text-[12px]">EN</button>
-    </div>
-  </div>
-</nav>
-
-<div class="relative min-h-[calc(100vh-3.5rem)] flex items-center justify-center px-5 py-12 overflow-hidden">
-  <div class="absolute inset-0 grid-bg pointer-events-none"></div>
-  <div class="relative w-full max-w-[400px] rise">
-    <div class="text-center mb-7">
-      <h1 class="display text-[26px] font-medium mb-1.5" id="title"></h1>
-      <p class="text-[13.5px] text-base-content/60" id="subtitle"></p>
-    </div>
-
-    <div class="card bg-base-100 shadow-sm rounded-2xl border border-base-300">
-      <div class="card-body p-6">
-        <div id="formArea">
-          <div class="form-control mb-3">
-            <label class="label py-1"><span class="label-text text-[12.5px]" data-i18n="email"></span></label>
-            <input type="email" id="email" autocomplete="email" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" placeholder="you@clinic.com">
-          </div>
-          <div class="form-control mb-4">
-            <label class="label py-1"><span class="label-text text-[12.5px]" data-i18n="password"></span></label>
-            <input type="password" id="password" autocomplete="current-password" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" placeholder="••••••••">
-          </div>
-          <button id="submitBtn" class="btn btn-primary btn-sm w-full normal-case"></button>
-          <div id="msg" class="text-[12.5px] mt-3 leading-relaxed"></div>
-        </div>
-
-        <div class="text-center mt-4 pt-4 border-t border-base-300">
-          <button id="toggleMode" class="text-[12.5px] text-primary hover:underline"></button>
-        </div>
-      </div>
-    </div>
-
-    <p class="text-[11.5px] text-base-content/50 leading-relaxed mt-5 text-center px-2" data-i18n="privacy"></p>
-    <p class="text-center mt-3">
-      <a href="/app" class="text-[12.5px] text-base-content/50 hover:text-base-content" data-i18n="skip"></a>
-    </p>
-  </div>
-</div>
-
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/ds.css">
+<script src="/assets/ds.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/config.js"></script>
 <script src="/dermcase-cloud.js"></script>
+</head>
+<body>
+<div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<header class="nav">
+  <div class="wrap wide nav-in">
+    <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="nav-link" href="/app" data-i18n="navApp"></a>
+      <button class="nav-link" id="langBtn" type="button">EN</button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme">
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      
+    </nav>
+  </div>
+</header>
+<main class="wrap center">
+  <div class="auth">
+    <h1 id="title"></h1>
+    <p class="sub" id="subtitle"></p>
+    <div class="form" id="formArea">
+      <div class="field"><label for="email" data-i18n="email"></label><input class="input" type="email" id="email" autocomplete="email" placeholder="you@clinic.com"></div>
+      <div class="field"><label for="password" data-i18n="password"></label><input class="input" type="password" id="password" autocomplete="current-password"></div>
+      <button class="btn btn-solid btn-block" id="submitBtn" type="button"></button>
+      <div id="msg" class="msg" role="status"></div>
+    </div>
+    <div class="auth-alt"><button id="toggleMode" type="button" class="link"></button></div>
+    <p class="auth-fine" data-i18n="privacy"></p>
+    <p class="auth-fine"><a href="/app" data-i18n="skip"></a></p>
+  </div>
+</main>
 <script>
 const I18N = {
   ko: {
@@ -116,10 +55,10 @@ const I18N = {
     signInBtn: '로그인', signUpBtn: '가입하기',
     toSignUp: '계정이 없으신가요? 가입하기', toSignIn: '이미 계정이 있으신가요? 로그인',
     privacy: '증례 사진은 저장되지 않습니다. 클라우드에는 구조화된 증례 정보만 보관되며, 본인만 접근할 수 있습니다.',
-    skip: '로그인 없이 계속 →',
+    skip: '로그인 없이 계속',
     checkEmail: '확인 이메일을 보냈습니다. 메일함을 확인해 주세요.',
     notConfigured: '클라우드 계정이 아직 설정되지 않았습니다. 로그인 없이 앱을 사용할 수 있습니다.',
-    working: '처리 중…',
+    working: '처리 중',
   },
   en: {
     navApp: 'Open app',
@@ -129,13 +68,13 @@ const I18N = {
     signInBtn: 'Sign in', signUpBtn: 'Create account',
     toSignUp: "Don't have an account? Sign up", toSignIn: 'Already have an account? Sign in',
     privacy: 'Case photos are never stored. The cloud holds only the structured case, accessible to you alone.',
-    skip: 'Continue without an account →',
+    skip: 'Continue without an account',
     checkEmail: 'Check your email to confirm your account.',
     notConfigured: 'Cloud accounts aren\u2019t set up yet. You can use the app without signing in.',
-    working: 'Working…',
+    working: 'Working',
   }
 };
-let lang = (navigator.language || '').toLowerCase().startsWith('en') ? 'en' : 'ko';
+let lang = (window.dcLang ? dcLang.get() : 'ko');
 let mode = 'signin';
 function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
 const $ = id => document.getElementById(id);
@@ -153,10 +92,10 @@ function render(){
 function setMsg(text, kind){
   const el = $('msg');
   el.textContent = text || '';
-  el.className = 'text-[12.5px] mt-3 leading-relaxed ' + (kind === 'error' ? 'text-error' : kind === 'ok' ? 'text-success' : 'text-base-content/60');
+  el.className = 'msg' + (kind ? ' ' + kind : '');
 }
 
-$('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; render(); });
+$('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; if(window.dcLang) dcLang.set(lang); render(); });
 $('toggleMode').addEventListener('click', () => { mode = mode === 'signin' ? 'signup' : 'signin'; setMsg(''); render(); });
 
 $('submitBtn').addEventListener('click', async () => {
@@ -180,12 +119,6 @@ $('submitBtn').addEventListener('click', async () => {
     $('submitBtn').disabled = false; $('submitBtn').textContent = orig;
   }
 });
-
-// If already signed in, go straight to the app.
-(async () => {
-  try { if (window.DermCaseCloud && DermCaseCloud.enabled()) { const u = await DermCaseCloud.user(); if (u) window.location.href = '/app'; } } catch(e){}
-})();
-
 render();
 </script>
 </body>

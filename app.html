@@ -1,275 +1,189 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ko" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Darae DermCase Assistant</title>
-<script src="https://cdn.tailwindcss.com"></script>
+<title>DermCase</title>
+<meta name="theme-color" content="#F4F5F3">
+<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/ds.css">
+<script src="/assets/ds.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script src="/config.js"></script>
 <script src="/dermcase-cloud.js"></script>
-<link href="https://cdn.jsdelivr.net/npm/daisyui@4.12.10/dist/full.min.css" rel="stylesheet" type="text/css" />
-<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
-<link rel="apple-touch-icon" href="/assets/favicon-180.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
-<style>
-[data-theme="dermcase"] {
-  --p: 151 59% 26%;
-  --pc: 0 0% 100%;
-  --s: 150 50% 11%;
-  --sc: 144 26% 85%;
-  --a: 147 27% 49%;
-  --ac: 150 50% 11%;
-  --n: 67 23% 8%;
-  --nc: 51 47% 97%;
-  --b1: 51 47% 97%;
-  --b2: 45 32% 93%;
-  --b3: 46 24% 86%;
-  --bc: 67 23% 8%;
-  --su: 151 59% 26%;
-  --suc: 0 0% 100%;
-  --in: 205 31% 32%;
-  --inc: 0 0% 100%;
-  --wa: 40 71% 32%;
-  --wac: 0 0% 100%;
-  --er: 0 65% 29%;
-  --erc: 0 0% 100%;
-  --color-primary: #1C6B45;
-  --color-primary-content: #FBFAF4;
-  --color-secondary: #0E2A1C;
-  --color-base-100: #FBFAF4;
-  --color-base-200: #F2EFE6;
-  --color-base-300: #E4E0D3;
-  --color-base-content: #17180F;
-  --color-success: #1C6B45;
-  --color-info: #38566B;
-  --color-warning: #8A6417;
-  --color-error: #7A1A1A;
-  --pine: #0E2A1C; --green: #1C6B45; --sage: #5BA07A; --ink2: #5B5C4E; --line: #E4E0D3;
-}
-html,body { font-family: 'Pretendard','Pretendard Variable',-apple-system,BlinkMacSystemFont,system-ui,sans-serif; background: #F2EFE6; color:#17180F; -webkit-font-smoothing: antialiased; }
-.brand-word { font-family:'Bricolage Grotesque','Pretendard',sans-serif; font-weight:600; letter-spacing:-0.01em; }
-.font-mono-dm { font-family:'Pretendard',sans-serif; font-variant-numeric: tabular-nums; }
-.eyebrow-app { font-family:inherit; font-size:12.5px; font-weight:600; letter-spacing:0; text-transform:none; color:#17180F; }
-/* fine-line, de-templated components */
-.card { background: var(--color-base-100); border:1px solid var(--line); border-radius:14px; }
-.input,.select,.textarea { border:1px solid var(--line) !important; background: var(--color-base-100) !important; border-radius:10px !important; transition:border-color .15s, box-shadow .15s; }
-.input:focus,.select:focus,.textarea:focus,.input:focus-within { outline:none !important; border-color: var(--green) !important; box-shadow:0 0 0 3px rgba(28,107,69,.13) !important; }
-.btn { text-transform:none; border-radius:11px; font-weight:600; letter-spacing:0; }
-.btn-primary { background: var(--green); border-color: var(--green); color:#FBFAF4; }
-.btn-primary:hover { background:#17563A; border-color:#17563A; }
-label .label-text { color:#5B5C4E; font-weight:500; }
-.page-enter { animation: pageEnter .5s cubic-bezier(.22,1,.36,1) both; }
-@keyframes pageEnter { from { opacity:0; transform:translateY(8px);} to {opacity:1; transform:translateY(0);} }
-@media (prefers-reduced-motion: reduce){ .page-enter{animation:none;} }
-.evp{display:inline-block;font-size:11px;font-weight:600;padding:2px 9px;border-radius:7px;line-height:1.5}
-.evp-s{background:#E7F1EA;color:#14543A}
-.evp-m{background:#E8EDF1;color:#38566B}
-.evp-w{background:#F3EBDC;color:#8A6417}
-.fitz-chip{position:relative;width:40px;height:34px;border-radius:9px;border:1.5px solid var(--line);font-family:'Pretendard',sans-serif;font-size:12px;font-weight:600;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:transform .12s,border-color .15s,box-shadow .15s}
-.fitz-chip:hover{transform:translateY(-1px)}
-.fitz-chip.sel{border-color:var(--green);box-shadow:0 0 0 2px rgba(28,107,69,.3)}
-</style>
 </head>
-<body data-theme="dermcase">
-<div style="height:2px;background:#0E2A1C"></div>
-<nav class="sticky top-0 z-30 backdrop-blur bg-base-200/80 border-b border-base-300">
-  <div class="max-w-[1100px] mx-auto px-4 h-14 flex items-center justify-between">
-    <a href="/" class="flex items-center gap-2.5 group">
-      <img src="/assets/darae-ink.svg" alt="Darae" width="24" height="24" class="transition-transform group-hover:scale-105" style="width:24px;height:24px">
-      <span class="brand-word text-[15px]">DermCase</span>
-    </a>
-    <div class="flex items-center gap-1 text-[13px]">
-      <span id="authSlot" class="flex items-center gap-1"></span>
-      <a href="/about" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navAbout"></a>
-      <a href="/" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition" data-i18n="navHome"></a>
-    </div>
+<body>
+<div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<header class="nav">
+  <div class="wrap wide nav-in">
+    <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <span id="authSlot" style="display:contents"></span>
+      <a class="nav-link" href="/about" data-i18n="navAbout"></a>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme">
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+    </nav>
   </div>
-</nav>
-<div class="max-w-[700px] mx-auto px-4 py-6 pb-12 page-enter">
+</header>
 
-  <!-- Header -->
-  <div class="flex items-center gap-3.5 mb-5 px-1">
-    <img src="/assets/darae-ink.svg" alt="Darae" width="38" height="38" class="flex-shrink-0" style="width:38px;height:38px">
-    <div>
-      <h1 class="brand-word text-[21px] leading-tight">Darae DermCase</h1>
-      <p class="text-[12.5px] leading-snug mt-1" style="color:#5B5C4E" data-i18n="subtitle"></p>
-    </div>
-  </div>
-
-  <!-- Upload card -->
-  <div class="card bg-base-100 border border-base-300 rounded-2xl mb-3">
-    <div class="card-body p-5">
-      <h3 class="eyebrow-app mb-3" data-i18n="casePhoto"></h3>
-      <div id="dropZone" class="border-[1.5px] border-dashed border-base-300 rounded-lg bg-base-200 min-h-[155px] flex items-center justify-center relative text-center p-5 transition-colors hover:border-primary hover:bg-primary/5">
-        <input type="file" id="fileInput" accept="image/*" multiple class="hidden">
-        <div id="uploadPrompt" class="cursor-pointer">
-          <div class="opacity-25 mb-2 flex justify-center">
-            <svg width="32" height="32" viewBox="0 0 32 32" fill="none">
-              <rect x="3" y="7" width="26" height="20" rx="3" stroke="currentColor" stroke-width="1.5"/>
-              <circle cx="11" cy="15" r="3" stroke="currentColor" stroke-width="1.5"/>
-              <path d="M3 22l7-5 5 4 5-6 9 8" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-              <path d="M21 4v7M18.5 6.5L21 4l2.5 2.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/>
-            </svg>
-          </div>
-          <div class="text-[14px] text-base-content/70 leading-relaxed" data-i18n="uploadText"></div>
-          <div class="text-[12px] text-base-content/50 mt-1" data-i18n="uploadSub"></div>
-        </div>
-        <div id="uploadLoading" style="display:none;" class="items-center gap-2.5 text-base-content/70 text-[13px]">
-          <span class="loading loading-spinner loading-sm text-primary"></span>
-          <span data-i18n="optimizing"></span>
-        </div>
-        <div id="thumbGrid" style="display:none;" class="w-full flex flex-wrap gap-2.5 justify-center"></div>
+<main class="wrap wide work">
+  <aside class="case" aria-label="Case">
+    <div class="case-sec">
+      <div class="case-head"><h2 data-i18n="caseTitle"></h2><button type="button" id="sampleBtn" class="link" data-i18n="trySample"></button></div>
+      <div class="bed" id="dropZone">
+        <input type="file" id="fileInput" accept="image/*" multiple class="hide" aria-label="Case photos">
+        <button type="button" class="bed-prompt" id="uploadPrompt">
+          <svg viewBox="0 0 32 32" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="8" width="26" height="19" rx="3.5"/><circle cx="16" cy="17.5" r="5"/><path d="M11 8l1.6-3h6.8L21 8"/></svg>
+          <span class="t1" data-i18n="uploadText"></span>
+          <span class="t2" data-i18n="uploadSub"></span>
+        </button>
+        <div class="bed-load" id="uploadLoading"><span class="spin"></span><span data-i18n="optimizing"></span></div>
+        <div class="thumbs" id="thumbGrid" style="display:none"></div>
       </div>
     </div>
-  </div>
-
-  <!-- Patient context card -->
-  <div class="card bg-base-100 border border-base-300 rounded-2xl mb-3">
-    <div class="card-body p-5">
-      <div class="flex items-center justify-between mb-3"><h3 class="eyebrow-app" data-i18n="patientContext"></h3><button type="button" id="sampleBtn" class="text-[11.5px] text-primary hover:underline" data-i18n="trySample"></button></div>
-      <div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="age"></span></label>
-          <input type="number" id="age" data-i18n-placeholder="agePh" min="0" max="120" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="sex"></span></label>
-          <select id="sex" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
-            <option value="" data-i18n="sexSelect"></option>
-            <option value="Male" data-i18n="sexMale"></option>
-            <option value="Female" data-i18n="sexFemale"></option>
-            <option value="Other" data-i18n="sexOther"></option>
-          </select>
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="area"></span></label>
-          <input type="text" id="area" data-i18n-placeholder="areaPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="duration"></span></label>
-          <input type="text" id="duration" data-i18n-placeholder="durationPh" class="input input-bordered input-sm w-full bg-base-200 text-[14px]" />
-        </div>
-        <div class="form-control">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="reportLang"></span></label>
-          <select id="lang" class="select select-bordered select-sm w-full bg-base-200 text-[14px]">
-            <option value="ko">한국어</option>
-            <option value="en">English</option>
-          </select>
-        </div>
-        <div class="form-control sm:col-span-2">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="fitzLabel"></span></label>
-          <div id="fitzPicker" class="flex gap-1.5 flex-wrap items-center">
-            <button type="button" class="fitz-chip" data-fitz="I"   style="background:#F5D6C6;color:#3a2a22">I</button>
-            <button type="button" class="fitz-chip" data-fitz="II"  style="background:#E8B99B;color:#3a2a22">II</button>
-            <button type="button" class="fitz-chip" data-fitz="III" style="background:#D2A077;color:#2e1f14">III</button>
-            <button type="button" class="fitz-chip" data-fitz="IV"  style="background:#B07B53;color:#fff">IV</button>
-            <button type="button" class="fitz-chip" data-fitz="V"   style="background:#8D5524;color:#fff">V</button>
-            <button type="button" class="fitz-chip" data-fitz="VI"  style="background:#5C3317;color:#fff">VI</button>
+    <div class="case-sec">
+      <div class="grid2">
+        <div class="field"><label for="age" data-i18n="age"></label><input class="input" type="number" id="age" inputmode="numeric" min="0" max="120" data-i18n-placeholder="agePh"></div>
+        <div class="field"><label for="sex" data-i18n="sex"></label><div class="select-wrap"><select class="select" id="sex">
+          <option value="" data-i18n="sexSelect"></option><option value="Male" data-i18n="sexMale"></option><option value="Female" data-i18n="sexFemale"></option><option value="Other" data-i18n="sexOther"></option>
+        </select></div></div>
+        <div class="field span2"><label for="area" data-i18n="area"></label><input class="input" type="text" id="area" data-i18n-placeholder="areaPh"></div>
+        <div class="field"><label for="duration" data-i18n="duration"></label><input class="input" type="text" id="duration" data-i18n-placeholder="durationPh"></div>
+        <div class="field"><label for="lang" data-i18n="reportLang"></label><div class="select-wrap"><select class="select" id="lang"><option value="ko">한국어</option><option value="en">English</option></select></div></div>
+        <div class="field span2">
+          <span class="lbl" id="fitzLbl" data-i18n="fitzLabel"></span>
+          <div class="fitz" id="fitzPicker" role="group" aria-labelledby="fitzLbl">
+            <button type="button" class="fitz-chip" data-fitz="I" aria-pressed="false">I</button>
+            <button type="button" class="fitz-chip" data-fitz="II" aria-pressed="false">II</button>
+            <button type="button" class="fitz-chip" data-fitz="III" aria-pressed="false">III</button>
+            <button type="button" class="fitz-chip" data-fitz="IV" aria-pressed="false">IV</button>
+            <button type="button" class="fitz-chip" data-fitz="V" aria-pressed="false">V</button>
+            <button type="button" class="fitz-chip" data-fitz="VI" aria-pressed="false">VI</button>
           </div>
-          <div id="fitzDesc" class="text-[11px] text-base-content/55 mt-1.5 min-h-[15px]"></div>
+          <div id="fitzDesc" class="fitz-desc"></div>
         </div>
-        <div class="form-control sm:col-span-2">
-          <label class="label py-1"><span class="label-text text-[12px]" data-i18n="notes"></span></label>
-          <textarea id="notes" data-i18n-placeholder="notesPh" class="textarea textarea-bordered textarea-sm w-full bg-base-200 text-[14px] min-h-[58px]"></textarea>
-        </div>
+        <div class="field span2"><label for="notes" data-i18n="notes"></label><textarea class="textarea" id="notes" data-i18n-placeholder="notesPh"></textarea></div>
       </div>
     </div>
-  </div>
+    <div class="case-sec act">
+      <button class="btn btn-solid btn-block" id="analyzeBtn" type="button" disabled data-i18n="analyzeBtn"></button>
+      <p class="fine" style="margin-top:12px" data-i18n="deid"></p>
+    </div>
+  </aside>
 
-  <button class="btn btn-primary w-full normal-case mt-2" id="analyzeBtn" disabled data-i18n="analyzeBtn"></button>
-
-  <div id="outputArea"></div>
-
-  <div id="historyArea" class="mt-3"></div>
-
-  <div class="text-[11.5px] text-base-content/50 leading-relaxed mt-3 px-3" data-i18n="disclaimer"></div>
-
-</div>
+  <section class="out" aria-label="Brief">
+    <div id="status" class="sr" role="status"></div>
+    <div id="emptyState" class="empty">
+      <h2 data-i18n="emptyTitle"></h2>
+      <p data-i18n="emptyBody"></p>
+      <div class="ghost" aria-hidden="true">
+        <div><i class="s"></i><i class="l"></i><i class="m"></i></div>
+        <div><i class="s"></i><i class="l"></i><i class="l"></i><i class="m"></i></div>
+      </div>
+    </div>
+    <div id="outputArea"></div>
+    <div id="historyArea"></div>
+    <p class="page-foot" data-i18n="disclaimer"></p>
+  </section>
+</main>
 
 <script>
 const I18N = {
   ko: {
-    subtitle: '피부과 증례를 위한 AI 감별진단 및 문헌 가이드.',
-    navAbout: '소개', navHome: '홈',
-    casePhoto: '증례 사진',
-    trySample: '예시 증례 불러오기',
-    sampleLoaded: '예시 정보 입력됨 — 사진을 추가하고 분석하세요',
-    uploadText: '사진을 끌어다 놓거나 <span class="text-primary">파일 선택</span>',
-    uploadSub: 'JPG · PNG · 최대 3장 — 저장되지 않습니다',
+    navAbout: '소개',
+    caseTitle: '새 증례',
+    trySample: '예시 불러오기',
+    sampleLoaded: '입력됨. 사진을 추가하세요',
+    uploadText: '사진을 끌어다 놓거나 <b>파일 선택</b>',
+    uploadSub: 'JPG, PNG, 최대 3장. 저장되지 않습니다.',
     patientContext: '환자 정보',
-    age: '나이', agePh: '예: 42',
+    age: '나이', agePh: '예: 42', ageUnit: '세',
     sex: '성별', sexSelect: '선택', sexMale: '남성', sexFemale: '여성', sexOther: '기타 / 미지정',
     area: '발생 부위', areaPh: '예: 왼쪽 팔뚝, 두피',
-    fitzLabel: '피부 유형 (Fitzpatrick · 선택)',
+    fitzLabel: '피부 유형 (Fitzpatrick, 선택)',
     fitzI: '항상 화상, 태닝되지 않음', fitzII: '대개 화상, 약간 태닝', fitzIII: '때때로 화상, 고르게 태닝',
     fitzIV: '거의 화상 없음, 쉽게 태닝', fitzV: '매우 드물게 화상, 짙게 태닝', fitzVI: '화상 없음, 짙은 색소',
     duration: '기간', durationPh: '예: 3주, 6개월',
     reportLang: '보고서 언어',
-    notes: '추가 메모 (선택사항)', notesPh: '증상, 이전 치료, 관련 병력…',
+    notes: '추가 메모 (선택)', notesPh: '증상, 이전 치료, 관련 병력',
     analyzeBtn: '증례 분석',
-    disclaimer: '임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
-    analyzing: '증례 분석 중',
-    optimizing: '이미지 처리 중…',
-    copyChart: '차트에 복사', copied: '복사됨!',
-    shareReport: '보고서 공유', linkCopied: '링크 복사됨!', exportPdf: 'PDF 내보내기',
+    deid: '비식별화된 증례만 입력하세요.',
+    disclaimer: '임상 의사결정 지원 목적으로만 사용하세요. 의사의 판단을 대체하지 않습니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.',
+    emptyTitle: '브리프가 여기에 표시됩니다',
+    emptyBody: '사진을 1장에서 3장 올리고 환자 정보를 입력한 뒤 증례 분석을 누르세요. 감별진단과 참고문헌, 선택이 분명하지 않은 경우에는 치료 옵션 비교까지 한 장으로 정리됩니다.',
+    analyzing: '사진을 읽고 문헌을 검색하고 있습니다',
+    analyzingNote: '최대 1분 정도 걸릴 수 있습니다.',
+    ready: '브리프가 준비되었습니다',
+    optimizing: '이미지 처리 중',
+    removePhoto: '사진 삭제', addPhoto: '사진 추가',
+    briefTitle: '브리프',
+    copyChart: '차트용 복사', copied: '복사됨',
+    shareReport: '링크 공유', linkCopied: '링크 복사됨', exportPdf: 'PDF',
     newCase: '새 증례',
-    navSignIn: '로그인', navLibrary: '내 증례', navSignOut: '로그아웃', savedCloud: '저장됨 (클라우드)',
-    saveCase: '증례 저장', caseSaved: '저장됨!',
-    rejTitle: '이 이미지는 분석할 수 없습니다', rejBody: '임상 피부 사진으로 보이지 않습니다. 평가하려는 피부·손발톱·모발·점막 부위가 선명하게 보이는 사진을 올려 주세요.', rejDetected: '인식된 내용:', rejTryAnother: '다른 사진으로 시도',
+    navSignIn: '로그인', navLibrary: '내 증례', navSignOut: '로그아웃', savedCloud: '클라우드에 저장됨',
+    saveCase: '저장', caseSaved: '저장됨',
+    rejTitle: '이 이미지는 분석할 수 없습니다', rejBody: '임상 피부 사진으로 보이지 않습니다. 평가하려는 피부, 손발톱, 모발, 점막 부위가 선명하게 보이는 사진을 올려 주세요.', rejDetected: '인식된 내용:', rejTryAnother: '다른 사진으로 시도',
+    errTitle: '분석하지 못했습니다', errHint: '잠시 후 다시 시도하세요. 계속 실패하면 아래 내용을 함께 알려 주세요.',
     savedCases: '저장된 증례', noCases: '저장된 증례 없음',
     clearAll: '전체 삭제', deleteCase: '삭제',
     storageNote: '증례는 이 기기에만 저장됩니다. 서버로 전송되지 않습니다.',
     confirmClear: '저장된 모든 증례를 삭제하시겠습니까?',
-    sectionAssessment: '임상 평가',
-    sectionLit: '관련 문헌',
-    sectionTreatment: '치료 옵션',
-    txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항',
-    txDisclaimer: '의사 검토용 문헌 기반 옵션 — 처방 권고가 아닙니다.',
+    sectionAssessment: '임상 평가', sectionLit: '참고문헌', sectionTreatment: '치료 옵션',
+    dxPrimary: '가능성이 가장 높음', dxAlt: '함께 고려',
+    txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항', rowSource: '출처',
+    txDisclaimer: '의사 검토용 문헌 기반 옵션입니다. 처방 권고가 아닙니다.',
+    refVerify: 'PubMed에서 확인', refSearch: 'PubMed 검색 결과로 연결됩니다',
     evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
-    errStrong: '오류',
   },
   en: {
-    subtitle: 'AI-assisted differential diagnosis and literature guidance for dermatology cases.',
-    navAbout: 'About', navHome: 'Home',
-    casePhoto: 'Case photos',
-    trySample: 'Load sample case',
-    sampleLoaded: 'Sample context filled — add a photo and analyze',
-    uploadText: 'Drop case photos here or <span class="text-primary">browse</span>',
-    uploadSub: 'JPG · PNG · up to 3 — not stored anywhere',
-    patientContext: 'Patient context',
-    age: 'Age', agePh: 'e.g. 42',
+    navAbout: 'About',
+    caseTitle: 'New case',
+    trySample: 'Load example',
+    sampleLoaded: 'Filled. Add a photo',
+    uploadText: 'Drop photos here or <b>browse</b>',
+    uploadSub: 'JPG or PNG, up to 3. Never stored.',
+    patientContext: 'Patient',
+    age: 'Age', agePh: 'e.g. 42', ageUnit: 'y',
     sex: 'Sex', sexSelect: 'Select', sexMale: 'Male', sexFemale: 'Female', sexOther: 'Other / Not specified',
     area: 'Affected area', areaPh: 'e.g. left forearm, scalp',
-    fitzLabel: 'Skin type (Fitzpatrick · optional)',
+    fitzLabel: 'Skin type (Fitzpatrick, optional)',
     fitzI: 'Always burns, never tans', fitzII: 'Usually burns, tans minimally', fitzIII: 'Sometimes burns, tans evenly',
     fitzIV: 'Rarely burns, tans easily', fitzV: 'Very rarely burns, tans darkly', fitzVI: 'Never burns, deeply pigmented',
     duration: 'Duration', durationPh: 'e.g. 3 weeks, 6 months',
     reportLang: 'Report language',
-    notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, relevant history…',
+    notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, relevant history',
     analyzeBtn: 'Analyze case',
-    disclaimer: 'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
-    analyzing: 'Running case analysis',
-    optimizing: 'Optimizing image…',
-    copyChart: 'Copy for chart', copied: 'Copied!',
-    shareReport: 'Share report', linkCopied: 'Link copied!', exportPdf: 'Export PDF',
+    deid: 'Use de-identified cases only.',
+    disclaimer: 'For clinical decision support only. Not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
+    emptyTitle: 'Your brief appears here',
+    emptyBody: 'Add one to three photos and a few details, then select Analyze case. You get the assessment and references, plus a treatment comparison when the choice is not obvious.',
+    analyzing: 'Reading the photo and searching the literature',
+    analyzingNote: 'This can take up to a minute.',
+    ready: 'Brief ready',
+    optimizing: 'Processing image',
+    removePhoto: 'Remove photo', addPhoto: 'Add photo',
+    briefTitle: 'Brief',
+    copyChart: 'Copy for chart', copied: 'Copied',
+    shareReport: 'Share link', linkCopied: 'Link copied', exportPdf: 'PDF',
     newCase: 'New case',
     navSignIn: 'Sign in', navLibrary: 'My cases', navSignOut: 'Sign out', savedCloud: 'Saved to library',
-    saveCase: 'Save case', caseSaved: 'Saved!',
+    saveCase: 'Save', caseSaved: 'Saved',
     rejTitle: "This image can't be analyzed", rejBody: "It doesn't look like a clinical skin photo. Upload a clear photo of the skin, nail, hair, or mucosal finding you want assessed.", rejDetected: 'Appears to show:', rejTryAnother: 'Try another image',
+    errTitle: 'The analysis failed', errHint: 'Try again in a moment. If it keeps failing, share the details below.',
     savedCases: 'Saved cases', noCases: 'No saved cases yet',
     clearAll: 'Clear all', deleteCase: 'Delete',
     storageNote: 'Cases are stored only on this device. Nothing is sent to a server.',
     confirmClear: 'Delete all saved cases?',
-    sectionAssessment: 'Clinical assessment',
-    sectionLit: 'Literature',
-    sectionTreatment: 'Treatment options',
-    txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration',
-    txDisclaimer: 'Literature-derived options for physician consideration — not a prescribing recommendation.',
+    sectionAssessment: 'Assessment', sectionLit: 'References', sectionTreatment: 'Treatment options',
+    dxPrimary: 'Most likely', dxAlt: 'Also consider',
+    txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration', rowSource: 'Source',
+    txDisclaimer: 'Literature-derived options for physician review. Not a prescribing recommendation.',
+    refVerify: 'Check on PubMed', refSearch: 'Opens a PubMed search',
     evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
-    errStrong: 'Error',
   }
 };
 
@@ -278,24 +192,24 @@ const SAMPLE_CASE = {
   duration: '8 months, worsening', fitz: 'III',
   notes: 'Well-demarcated erythematous plaques with thick silvery scale. Failed 3 months of high-potency topical corticosteroids and vitamin D analog. History of mild hypertension. Patient asks about systemic options. Fitzpatrick III.'
 };
-let currentLang = 'ko';
+let currentLang = (window.dcLang ? dcLang.get() : 'ko');
 function t(key) { return I18N[currentLang][key] || I18N.en[key] || key; }
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function applyI18n() {
-  document.querySelectorAll('[data-i18n]').forEach(el => {
-    el.innerHTML = t(el.getAttribute('data-i18n'));
-  });
-  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => {
-    el.placeholder = t(el.getAttribute('data-i18n-placeholder'));
-  });
+  document.documentElement.lang = currentLang;
+  document.querySelectorAll('[data-i18n]').forEach(el => { el.innerHTML = t(el.getAttribute('data-i18n')); });
+  document.querySelectorAll('[data-i18n-placeholder]').forEach(el => { el.placeholder = t(el.getAttribute('data-i18n-placeholder')); });
   const sex = document.getElementById('sex');
   if (sex) {
     const keys = ['sexSelect','sexMale','sexFemale','sexOther'];
     Array.from(sex.options).forEach((opt, i) => { if (keys[i]) opt.text = t(keys[i]); });
   }
 }
+function announce(msg){const s=document.getElementById('status');if(s)s.textContent=msg;}
 
 let images = []; const MAX_IMAGES = 3;
-const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadLoading=document.getElementById('uploadLoading'),thumbGrid=document.getElementById('thumbGrid'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea');
+const dropZone=document.getElementById('dropZone'),fileInput=document.getElementById('fileInput'),uploadPrompt=document.getElementById('uploadPrompt'),uploadLoading=document.getElementById('uploadLoading'),thumbGrid=document.getElementById('thumbGrid'),analyzeBtn=document.getElementById('analyzeBtn'),outputArea=document.getElementById('outputArea'),emptyState=document.getElementById('emptyState');
+function setOutput(html){outputArea.innerHTML=html||'';emptyState.style.display=html?'none':'';}
 
 function processFile(file){
   return new Promise((resolve,reject)=>{
@@ -316,10 +230,10 @@ async function loadImages(fileList){
   renderThumbs();updateBtn();
 }
 function renderThumbs(){
-  if(!images.length){uploadPrompt.style.display='block';thumbGrid.style.display='none';thumbGrid.innerHTML='';return;}
-  uploadPrompt.style.display='none';thumbGrid.style.display='flex';
-  const tiles=images.map((im,i)=>`<div class="relative"><img src="${im.dataUrl}" class="w-[88px] h-[88px] object-cover rounded-lg border border-base-300"><button data-rm="${i}" type="button" class="absolute -top-1.5 -right-1.5 w-5 h-5 rounded-full bg-base-100 border border-base-300 text-base-content/60 text-[10px] flex items-center justify-center hover:bg-base-300 hover:text-base-content">✕</button></div>`).join('');
-  const add=images.length<MAX_IMAGES?`<button id="addTile" type="button" class="w-[88px] h-[88px] rounded-lg border-[1.5px] border-dashed border-base-300 text-base-content/40 hover:border-primary hover:text-primary flex items-center justify-center text-2xl leading-none">+</button>`:'';
+  if(!images.length){uploadPrompt.style.display='flex';thumbGrid.style.display='none';thumbGrid.innerHTML='';return;}
+  uploadPrompt.style.display='none';thumbGrid.style.display='grid';
+  const tiles=images.map((im,i)=>`<div class="thumb"><img src="${im.dataUrl}" alt=""><button data-rm="${i}" type="button" aria-label="${esc(t('removePhoto'))} ${i+1}">✕</button></div>`).join('');
+  const add=images.length<MAX_IMAGES?`<button id="addTile" type="button" class="thumb-add" aria-label="${esc(t('addPhoto'))}">+</button>`:'';
   thumbGrid.innerHTML=tiles+add;
   thumbGrid.querySelectorAll('[data-rm]').forEach(b=>b.addEventListener('click',e=>{e.stopPropagation();removeImage(parseInt(b.getAttribute('data-rm'),10));}));
   const at=document.getElementById('addTile');if(at)at.addEventListener('click',()=>fileInput.click());
@@ -328,8 +242,8 @@ function removeImage(i){images.splice(i,1);renderThumbs();updateBtn();}
 function resetImages(){images=[];fileInput.value='';renderThumbs();updateBtn();}
 function updateBtn(){analyzeBtn.disabled=images.length===0;}
 
-document.addEventListener('DOMContentLoaded', () => { applyI18n(); });
-document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); });
+document.addEventListener('DOMContentLoaded', () => { document.getElementById('lang').value = currentLang; applyI18n(); });
+document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; if(window.dcLang) dcLang.set(currentLang); applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); if(window.__renderHistory) window.__renderHistory(); });
 document.getElementById('sampleBtn').addEventListener('click', () => {
   document.getElementById('age').value = SAMPLE_CASE.age;
   document.getElementById('sex').value = SAMPLE_CASE.sex;
@@ -347,34 +261,38 @@ document.getElementById('sampleBtn').addEventListener('click', () => {
 let fitz = '';
 const fitzDescEl = document.getElementById('fitzDesc');
 function renderFitz(){
-  document.querySelectorAll('.fitz-chip').forEach(function(ch){ ch.classList.toggle('sel', ch.getAttribute('data-fitz') === fitz); });
-  if(fitzDescEl) fitzDescEl.textContent = fitz ? (fitz + ' · ' + t('fitz'+fitz)) : '';
+  document.querySelectorAll('.fitz-chip').forEach(function(ch){ const on = ch.getAttribute('data-fitz') === fitz; ch.classList.toggle('sel', on); ch.setAttribute('aria-pressed', on ? 'true' : 'false'); });
+  if(fitzDescEl) fitzDescEl.textContent = fitz ? (fitz + ': ' + t('fitz'+fitz)) : '';
 }
 function setFitz(v){ fitz = (fitz === v ? '' : v); renderFitz(); }
 window.__renderFitz = renderFitz;
 document.querySelectorAll('.fitz-chip').forEach(function(ch){
   var v = ch.getAttribute('data-fitz');
   ch.addEventListener('click', function(){ setFitz(v); });
-  ch.addEventListener('mouseenter', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = v + ' · ' + t('fitz'+v); });
+  ch.addEventListener('mouseenter', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = v + ': ' + t('fitz'+v); });
   ch.addEventListener('mouseleave', function(){ if(!fitz && fitzDescEl) fitzDescEl.textContent = ''; });
 });
 uploadPrompt.addEventListener('click',()=>fileInput.click());
 fileInput.addEventListener('change',e=>{loadImages(e.target.files);fileInput.value='';});
-dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('border-primary','bg-primary/5');});
-dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('border-primary','bg-primary/5'));
-dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('border-primary','bg-primary/5');loadImages(e.dataTransfer.files);});
+dropZone.addEventListener('dragover',e=>{e.preventDefault();dropZone.classList.add('over');});
+dropZone.addEventListener('dragleave',()=>dropZone.classList.remove('over'));
+dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remove('over');loadImages(e.dataTransfer.files);});
 updateBtn();
 analyzeBtn.addEventListener('click',runAnalysis);
 
 function showProgress(){
-  outputArea.innerHTML=`<div class="alert bg-base-100 border border-base-300 mt-3 py-3.5 rounded-2xl"><span class="loading loading-spinner loading-sm text-primary"></span><span class="text-[13px] text-base-content/70">${t('analyzing')}</span></div>`;
+  setOutput(`<div class="loadcard"><p>${esc(t('analyzing'))}. ${esc(t('analyzingNote'))}</p><div class="skel"><i class="h"></i><i class="w"></i><i class="n"></i></div><div class="skel"><i class="h" style="width:34%"></i><i class="w"></i><i class="w"></i><i class="n"></i></div></div>`);
+  announce(t('analyzing'));
+}
+function scrollToBrief(){
+  if(window.matchMedia('(max-width: 999px)').matches){const el=document.getElementById('brief')||outputArea;el.scrollIntoView({behavior:'smooth',block:'start'});}
 }
 
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
   const ctx=[age&&`Age: ${age}`,sex&&`Sex: ${sex}`,area&&`Affected area: ${area}`,duration&&`Duration: ${duration}`,fitz&&`Fitzpatrick skin type: ${fitz}`,notes&&`Notes: ${notes}`].filter(Boolean).join('\n')||'No patient context provided.';
   const langInstruction=lang==='ko'?'IMPORTANT: Write ALL text in your JSON response in Korean (한국어). This includes diagnosis names, rationale, and reference relevance text. Only keep source citations and DOIs in their original language.':'Write all response text in English.';
-  analyzeBtn.disabled=true;showProgress();
+  analyzeBtn.disabled=true;showProgress();scrollToBrief();
   const sys=`You are a clinical literature assistant for practicing dermatologists. Analyze the case photo and patient context. Return ONLY a valid JSON object — no markdown fences, no preamble, nothing outside the JSON.
 
 ${langInstruction}
@@ -421,7 +339,7 @@ Rules:
     if(parsed && parsed.relevant===false){ renderRejection(parsed.rejection||{}); analyzeBtn.disabled=false; return; }
     renderOutput(parsed);
   }catch(err){
-    outputArea.innerHTML=`<div class="mt-3 rounded-2xl border p-4" style="background:#F6EBE7;border-color:#E6D5CE;color:#8A3324"><strong class="text-[13px]">${t('errStrong')}</strong><pre class="text-[11px] font-mono-dm whitespace-pre-wrap break-all opacity-80 mt-1">${err.message}</pre></div>`;
+    setOutput(`<div class="notice err" role="alert"><span class="notice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg></span><div><h3>${esc(t('errTitle'))}</h3><p>${esc(t('errHint'))}</p><pre>${esc(err.message)}</pre></div></div>`);
     analyzeBtn.disabled=false;
   }
 }
@@ -429,73 +347,72 @@ Rules:
 function safeUrl(u){u=(u||'').trim();return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';}
 function pubmedSearch(title){return 'https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(String(title||'').replace(/[^\w\s().-]/g,' ').trim());}
 function refHref(r){return safeUrl(r&&r.url)||pubmedSearch(r&&r.title);}
+
 function renderRejection(rej){
-  const detected = rej && rej.detected ? `<div class="text-[12px] text-base-content/55 mt-2"><span class="font-medium">${t('rejDetected')}</span> ${rej.detected}</div>` : '';
+  const detected = rej && rej.detected ? `<p style="margin-top:8px"><b>${esc(t('rejDetected'))}</b> ${esc(rej.detected)}</p>` : '';
   const reason = (rej && rej.reason) ? rej.reason : t('rejBody');
-  outputArea.innerHTML = `<div class="card bg-base-100 border border-base-300 rounded-2xl mt-3"><div class="card-body p-5 items-start">
-    <div class="flex items-start gap-3">
-      <span class="w-9 h-9 rounded-xl flex items-center justify-center flex-shrink-0" style="background:#F7ECDA">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none"><path d="M4 5l16 14M21 6.5V17a2 2 0 0 1-2 2H7m-3-1V7a2 2 0 0 1 2-2h11" stroke="#9A5B12" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9" cy="10" r="1.6" fill="#9A5B12"/></svg>
-      </span>
-      <div>
-        <div class="text-[14px] font-medium">${t('rejTitle')}</div>
-        <div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${reason}</div>
-        ${detected}
-      </div>
-    </div>
-    <button class="btn btn-primary btn-sm normal-case mt-4" id="rejNewBtn">${t('rejTryAnother')}</button>
-  </div></div>`;
-  const b=document.getElementById('rejNewBtn'); if(b) b.addEventListener('click',()=>{ resetImages(); outputArea.innerHTML=''; });
+  setOutput(`<div class="notice" role="alert"><span class="notice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M4 5l16 14M21 6.5V17a2 2 0 0 1-2 2H7m-3-1V7a2 2 0 0 1 2-2h11"/><circle cx="9" cy="10" r="1.6" fill="currentColor"/></svg></span><div><h3>${esc(t('rejTitle'))}</h3><p>${esc(reason)}</p>${detected}<button class="btn btn-solid btn-sm" id="rejNewBtn" type="button">${esc(t('rejTryAnother'))}</button></div></div>`);
+  const b=document.getElementById('rejNewBtn'); if(b) b.addEventListener('click',()=>{ resetImages(); setOutput(''); });
 }
-function renderOutput(d){
-  const assessment=d.assessment||[],refs=d.references||[];
-  const assessHtml=assessment.map((item,i)=>`<div class="bg-base-200 rounded-lg p-3.5 mb-2 last:mb-0"><div class="flex items-center gap-2 flex-wrap mb-1.5"><span class="text-[14px] font-medium">${item.diagnosis}</span>${item.icd10?`<span class="badge badge-sm font-mono-dm text-[11px] bg-base-100 border-base-300">ICD-10 · ${item.icd10}</span>`:''}</div><div class="text-[13px] text-base-content/70 leading-relaxed">${item.rationale}</div></div>`).join('');
-  const evMap={'guideline':{variant:'s',key:'evGuideline'},'meta-analysis':{variant:'s',key:'evMetaAnalysis'},'rct':{variant:'s',key:'evRct'},'cohort':{variant:'m',key:'evCohort'},'review':{variant:'m',key:'evReview'},'case-report':{variant:'w',key:'evCaseReport'}};
-  const refHtml=refs.map((r,i)=>{const ev=evMap[r.evidence_level];const pill=ev?`<div class="evp evp-${ev.variant} mb-1.5">${t(ev.key)}</div>`:'';const direct=safeUrl(r.url);const href=direct||pubmedSearch(r.title);const verify=direct?`<a href="${pubmedSearch(r.title)}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-base-content/45 hover:text-primary ml-2 whitespace-nowrap">PubMed ↗</a>`:'';return `<div class="border-b border-base-300 pb-3 mb-3 last:border-0 last:mb-0 last:pb-0">${pill}<a href="${href}" target="_blank" rel="noopener noreferrer" class="text-[13px] font-medium hover:text-primary hover:underline">${r.title} <span class="text-[10px] text-base-content/40">↗</span></a><div class="text-[13px] text-base-content/70 leading-relaxed mt-1">${r.relevance}</div><div class="mt-1.5 flex items-center flex-wrap"><span class="text-[11.5px] text-primary font-mono-dm">${r.source}</span>${verify}</div></div>`;}).join('');
-  const tc=d.treatment_comparison;
+
+const EV={'guideline':{n:3,k:'evGuideline'},'meta-analysis':{n:3,k:'evMetaAnalysis'},'rct':{n:3,k:'evRct'},'cohort':{n:2,k:'evCohort'},'review':{n:2,k:'evReview'},'case-report':{n:1,k:'evCaseReport'}};
+const FITZ_N={I:1,II:2,III:3,IV:4,V:5,VI:6};
+function tier(level){const e=EV[level];if(!e)return '';return `<span class="tier"><span class="gauge" data-n="${e.n}" aria-hidden="true"><b></b><b></b><b></b></span>${esc(t(e.k))}</span>`;}
+function readMeta(){const v=id=>document.getElementById(id).value.trim();return {age:v('age'),sex:document.getElementById('sex').value,area:v('area'),duration:v('duration'),fitz:fitz};}
+function payloadFor(d,meta){return btoa(unescape(encodeURIComponent(JSON.stringify({result:d,meta:Object.assign({},meta,{sharedAt:new Date().toISOString()}),lang:currentLang}))));}
+function ctxHtml(meta){
+  const sexMap={Male:t('sexMale'),Female:t('sexFemale'),Other:t('sexOther')};
+  const parts=[];
+  if(meta.age)parts.push(`<span>${esc(meta.age)}${esc(t('ageUnit'))}</span>`);
+  if(meta.sex)parts.push(`<span>${esc(sexMap[meta.sex]||meta.sex)}</span>`);
+  if(meta.area)parts.push(`<span>${esc(meta.area)}</span>`);
+  if(meta.duration)parts.push(`<span>${esc(meta.duration)}</span>`);
+  if(meta.fitz&&FITZ_N[meta.fitz])parts.push(`<span><i class="dot" style="background:var(--f${FITZ_N[meta.fitz]})"></i>Fitzpatrick ${esc(meta.fitz)}</span>`);
+  return parts.join('')||`<span>${esc(t('briefTitle'))}</span>`;
+}
+
+function renderOutput(d, metaIn){
+  const meta=metaIn||readMeta();
+  const assessment=d.assessment||[],refs=d.references||[],tc=d.treatment_comparison;
+  const assessHtml=assessment.map((item,i)=>`<div><div class="dx-rank">${esc(t(i===0?'dxPrimary':'dxAlt'))}</div><div class="dx"><h3>${esc(item.diagnosis)}</h3>${item.icd10?`<span class="tag">ICD-10 ${esc(item.icd10)}</span>`:''}</div><p class="rationale">${esc(item.rationale)}</p></div>`).join('');
   let txHtml='';
   if(tc&&Array.isArray(tc.options)&&tc.options.length){
+    const opts=tc.options,n=opts.length;
     const axes=[['efficacy','txEfficacy'],['onset','txOnset'],['monitoring','txMonitoring'],['key_consideration','txConsideration']];
-    const optCards=tc.options.map(o=>{const ev=evMap[o.evidence_level];const pill=ev?`<span class="evp evp-${ev.variant}">${t(ev.key)}</span>`:'';const rows=axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="mt-2"><div class="text-[10.5px] font-medium text-base-content/50 uppercase tracking-wide">${t(lbl)}</div><div class="text-[12.5px] text-base-content/80 leading-snug mt-0.5">${o[k]}</div></div>`).join('');return `<div class="bg-base-200 rounded-lg p-3.5"><div class="flex items-center gap-2 flex-wrap mb-1"><span class="text-[14px] font-medium">${o.name}</span>${pill}</div>${rows}${o.source?`<div class="mt-2"><a href="${safeUrl(o.url)||pubmedSearch(o.name+' '+o.source)}" target="_blank" rel="noopener noreferrer" class="text-[11px] text-primary font-mono-dm hover:underline">${o.source} ↗</a></div>`:''}</div>`;}).join('');
-    txHtml=`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="eyebrow-app mb-1">${t('sectionTreatment')}</h3>${tc.rationale?`<div class="text-[12.5px] text-base-content/60 leading-relaxed mb-3">${tc.rationale}</div>`:'<div class="mb-3"></div>'}<div class="grid grid-cols-1 sm:grid-cols-2 gap-2.5">${optCards}</div><div class="text-[11px] text-base-content/45 leading-relaxed mt-3">${t('txDisclaimer')}</div></div>`;
+    let cells='<div class="rh"></div>'+opts.map(o=>`<div class="oh"><span class="oname">${esc(o.name)}</span>${tier(o.evidence_level)}</div>`).join('');
+    axes.forEach(([k,lbl])=>{ if(opts.some(o=>o[k])) cells+=`<div class="rh">${esc(t(lbl))}</div>`+opts.map(o=>`<div>${esc(o[k]||'')}</div>`).join(''); });
+    if(opts.some(o=>o.source)) cells+=`<div class="rh">${esc(t('rowSource'))}</div>`+opts.map(o=>`<div>${o.source?`<a href="${safeUrl(o.url)||pubmedSearch(o.name+' '+o.source)}" target="_blank" rel="noopener noreferrer">${esc(o.source)}</a>`:''}</div>`).join('');
+    txHtml=`<section class="sec"><h2 class="sec-h">${esc(t('sectionTreatment'))}</h2>${tc.rationale?`<p class="sec-lede">${esc(tc.rationale)}</p>`:''}<div class="cmp"><div class="cmp-grid" style="--n:${n}">${cells}</div></div><p class="fine">${esc(t('txDisclaimer'))}</p></section>`;
   }
-  outputArea.innerHTML=`<div class="card bg-base-100 border border-base-300 rounded-2xl overflow-hidden mt-3">${assessHtml?`<div class="card-body p-5 pb-4"><h3 class="eyebrow-app mb-3">${t('sectionAssessment')}</h3>${assessHtml}</div>`:''}${txHtml}${refHtml?`<div class="border-t border-base-300"></div><div class="card-body p-5"><h3 class="eyebrow-app mb-3">${t('sectionLit')}</h3>${refHtml}</div>`:''}</div><div class="flex flex-wrap gap-2 mt-3 mb-6"><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="saveBtn">${t('saveCase')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="copyBtn">${t('copyChart')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="pdfBtn">${t('exportPdf')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="shareBtn">${t('shareReport')}</button><button class="btn btn-ghost btn-sm flex-1 min-w-[84px] normal-case" id="newBtn">${t('newCase')}</button></div>`;
-  analyzeBtn.disabled=false;
+  const refHtml=refs.map(r=>{const direct=safeUrl(r.url);const href=direct||pubmedSearch(r.title);const extra=direct?`<a href="${pubmedSearch(r.title)}" target="_blank" rel="noopener noreferrer">${esc(t('refVerify'))}</a>`:`<span>${esc(t('refSearch'))}</span>`;return `<div class="ref"><div>${tier(r.evidence_level)}</div><div><a class="ref-t" href="${href}" target="_blank" rel="noopener noreferrer">${esc(r.title)}<span aria-hidden="true"> ↗</span></a><p class="ref-rel">${esc(r.relevance)}</p><div class="ref-src"><span>${esc(r.source)}</span>${extra}</div></div></div>`;}).join('');
+  setOutput(`<article class="brief" id="brief"><div class="brief-head"><div class="ctx">${ctxHtml(meta)}</div><div class="actions"><button class="btn btn-solid btn-sm" id="saveBtn" type="button">${esc(t('saveCase'))}</button><button class="btn btn-line btn-sm" id="copyBtn" type="button">${esc(t('copyChart'))}</button><button class="btn btn-line btn-sm" id="pdfBtn" type="button">${esc(t('exportPdf'))}</button><button class="btn btn-line btn-sm" id="shareBtn" type="button">${esc(t('shareReport'))}</button><button class="btn btn-quiet btn-sm" id="newBtn" type="button">${esc(t('newCase'))}</button></div></div>${assessHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionAssessment'))}</h2><div class="dx-list">${assessHtml}</div></section>`:''}${txHtml}${refHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionLit'))}</h2>${refHtml}</section>`:''}</article>`);
+  analyzeBtn.disabled=images.length===0;
+  announce(t('ready'));
+  scrollToBrief();
   document.getElementById('shareBtn').addEventListener('click',()=>{
-    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
-    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({result:d,meta,lang:currentLang}))));
-    const url=window.location.origin+'/report#'+payload;
+    const url=window.location.origin+'/report#'+payloadFor(d,meta);
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
-  document.getElementById('pdfBtn').addEventListener('click',()=>{
-    const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz,sharedAt:new Date().toISOString()};
-    const payload=btoa(unescape(encodeURIComponent(JSON.stringify({result:d,meta,lang:currentLang}))));
-    window.open('/report?print=1#'+payload,'_blank');
-  });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''} — ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev} — ${r.relevance} [${r.source}] ${refHref(r)}`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
-  document.getElementById('saveBtn').addEventListener('click',async ()=>{const meta={age:document.getElementById('age').value.trim(),sex:document.getElementById('sex').value,area:document.getElementById('area').value.trim(),duration:document.getElementById('duration').value.trim(),fitz:fitz};const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'—';await DermCaseCloud.saveCase({dx,meta,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,meta);btn.textContent=t('caseSaved');}}else{saveCase(d,meta);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
-  document.getElementById('newBtn').addEventListener('click',()=>{resetImages();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});outputArea.innerHTML='';fitz='';if(window.__renderFitz)window.__renderFitz();});
+  document.getElementById('pdfBtn').addEventListener('click',()=>{ window.open('/report?print=1#'+payloadFor(d,meta),'_blank'); });
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''}: ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev}: ${r.relevance} [${r.source}] ${refHref(r)}`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('saveBtn').addEventListener('click',async ()=>{const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();const m=Object.assign({},meta);if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'-';await DermCaseCloud.saveCase({dx,meta:m,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,m);btn.textContent=t('caseSaved');}}else{saveCase(d,m);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
+  document.getElementById('newBtn').addEventListener('click',()=>{resetImages();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});setOutput('');fitz='';if(window.__renderFitz)window.__renderFitz();window.scrollTo({top:0,behavior:'smooth'});});
 }
 </script>
 <script>
-// ── Local case history (localStorage only, never leaves device) ──
+// Local case history (localStorage only, never leaves the device)
 const HKEY = 'dermcase_history';
 function loadHistory(){ try { return JSON.parse(localStorage.getItem(HKEY) || '[]'); } catch(e){ return []; } }
 function saveHistory(arr){ try { localStorage.setItem(HKEY, JSON.stringify(arr)); } catch(e){} }
 function saveCase(result, meta){
   const arr = loadHistory();
-  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '—';
+  const dx = (result.assessment && result.assessment[0] && result.assessment[0].diagnosis) || '-';
   arr.unshift({ id: Date.now(), savedAt: new Date().toISOString(), dx, meta, result });
   saveHistory(arr.slice(0, 50));
   renderHistory();
 }
-function deleteCase(id){
-  saveHistory(loadHistory().filter(x => x.id !== id));
-  renderHistory();
-}
-function clearAllCases(){
-  if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); }
-}
+function deleteCase(id){ saveHistory(loadHistory().filter(x => x.id !== id)); renderHistory(); }
+function clearAllCases(){ if (confirm(t('confirmClear'))) { saveHistory([]); renderHistory(); } }
 function renderHistory(){
   const arr = loadHistory();
   const el = document.getElementById('historyArea');
@@ -504,42 +421,44 @@ function renderHistory(){
   const rows = arr.map(x => {
     const d = new Date(x.savedAt);
     const dateStr = d.toLocaleDateString() + ' ' + d.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'});
-    const ctx = [x.meta && x.meta.age && (x.meta.age+'y'), x.meta && x.meta.sex, x.meta && x.meta.area, x.meta && x.meta.fitz && ('Fitz '+x.meta.fitz)].filter(Boolean).join(' · ');
-    return `<div class="flex items-center justify-between gap-2 py-2.5 border-b border-base-300 last:border-0">
-      <button class="text-left flex-1 min-w-0" onclick="reopenCase(${x.id})">
-        <div class="text-[13px] font-medium truncate">${x.dx}</div>
-        <div class="text-[11.5px] text-base-content/55 truncate">${ctx ? ctx + ' · ' : ''}${dateStr}</div>
+    const m = x.meta || {};
+    const ctx = [m.age && (m.age + t('ageUnit')), m.area, m.fitz && ('Fitzpatrick ' + m.fitz)].filter(Boolean).join(', ');
+    return `<div class="hist-row">
+      <button class="open" type="button" data-open="${x.id}">
+        <div class="dx-n">${esc(x.dx)}</div>
+        <div class="dx-s">${esc(ctx ? ctx + ', ' : '')}${esc(dateStr)}</div>
       </button>
-      <button class="text-[11px] text-base-content/40 hover:text-error flex-shrink-0" onclick="deleteCase(${x.id})">${t('deleteCase')}</button>
+      <button class="hist-del" type="button" data-del="${x.id}">${esc(t('deleteCase'))}</button>
     </div>`;
   }).join('');
-  el.innerHTML = `<div class="card bg-base-100 border border-base-300 rounded-2xl"><div class="card-body p-5">
-    <div class="flex items-center justify-between mb-1">
-      <h3 class="eyebrow-app">${t('savedCases')}</h3>
-      <button class="text-[11.5px] text-base-content/50 hover:text-error" onclick="clearAllCases()">${t('clearAll')}</button>
-    </div>
-    <div class="text-[11px] text-base-content/45 leading-relaxed mb-2">${t('storageNote')}</div>
+  el.innerHTML = `<div class="hist">
+    <div class="hist-head"><h3>${esc(t('savedCases'))}</h3><button class="hist-del" type="button" id="histClear">${esc(t('clearAll'))}</button></div>
+    <p class="fine" style="margin-top:4px">${esc(t('storageNote'))}</p>
     ${rows}
-  </div></div>`;
+  </div>`;
+  el.querySelectorAll('[data-open]').forEach(b => b.addEventListener('click', () => reopenCase(parseInt(b.getAttribute('data-open'),10))));
+  el.querySelectorAll('[data-del]').forEach(b => b.addEventListener('click', () => deleteCase(parseInt(b.getAttribute('data-del'),10))));
+  const hc = document.getElementById('histClear'); if (hc) hc.addEventListener('click', clearAllCases);
 }
+window.__renderHistory = renderHistory;
 function reopenCase(id){
   const x = loadHistory().find(c => c.id === id);
   if (!x) return;
-  renderOutput(x.result);
+  renderOutput(x.result, x.meta);
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 document.addEventListener('DOMContentLoaded', renderHistory);
 </script>
 <script>
-// Cloud auth wiring (additive — anonymous/local path is untouched).
+// Cloud auth wiring (additive; the anonymous/local path is untouched).
 (function(){
   let cloudUser = null;
   const slot = document.getElementById('authSlot');
-  function link(href,label){ return '<a href="'+href+'" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition">'+label+'</a>'; }
+  function link(href,label){ return '<a href="'+href+'" class="nav-link">'+label+'</a>'; }
   function renderAuth(){
     if(!slot) return;
     if(cloudUser){
-      slot.innerHTML = link('/library', t('navLibrary')) + '<button id="navSignOut" class="px-3 py-1.5 rounded-lg text-base-content/70 hover:text-base-content hover:bg-base-300/60 transition">'+t('navSignOut')+'</button>';
+      slot.innerHTML = link('/library', t('navLibrary')) + '<button id="navSignOut" type="button" class="nav-link">'+t('navSignOut')+'</button>';
       const so = document.getElementById('navSignOut');
       if(so) so.addEventListener('click', async()=>{ try{ await DermCaseCloud.signOut(); }catch(e){} window.location.reload(); });
     } else {
@@ -555,7 +474,6 @@ document.addEventListener('DOMContentLoaded', renderHistory);
         renderAuth();
         DermCaseCloud.onAuthChange(function(u){ cloudUser = u; renderAuth(); });
       }
-      // If cloud isn't configured, authSlot stays empty (clean degradation).
     }catch(e){ /* leave anonymous */ }
   })();
 })();

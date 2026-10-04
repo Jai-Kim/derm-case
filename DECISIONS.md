@@ -102,3 +102,20 @@ This log exists because the small, day-to-day calls compound into the product's 
 **What stays true from D-002:** the heaviest tracking burden is still the dermatologist conversation log (CONVERSATIONS.md), and the in-repo docs remain the source of truth for decisions and conversation signal. ClickUp is for forward planning, not for replacing the validation discipline.
 
 **Guard against the obvious risk:** adopting a planning tool can become a way to *feel* productive without validating. The roadmap explicitly gates all Phase 2/3 epics on Phase 1 signal. ClickUp organizes the plan; it does not authorize building ahead of validation.
+
+## D-007: Design system v2 ("the viewing room"), one shared stylesheet
+
+**Date:** October 2026
+**Flagged by:** User ("overhaul so it's the most trendy and doesn't look like an AI template")
+
+**Decision:** Replace Tailwind CDN + DaisyUI and the per-page bespoke CSS with one hand-written design system (`assets/ds.css`, `assets/ds.js`) used by every page.
+
+**Why:**
+- The previous look was a stack of rounded cards on DaisyUI with a cream and green palette, which reads as a default. DaisyUI also caused the purple-theme bug (v4/v5 variable mismatch) and the repeated palette drift, because every page carried its own copy of the tokens.
+- One stylesheet is the single source of truth. A token change now reaches every page.
+
+**The look:** Grayscale chrome with black ink for action. The only color is skin: the case photo and the Fitzpatrick I to VI spectrum (top strip, skin-type picker, brief header). The DARAE mark is black line art, so it sits natively. Pretendard Variable is the only typeface, which keeps Hangul and Latin matched in a bilingual product. Evidence strength is shown as a 1 to 3 bar gauge plus a word, never color alone. Light and dark themes via tokens, WCAG AA verified for every text pair.
+
+**Rejected:** indigo accent (generic SaaS blue-violet, and the user already flagged purple), DARAE-green on cream (a default for any Korean-medicine brief), Bricolage Grotesque (overused, mismatches Hangul).
+
+**Also changed:** model-generated text is now HTML-escaped before rendering (it was injected raw). References without a direct link now say "Opens a PubMed search" instead of implying a direct link. Fabricated landing stats ("15+ tabs", "20 min") and the unverified "built with practicing dermatologists" claim were removed.

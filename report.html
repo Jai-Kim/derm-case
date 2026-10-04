@@ -1,136 +1,54 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="en" data-theme="light">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>DermCase — Clinical Literature Brief</title>
+<title>DermCase | Clinical Literature Brief</title>
+<meta name="theme-color" content="#F4F5F3">
 <link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
 <link rel="apple-touch-icon" href="/assets/favicon-180.png">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/static/pretendard.css">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,500;12..96,600&display=swap" rel="stylesheet">
-<style>
-*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-:root{
-  --ink:#17180F; --ink-2:#68655C; --ink-3:#9C9990;
-  --paper:#F2EFE6; --surface:#FFFFFF; --border:#E4E0D3; --border-2:#D2CEC3;
-  --green:#1C6B45; --forest:#0E2A1C;
-  --r:14px; --r-sm:9px;
-}
-body{font-family:'Pretendard',system-ui,sans-serif;background:var(--paper);color:var(--ink);line-height:1.5;-webkit-font-smoothing:antialiased;padding:2rem 1rem 4rem}
-.mono{font-family:'Pretendard',monospace}
-.container{max-width:720px;margin:0 auto}
-
-.toolbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:1.25rem}
-.back-link{display:inline-flex;align-items:center;gap:7px;font-size:13px;color:var(--ink-2);text-decoration:none}
-.back-link:hover{color:var(--ink)}
-.pdf-btn{display:inline-flex;align-items:center;gap:7px;font-size:13px;font-weight:500;color:#fff;background:var(--green);border:none;border-radius:10px;padding:8px 15px;cursor:pointer;transition:background .15s}
-.pdf-btn:hover{background:#15532f}
-
-.report-header{display:flex;align-items:flex-start;justify-content:space-between;gap:16px;padding-bottom:1rem;border-bottom:1.5px solid var(--border);margin-bottom:1.25rem}
-.brand{display:flex;align-items:center;gap:11px}
-.logo{width:38px;height:38px;border-radius:10px;background:var(--green);display:grid;place-items:center;flex-shrink:0}
-.brand h1{font-size:17px;font-weight:600;letter-spacing:-.01em}
-.brand .sub{font-size:12px;color:var(--ink-2);margin-top:2px}
-.gen{font-size:11px;color:var(--ink-3);text-align:right;font-family:'Pretendard',monospace;white-space:nowrap}
-
-.meta-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:.95rem 1.2rem;margin-bottom:1rem;display:flex;flex-wrap:wrap;gap:11px 26px}
-.meta-item{display:flex;flex-direction:column;gap:2px}
-.meta-label{font-size:10px;font-weight:500;letter-spacing:.08em;text-transform:uppercase;color:var(--ink-3)}
-.meta-value{font-size:14px;color:var(--ink);font-weight:500}
-
-.section{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:1.1rem 1.25rem;margin-bottom:1rem}
-.section-title{font-size:10.5px;font-weight:600;letter-spacing:.09em;text-transform:uppercase;color:var(--ink-3);margin-bottom:13px}
-
-.assess-item{background:var(--paper);border-radius:var(--r-sm);padding:12px 14px;margin-bottom:9px}
-.assess-item:last-child{margin-bottom:0}
-.assess-top{display:flex;align-items:center;gap:9px;flex-wrap:wrap;margin-bottom:6px}
-.assess-name{font-size:15px;font-weight:600}
-.icd{font-family:'Pretendard',monospace;font-size:11px;background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:2px 7px}
-.assess-rationale{font-size:13px;color:var(--ink-2);line-height:1.6}
-
-.tx-rationale{font-size:12.5px;color:var(--ink-2);line-height:1.6;margin-bottom:12px}
-.opts{display:grid;grid-template-columns:1fr 1fr;gap:10px}
-.opt{background:var(--paper);border-radius:var(--r-sm);padding:13px}
-.opt-top{display:flex;align-items:center;gap:8px;flex-wrap:wrap;margin-bottom:3px}
-.opt-name{font-size:14px;font-weight:600}
-.axis{margin-top:8px}
-.axis-label{font-size:10px;font-weight:600;letter-spacing:.04em;text-transform:uppercase;color:var(--ink-3)}
-.axis-val{font-size:12.5px;color:var(--ink);line-height:1.45;margin-top:1px}
-.opt-source{font-size:10.5px;color:var(--green);font-family:'Pretendard',monospace;margin-top:9px}
-
-.ref{padding:11px 0;border-bottom:1px solid var(--border)}
-.ref:first-child{padding-top:0}
-.ref:last-child{border-bottom:none;padding-bottom:0}
-.ref-title{font-size:13px;font-weight:600;margin:4px 0 2px}
-.ref-rel{font-size:12.5px;color:var(--ink-2);line-height:1.55}
-.ref-source{font-size:11px;color:var(--green);font-family:'Pretendard',monospace;margin-top:4px}
-
-.evp{display:inline-block;font-size:10px;font-weight:500;padding:2px 8px;border-radius:99px;line-height:1.5}
-.evp-s{background:#E1F5EE;color:#0F6E56} .evp-m{background:#E7EFFA;color:#38566B} .evp-w{background:#F7ECDA;color:#8A6417}
-
-.tx-note,.disclaimer{font-size:11px;color:var(--ink-3);line-height:1.6}
-.tx-note{margin-top:11px}
-.disclaimer{padding:11px 13px;border-radius:var(--r-sm);border:1px solid var(--border);background:var(--surface);margin-top:.25rem}
-.error{padding:2.5rem 1rem;text-align:center;color:var(--ink-2);font-size:14px;line-height:1.7}
-
-@media (max-width:540px){ .opts{grid-template-columns:1fr} }
-
-@media print{
-  @page{margin:15mm}
-  body{background:#fff;padding:0;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .no-print{display:none!important}
-  .container{max-width:none}
-  .meta-card,.section{border-color:#d8d5cc;box-shadow:none}
-  .section,.assess-item,.opt,.ref{break-inside:avoid}
-  .section{margin-bottom:.6rem;page-break-inside:avoid}
-  .evp{-webkit-print-color-adjust:exact;print-color-adjust:exact}
-}
-</style>
-<style>.brand{font-family:'Bricolage Grotesque','Pretendard',sans-serif;font-weight:600;letter-spacing:-.01em}</style>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/ds.css">
+<script src="/assets/ds.js"></script>
 </head>
 <body>
-<div class="container">
-  <div class="toolbar no-print">
-    <a class="back-link" href="/app">
-      <svg width="13" height="13" viewBox="0 0 14 14" fill="none"><path d="M9 2L4 7l5 5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span id="backTxt">Back to DermCase</span>
-    </a>
-    <button class="pdf-btn" id="pdfBtn">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none"><path d="M12 3v11m0 0l-4-4m4 4l4-4M5 19h14" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
-      <span id="pdfTxt">Save as PDF</span>
-    </button>
+<div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="wrap report">
+  <div class="report-bar no-print">
+    <a class="btn btn-quiet btn-sm" href="/app" id="backLink"><span id="backTxt">Back to DermCase</span></a>
+    <button class="btn btn-solid btn-sm" id="pdfBtn" type="button"><span id="pdfTxt">Save as PDF</span></button>
   </div>
-  <div id="content"><div class="error">Loading brief…</div></div>
+  <div id="content"><p class="state">Loading brief</p></div>
 </div>
 <script>
 const L = {
   en: {
-    title:'Clinical Literature Brief', sub:'AI-assisted · de-identified · for physician review',
-    back:'Back to DermCase', pdf:'Save as PDF', generated:'Generated',
-    mAge:'Age', mSex:'Sex', mArea:'Affected area', mDuration:'Duration', mFitz:'Skin type',
-    sAssess:'Clinical assessment', sTx:'Treatment options', sLit:'Literature',
-    axEff:'Efficacy', axOns:'Onset', axMon:'Monitoring', axKey:'Key consideration',
-    txNote:'Literature-derived options for physician consideration — not a prescribing recommendation.',
-    disc:'For clinical decision support only — not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
-    invalid:'This brief link is invalid or has expired.',
-    ev:{'guideline':['s','Guideline'],'meta-analysis':['s','Meta-analysis'],'rct':['s','RCT'],'cohort':['m','Cohort'],'review':['m','Review'],'case-report':['w','Case report']},
+    title:'Clinical Literature Brief', sub:'AI-assisted, de-identified, for physician review',
+    back:'Back to DermCase', pdf:'Save as PDF', generated:'Generated', ageUnit:'y',
+    sAssess:'Assessment', sTx:'Treatment options', sLit:'References',
+    dxPrimary:'Most likely', dxAlt:'Also consider',
+    axEff:'Efficacy', axOns:'Onset', axMon:'Monitoring', axKey:'Key consideration', axSrc:'Source',
+    txNote:'Literature-derived options for physician review. Not a prescribing recommendation.',
+    disc:'For clinical decision support only. Not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
+    invalid:'This brief link is invalid or has expired.', searchTitle:'Search this title on PubMed',
+    ev:{'guideline':[3,'Guideline'],'meta-analysis':[3,'Meta-analysis'],'rct':[3,'RCT'],'cohort':[2,'Cohort'],'review':[2,'Review'],'case-report':[1,'Case report']},
     sex:{'Male':'Male','Female':'Female','Other':'Other'}
   },
   ko: {
-    title:'임상 문헌 브리프', sub:'AI 보조 · 비식별 · 의사 검토용',
-    back:'DermCase 앱으로', pdf:'PDF로 저장', generated:'생성일',
-    mAge:'나이', mSex:'성별', mArea:'발생 부위', mDuration:'기간', mFitz:'피부 유형',
-    sAssess:'임상 평가', sTx:'치료 옵션', sLit:'관련 문헌',
-    axEff:'효능', axOns:'발현 시기', axMon:'모니터링', axKey:'핵심 고려사항',
-    txNote:'의사 검토용 문헌 기반 옵션 — 처방 권고가 아닙니다.',
-    disc:'임상 의사결정 지원 목적으로만 사용 — 의사 판단을 대체하지 않습니다. 모든 결과는 현재 가이드라인 및 환자별 요인에 따라 검증하십시오.',
-    invalid:'유효하지 않거나 만료된 브리프 링크입니다.',
-    ev:{'guideline':['s','가이드라인'],'meta-analysis':['s','메타분석'],'rct':['s','RCT'],'cohort':['m','코호트'],'review':['m','리뷰'],'case-report':['w','증례 보고']},
+    title:'임상 문헌 브리프', sub:'AI 보조, 비식별, 의사 검토용',
+    back:'DermCase 앱으로', pdf:'PDF로 저장', generated:'생성일', ageUnit:'세',
+    sAssess:'임상 평가', sTx:'치료 옵션', sLit:'참고문헌',
+    dxPrimary:'가능성이 가장 높음', dxAlt:'함께 고려',
+    axEff:'효능', axOns:'발현 시기', axMon:'모니터링', axKey:'핵심 고려사항', axSrc:'출처',
+    txNote:'의사 검토용 문헌 기반 옵션입니다. 처방 권고가 아닙니다.',
+    disc:'임상 의사결정 지원 목적으로만 사용하세요. 의사의 판단을 대체하지 않습니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.',
+    invalid:'유효하지 않거나 만료된 브리프 링크입니다.', searchTitle:'PubMed에서 이 제목 검색',
+    ev:{'guideline':[3,'가이드라인'],'meta-analysis':[3,'메타분석'],'rct':[3,'RCT'],'cohort':[2,'코호트'],'review':[2,'리뷰'],'case-report':[1,'증례 보고']},
     sex:{'Male':'남성','Female':'여성','Other':'기타'}
   }
 };
-function esc(s){return String(s==null?'':s).replace(/[&<>]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;'}[c]));}
+const FITZ_N={I:1,II:2,III:3,IV:4,V:5,VI:6};
+function esc(s){return String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));}
 function safeUrl(u){u=(u||'').trim();return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';}
 function pubmed(title){return 'https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(String(title||'').replace(/[^\w\s().-]/g,' ').trim());}
 
@@ -142,47 +60,47 @@ function render(data, lang){
   document.getElementById('backTxt').textContent = t.back;
   document.getElementById('pdfTxt').textContent = t.pdf;
 
-  const sexVal = meta.sex ? (t.sex[meta.sex] || meta.sex) : '';
-  const metaFields = [
-    meta.age && {l:t.mAge, v:meta.age},
-    sexVal && {l:t.mSex, v:sexVal},
-    meta.area && {l:t.mArea, v:meta.area},
-    meta.duration && {l:t.mDuration, v:meta.duration},
-    meta.fitz && {l:t.mFitz, v:'Fitzpatrick '+meta.fitz}
-  ].filter(Boolean);
-  const metaHtml = metaFields.length ? `<div class="meta-card">${metaFields.map(f=>`<div class="meta-item"><span class="meta-label">${esc(f.l)}</span><span class="meta-value">${esc(f.v)}</span></div>`).join('')}</div>` : '';
+  const tier = lvl => { const e = t.ev[lvl]; return e ? `<span class="tier"><span class="gauge" data-n="${e[0]}" aria-hidden="true"><b></b><b></b><b></b></span>${esc(e[1])}</span>` : ''; };
 
-  const pill = lvl => { const e = t.ev[lvl]; return e ? `<span class="evp evp-${e[0]}">${esc(e[1])}</span>` : ''; };
+  const parts = [];
+  if(meta.age) parts.push(`<span>${esc(meta.age)}${t.ageUnit}</span>`);
+  if(meta.sex) parts.push(`<span>${esc(t.sex[meta.sex]||meta.sex)}</span>`);
+  if(meta.area) parts.push(`<span>${esc(meta.area)}</span>`);
+  if(meta.duration) parts.push(`<span>${esc(meta.duration)}</span>`);
+  if(meta.fitz && FITZ_N[meta.fitz]) parts.push(`<span><i class="dot" style="background:var(--f${FITZ_N[meta.fitz]})"></i>Fitzpatrick ${esc(meta.fitz)}</span>`);
+  const ctxHtml = parts.length ? `<div class="ctx-row"><div class="ctx">${parts.join('')}</div></div>` : '';
 
-  const assessHtml = assessment.map(a=>`<div class="assess-item"><div class="assess-top"><span class="assess-name">${esc(a.diagnosis)}</span>${a.icd10?`<span class="icd">ICD-10 · ${esc(a.icd10)}</span>`:''}</div><div class="assess-rationale">${esc(a.rationale)}</div></div>`).join('');
+  const assessHtml = assessment.map((a,i)=>`<div><div class="dx-rank">${esc(i===0?t.dxPrimary:t.dxAlt)}</div><div class="dx"><h3>${esc(a.diagnosis)}</h3>${a.icd10?`<span class="tag">ICD-10 ${esc(a.icd10)}</span>`:''}</div><p class="rationale">${esc(a.rationale)}</p></div>`).join('');
 
   let txHtml = '';
   if(tc && Array.isArray(tc.options) && tc.options.length){
+    const opts = tc.options, n = opts.length;
     const axes = [['efficacy',t.axEff],['onset',t.axOns],['monitoring',t.axMon],['key_consideration',t.axKey]];
-    const cards = tc.options.map(o=>{
-      const rows = axes.filter(([k])=>o[k]).map(([k,lbl])=>`<div class="axis"><div class="axis-label">${esc(lbl)}</div><div class="axis-val">${esc(o[k])}</div></div>`).join('');
-      return `<div class="opt"><div class="opt-top"><span class="opt-name">${esc(o.name)}</span>${pill(o.evidence_level)}</div>${rows}${o.source?`<div class="opt-source"><a href="${safeUrl(o.url)||pubmed(o.name+' '+o.source)}" target="_blank" rel="noopener noreferrer" style="color:var(--green);text-decoration:none">${esc(o.source)} ↗</a></div>`:''}</div>`;
-    }).join('');
-    txHtml = `<div class="section"><div class="section-title">${t.sTx}</div>${tc.rationale?`<div class="tx-rationale">${esc(tc.rationale)}</div>`:''}<div class="opts">${cards}</div><div class="tx-note">${t.txNote}</div></div>`;
+    let cells = '<div class="rh"></div>' + opts.map(o=>`<div class="oh"><span class="oname">${esc(o.name)}</span>${tier(o.evidence_level)}</div>`).join('');
+    axes.forEach(([k,lbl])=>{ if(opts.some(o=>o[k])) cells += `<div class="rh">${esc(lbl)}</div>` + opts.map(o=>`<div>${esc(o[k]||'')}</div>`).join(''); });
+    if(opts.some(o=>o.source)) cells += `<div class="rh">${esc(t.axSrc)}</div>` + opts.map(o=>`<div>${o.source?`<a href="${safeUrl(o.url)||pubmed(o.name+' '+o.source)}" target="_blank" rel="noopener noreferrer">${esc(o.source)}</a>`:''}</div>`).join('');
+    txHtml = `<section class="sec"><h2 class="sec-h">${t.sTx}</h2>${tc.rationale?`<p class="sec-lede">${esc(tc.rationale)}</p>`:''}<div class="cmp"><div class="cmp-grid" style="--n:${n}">${cells}</div></div><p class="fine">${t.txNote}</p></section>`;
   }
 
-  const refHtml = refs.map(function(r){var direct=safeUrl(r.url);var href=direct||pubmed(r.title);var shown=direct||pubmed(r.title);return `<div class="ref">${pill(r.evidence_level)}<a class="ref-title" href="${href}" target="_blank" rel="noopener noreferrer" style="color:inherit;text-decoration:none">${esc(r.title)} ↗</a><div class="ref-rel">${esc(r.relevance)}</div><div class="ref-source">${esc(r.source)} · <a href="${href}" target="_blank" rel="noopener noreferrer" style="color:var(--green);word-break:break-all">${esc(shown)}</a></div></div>`;}).join('');
+  const refHtml = refs.map(function(r){const direct=safeUrl(r.url);const href=direct||pubmed(r.title);const shown=direct||t.searchTitle;return `<div class="ref"><div>${tier(r.evidence_level)}</div><div><a class="ref-t" href="${href}" target="_blank" rel="noopener noreferrer">${esc(r.title)}<span aria-hidden="true"> ↗</span></a><p class="ref-rel">${esc(r.relevance)}</p><div class="ref-src"><span>${esc(r.source)}</span><a href="${href}" target="_blank" rel="noopener noreferrer" style="word-break:break-all">${esc(shown)}</a></div></div></div>`;}).join('');
 
   const dateStr = new Date(meta.sharedAt || Date.now()).toLocaleDateString(lang==='ko'?'ko-KR':'en-US',{year:'numeric',month:'short',day:'numeric'});
 
   document.getElementById('content').innerHTML = `
-    <div class="report-header">
-      <div class="brand">
-        <img src="/assets/darae-ink.svg" alt="Darae" style="width:26px;height:26px;vertical-align:middle">
+    <div class="report-head">
+      <div style="display:flex;align-items:flex-start;gap:14px">
+        <img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="34" height="34" style="width:34px;height:34px;margin-top:2px">
         <div><h1>${t.title}</h1><div class="sub">${t.sub}</div></div>
       </div>
-      <div class="gen">${t.generated}<br>${dateStr}</div>
+      <div class="gen">${t.generated}<br>${esc(dateStr)}</div>
     </div>
-    ${metaHtml}
-    ${assessHtml?`<div class="section"><div class="section-title">${t.sAssess}</div>${assessHtml}</div>`:''}
-    ${txHtml}
-    ${refHtml?`<div class="section"><div class="section-title">${t.sLit}</div>${refHtml}</div>`:''}
-    <div class="disclaimer">${t.disc}</div>`;
+    <article class="brief">
+      ${ctxHtml}
+      ${assessHtml?`<section class="sec"><h2 class="sec-h">${t.sAssess}</h2><div class="dx-list">${assessHtml}</div></section>`:''}
+      ${txHtml}
+      ${refHtml?`<section class="sec"><h2 class="sec-h">${t.sLit}</h2>${refHtml}</section>`:''}
+      <div class="brief-foot"><p class="fine">${t.disc}</p></div>
+    </article>`;
 }
 
 (function(){
@@ -197,7 +115,7 @@ function render(data, lang){
     if(new URLSearchParams(location.search).get('print')==='1'){ setTimeout(()=>window.print(), 450); }
   }catch(e){
     const t = L[lang] || L.en;
-    document.getElementById('content').innerHTML = `<div class="error">${t.invalid}<br><br><a class="back-link" href="/app">← ${t.back}</a></div>`;
+    document.getElementById('content').innerHTML = `<p class="state">${t.invalid}</p><p class="state"><a class="link" href="/app">${t.back}</a></p>`;
   }
 })();
 </script>
