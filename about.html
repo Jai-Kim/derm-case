@@ -9,11 +9,12 @@
 <link rel="apple-touch-icon" href="/assets/favicon-180.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="/assets/ds.css">
+<link rel="stylesheet" href="/assets/motion.css">
 <script src="/assets/ds.js"></script>
 
 </head>
 <body>
-<div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="spectrum" data-progress aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
 <header class="nav">
   <div class="wrap wide nav-in">
     <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
@@ -41,19 +42,19 @@
       <section id="pipeline">
         <h2 class="h2" data-i18n="pipeH"></h2>
         <div class="pipe">
-          <div class="pipe-row"><span class="n">1</span><h3 data-i18n="p1h"></h3><p data-i18n="p1p"></p></div>
-          <div class="pipe-row"><span class="n">2</span><h3 data-i18n="p2h"></h3><p data-i18n="p2p"></p></div>
-          <div class="pipe-row"><span class="n">3</span><h3 data-i18n="p3h"></h3><p data-i18n="p3p"></p></div>
-          <div class="pipe-row"><span class="n">4</span><h3 data-i18n="p4h"></h3><p data-i18n="p4p"></p></div>
+          <div class="pipe-row rv" data-reveal><span class="n">1</span><h3 data-i18n="p1h"></h3><p data-i18n="p1p"></p></div>
+          <div class="pipe-row rv" data-reveal><span class="n">2</span><h3 data-i18n="p2h"></h3><p data-i18n="p2p"></p></div>
+          <div class="pipe-row rv" data-reveal><span class="n">3</span><h3 data-i18n="p3h"></h3><p data-i18n="p3p"></p></div>
+          <div class="pipe-row rv" data-reveal><span class="n">4</span><h3 data-i18n="p4h"></h3><p data-i18n="p4p"></p></div>
         </div>
       </section>
       <section id="evidence">
         <h2 class="h2" data-i18n="evH"></h2>
         <p class="sec-sub" data-i18n="evP"></p>
         <div class="tiers" style="margin-top:32px">
-          <div class="tier-row"><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t3h"></h3><div class="kinds" data-i18n="t3k"></div><p data-i18n="t3p"></p></div></div>
-          <div class="tier-row"><span class="gauge" data-n="2" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t2h"></h3><div class="kinds" data-i18n="t2k"></div><p data-i18n="t2p"></p></div></div>
-          <div class="tier-row"><span class="gauge" data-n="1" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t1h"></h3><div class="kinds" data-i18n="t1k"></div><p data-i18n="t1p"></p></div></div>
+          <div class="tier-row gv" data-reveal><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t3h"></h3><div class="kinds" data-i18n="t3k"></div><p data-i18n="t3p"></p></div></div>
+          <div class="tier-row gv" data-reveal><span class="gauge" data-n="2" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t2h"></h3><div class="kinds" data-i18n="t2k"></div><p data-i18n="t2p"></p></div></div>
+          <div class="tier-row gv" data-reveal><span class="gauge" data-n="1" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t1h"></h3><div class="kinds" data-i18n="t1k"></div><p data-i18n="t1p"></p></div></div>
         </div>
         <p class="fine" style="margin-top:20px;max-width:60ch" data-i18n="evNote"></p>
       </section>
@@ -80,7 +81,7 @@
       </section>
     </div>
   </div>
-  <div class="band">
+  <div class="band" data-scrub="pass" data-from=".98" data-to=".5">
     <img class="band-mark" src="/assets/darae-white.svg" alt="" aria-hidden="true">
     <h2 class="h2" data-i18n="ctaH"></h2>
     <p data-i18n="ctaP"></p>
@@ -91,6 +92,7 @@
   <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="22" height="22"><span>DermCase by Darae</span></a>
   <p data-i18n="footDisc"></p>
 </div></div></footer>
+<script src="/assets/motion.js"></script>
 <script>
 var I18N={
 ko:{navHome:'홈',navOpen:'앱 열기',tocPipe:'작동 방식',tocEv:'근거 수준',tocPr:'개인정보',tocLi:'한계',
@@ -149,9 +151,9 @@ en:{navHome:'Home',navOpen:'Open app',tocPipe:'How it works',tocEv:'Evidence gra
  footDisc:'For clinical decision support only. Not a substitute for physician judgment and not for emergencies. Validate all findings against current guidelines and patient-specific factors.'}};
 var lang=(window.dcLang?dcLang.get():'ko');
 function t(k){return I18N[lang][k]||I18N.en[k]||k;}
-function render(){document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';}
+function render(){if(window.dcMotion&&window.__rendered)setTimeout(function(){dcMotion.refresh();},0);window.__rendered=true;document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';}
 document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);render();});
-render();
+if(window.dcMotion)dcMotion.refresh();
 (function(){
   var links=[].slice.call(document.querySelectorAll('.toc a'));
   if(!links.length||!('IntersectionObserver' in window))return;

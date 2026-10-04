@@ -1,0 +1,96 @@
+/* DermCase motion layer. Everything here is scoped so that without JS, or with
+   reduced motion (.js is never added), pages render fully visible and static. */
+
+/* Scroll progress, drawn with the Fitzpatrick strip */
+.js .spectrum[data-progress]{position:fixed;top:0;left:0;right:0;z-index:60}
+.js .spectrum[data-progress]::after{content:"";position:absolute;top:0;bottom:0;right:0;width:calc((1 - var(--sp,0)) * 100%);background:color-mix(in srgb,var(--canvas) 82%,transparent)}
+
+/* Statement: words darken as you read */
+.statement{padding:clamp(72px,12vw,168px) 0}
+.statement p{font-size:clamp(28px,4.6vw,64px);line-height:1.16;letter-spacing:-.04em;font-weight:650;max-width:19em;text-wrap:balance}
+html:lang(ko) .statement p{line-height:1.38;letter-spacing:-.03em}
+.js .statement .w{--a:calc(var(--i) / var(--n) * .8);--t:clamp(0,calc((var(--p,0) - var(--a)) / .2),1);color:color-mix(in srgb,var(--ink) calc(var(--t) * 100%),var(--ink-3))}
+
+/* Generic rise reveal, used sparingly */
+.js .rv{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .rv.in{opacity:1;transform:none}
+
+/* Evidence bars grow when you reach them */
+.js .gv .gauge b{transform:scaleY(0);transform-origin:bottom;transition:transform .8s var(--ease)}
+.js .gv .gauge b:nth-child(2){transition-delay:.12s}
+.js .gv .gauge b:nth-child(3){transition-delay:.24s}
+.js .gv.in .gauge b{transform:none}
+
+/* The pinned light-table scene */
+.scene{--p:1;--bed:#1A1D23;--bed-line:#5A5F68;background:#0E1013;color:var(--bed-ink)}
+:root[data-theme="dark"] .scene{background:#050607}
+.scene-stage{padding:clamp(56px,8vw,112px) 0}
+.scene-grid{display:grid;gap:44px}
+@media(min-width:900px){.scene-grid{grid-template-columns:minmax(0,.78fr) minmax(0,1.22fr);gap:56px;align-items:center}}
+.scene .h2{color:var(--bed-ink)}
+.rail{position:relative;margin-top:36px}
+.rail ol{padding-left:28px;display:grid;gap:26px}
+.rail::before{content:"";position:absolute;left:0;top:4px;bottom:4px;width:2px;background:#2B2F37;border-radius:2px}
+.rail-fill{position:absolute;left:0;top:4px;width:2px;height:calc((100% - 8px) * var(--p));background:var(--bed-ink);border-radius:2px}
+.rail h3{font-size:20px;font-weight:700;letter-spacing:-.02em;color:var(--bed-ink);transition:color .3s}
+.rail p{margin-top:6px;font-size:15px;line-height:1.65;color:var(--bed-ink-2);max-width:34ch;transition:color .3s}
+.scene[data-step] .rail li h3{color:#6E7480}
+.scene[data-step] .rail li p{color:#7C838E}
+.scene[data-step="1"] .rail li:nth-child(1) h3,.scene[data-step="2"] .rail li:nth-child(2) h3,.scene[data-step="3"] .rail li:nth-child(3) h3{color:var(--bed-ink)}
+.scene[data-step="1"] .rail li:nth-child(1) p,.scene[data-step="2"] .rail li:nth-child(2) p,.scene[data-step="3"] .rail li:nth-child(3) p{color:var(--bed-ink-2)}
+.scene-vis{display:grid;gap:22px;align-items:start}
+@media(min-width:900px){.scene-vis{grid-template-columns:232px minmax(0,1fr);gap:26px}}
+.lens{aspect-ratio:1;padding:22px;position:relative;overflow:hidden;max-width:240px}
+.lens svg{width:100%;height:100%}
+.scan{position:absolute;left:0;right:0;top:0;height:2px;background:var(--bed-ink);box-shadow:0 0 22px 3px rgba(233,235,238,.3);opacity:0;pointer-events:none}
+.chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:14px}
+.chips li{display:inline-flex;align-items:center;gap:0;border:1px solid #343A44;border-radius:999px;padding:5px 12px;font-size:13px;font-weight:600;color:var(--bed-ink)}
+.chips .cm::after{content:","}
+.chips .nx{margin-left:.35em}
+.chips .dot{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:7px}
+.lens-cap{margin-top:12px;font-size:12.5px;line-height:1.55;color:var(--bed-ink-2)}
+.scene .brief{color:var(--ink)}
+.scene-brief .brief-head{position:static;padding:12px 18px}
+.scene-brief .sec{padding:18px 20px}
+.scene-brief .dx h3{font-size:28px}
+.scene-brief .rationale{font-size:14px;margin-top:8px;line-height:1.6}
+.scene-brief .mini-ref{grid-template-columns:96px minmax(0,1fr)}
+.ref-open{position:relative;background:linear-gradient(currentColor,currentColor) 0 100%/0 1.5px no-repeat}
+.pop{display:inline-flex;align-items:center;height:22px;padding:0 9px;margin-left:8px;border-radius:999px;background:var(--ink);color:var(--canvas);font-size:11.5px;font-weight:700;vertical-align:middle;white-space:nowrap}
+@media(max-height:780px){.scene-brief .sec{padding:12px 18px}.scene-brief .dx h3{font-size:24px}.scene-brief .rationale{font-size:13px}.lens{padding:16px}}
+
+/* Pinned mode (desktop, JS on): the stage sticks while scroll drives the story */
+.scene.pin .scene-track{height:380vh}
+.scene.pin .scene-stage{position:sticky;top:0;height:100vh;padding:60px 0 0;display:grid;align-items:center}
+.scene.pin .sc{--t:clamp(0,calc((var(--p) - var(--a)) / (var(--b) - var(--a))),1);opacity:var(--t);transform:translateY(calc((1 - var(--t)) * 22px));will-change:opacity,transform}
+.scene.pin .gauge.sc{opacity:1;transform:none}
+.scene.pin .gauge b{transform:scaleY(var(--t));transform-origin:bottom}
+.scene.pin .scan{opacity:calc(1 - (2 * var(--t) - 1) * (2 * var(--t) - 1));top:calc(var(--t) * 100%);transform:none}
+.scene.pin .ref-open{opacity:1;transform:none;background-size:calc(var(--t) * 100%) 1.5px}
+.scene.pin .pop{transform:translateY(calc((1 - var(--t)) * 6px)) scale(calc(.9 + var(--t) * .1))}
+
+/* Not pinned (mobile, no JS, reduced motion): fully assembled, with a gentle reveal on mobile */
+.js .scene:not(.pin) .sc[data-reveal]{opacity:0;transform:translateY(14px);transition:opacity .7s var(--ease),transform .7s var(--ease)}
+.js .scene:not(.pin) .sc[data-reveal].in{opacity:1;transform:none}
+.scene:not(.pin) .ref-open{background-size:100% 1.5px}
+
+/* Privacy: the photo dissolves, the saved case stays */
+.flow{--t:1;margin-top:clamp(28px,4vw,48px);display:grid;grid-template-columns:minmax(0,1fr) 48px minmax(0,1fr);gap:clamp(10px,3vw,28px);align-items:center;max-width:760px}
+.js .flow{--t:clamp(0,calc((var(--p,0) - .12) / .5),1)}
+.flow-card{border:1px solid var(--line-2);border-radius:var(--r-3);padding:20px;background:var(--surface);display:grid;gap:14px;justify-items:start;align-content:start;min-height:196px}
+.flow-card b{font-size:16px;font-weight:700;letter-spacing:-.02em}
+.flow-card small{display:block;font-size:13px;line-height:1.55;color:var(--ink-3);min-height:40px}
+.flow-card .lens-mini{width:84px;height:84px}
+.flow-photo .lens-mini{opacity:calc(1 - var(--t) * .86);filter:blur(calc(var(--t) * 6px))}
+.flow-photo small{opacity:calc(.25 + var(--t) * .75)}
+.flow-case small{opacity:.95}
+.flow-line{width:48px;height:2px;background:var(--line-2);position:relative}
+.flow-line::after{content:"";position:absolute;right:-1px;top:-4px;width:9px;height:9px;border-top:2px solid var(--line-2);border-right:2px solid var(--line-2);transform:rotate(45deg)}
+.mini-brief{width:100%;display:grid;gap:7px}
+.mini-brief i{display:block;height:8px;border-radius:4px;background:var(--line-2)}
+.mini-brief i:nth-child(1){width:46%;height:12px;background:var(--ink)}
+.mini-brief i:nth-child(2){width:92%}.mini-brief i:nth-child(3){width:78%}
+@media(max-width:560px){.flow{grid-template-columns:1fr;max-width:420px}.flow-line{width:2px;height:28px;margin:0 auto}.flow-line::after{right:-4px;top:auto;bottom:-1px;transform:rotate(135deg)}}
+
+/* The brand mark drifts into place in the closing band */
+.js .band-mark{transform:translateY(calc((1 - var(--p,1)) * 90px)) rotate(calc((1 - var(--p,1)) * -10deg))}

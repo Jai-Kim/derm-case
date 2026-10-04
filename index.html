@@ -12,10 +12,34 @@
 <link rel="apple-touch-icon" href="/assets/favicon-180.png">
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="/assets/ds.css">
+<link rel="stylesheet" href="/assets/motion.css">
 <script src="/assets/ds.js"></script>
 </head>
 <body>
-<div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<div class="spectrum" data-progress aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
+  <defs>
+    <radialGradient id="lg-skin" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#E4B38D"/><stop offset=".65" stop-color="#CF9B73"/><stop offset="1" stop-color="#A97650"/></radialGradient>
+    <radialGradient id="lg-pl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#A94A40" stop-opacity=".95"/><stop offset=".55" stop-color="#C0675A" stop-opacity=".8"/><stop offset="1" stop-color="#C0675A" stop-opacity="0"/></radialGradient>
+    <filter id="lg-soft"><feGaussianBlur stdDeviation="2.4"/></filter>
+    <filter id="lg-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .97  0 0 0 0 .96  0 0 0 0 .93  0 0 0 1.5 -.62"/></filter>
+    <clipPath id="lg-clip"><circle cx="120" cy="120" r="112"/></clipPath>
+    <mask id="lg-mask"><g fill="#fff"><ellipse cx="100" cy="104" rx="46" ry="34"/><ellipse cx="152" cy="152" rx="38" ry="28"/></g></mask>
+    <symbol id="lens" viewBox="0 0 240 240">
+      <g clip-path="url(#lg-clip)">
+        <rect width="240" height="240" fill="url(#lg-skin)"/>
+        <g filter="url(#lg-soft)">
+          <ellipse cx="100" cy="104" rx="52" ry="40" fill="url(#lg-pl)"/>
+          <ellipse cx="152" cy="152" rx="44" ry="33" fill="url(#lg-pl)"/>
+          <ellipse cx="172" cy="84" rx="24" ry="18" fill="url(#lg-pl)" opacity=".7"/>
+        </g>
+        <rect width="240" height="240" filter="url(#lg-grain)" mask="url(#lg-mask)" opacity=".8"/>
+        <rect width="240" height="240" filter="url(#lg-grain)" opacity=".1"/>
+      </g>
+      <circle cx="120" cy="120" r="112" fill="none" stroke="#0E1013" stroke-opacity=".55" stroke-width="3"/>
+    </symbol>
+  </defs>
+</svg>
 <header class="nav">
   <div class="wrap wide nav-in">
     <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
@@ -72,13 +96,60 @@
     </div>
   </section>
 
-  <section class="section" id="how">
-    <div class="wrap wide">
-      <h2 class="h2" data-i18n="howH"></h2>
-      <div class="steps">
-        <div class="step"><div class="n">1</div><h3 data-i18n="st1h"></h3><p data-i18n="st1p"></p></div>
-        <div class="step"><div class="n">2</div><h3 data-i18n="st2h"></h3><p data-i18n="st2p"></p></div>
-        <div class="step"><div class="n">3</div><h3 data-i18n="st3h"></h3><p data-i18n="st3p"></p></div>
+  <section class="statement">
+    <div class="wrap wide"><p data-words data-scrub="pass" data-from=".9" data-to=".28" data-i18n="stmt"></p></div>
+  </section>
+
+  <section class="scene" id="how" data-scrub="pin" aria-labelledby="howH">
+    <div class="scene-track">
+      <div class="scene-stage">
+        <div class="wrap wide scene-grid">
+          <div>
+            <h2 class="h2" id="howH" data-i18n="howH"></h2>
+            <div class="rail">
+              <span class="rail-fill" aria-hidden="true"></span>
+              <ol>
+                <li><h3 data-i18n="st1h"></h3><p data-i18n="st1p"></p></li>
+                <li><h3 data-i18n="st2h"></h3><p data-i18n="st2p"></p></li>
+                <li><h3 data-i18n="st3h"></h3><p data-i18n="st3p"></p></li>
+              </ol>
+            </div>
+          </div>
+          <div class="scene-vis">
+            <div>
+              <figure class="bed lens sc" style="--a:-.25;--b:.1" role="img" aria-label="Illustrative case photo">
+                <svg viewBox="0 0 240 240" aria-hidden="true"><use href="#lens"/></svg>
+                <span class="scan sc" style="--a:.3;--b:.6" aria-hidden="true"></span>
+              </figure>
+              <ul class="chips">
+                <li class="sc" style="--a:.02;--b:.12"><span class="cm" data-i18n="cx1"></span><span class="nx" data-i18n="cx2"></span></li>
+                <li class="sc" style="--a:.07;--b:.17" data-i18n="cx3"></li>
+                <li class="sc" style="--a:.12;--b:.22"><i class="dot" style="background:var(--f3)"></i>Fitzpatrick III</li>
+              </ul>
+              <p class="lens-cap" data-i18n="lensCap"></p>
+            </div>
+            <article class="brief scene-brief sc" style="--a:.14;--b:.28" aria-label="Example brief">
+              <div class="brief-head"><span class="ex-tag" data-i18n="exTag"></span></div>
+              <section class="sec sc" data-reveal style="--a:.28;--b:.42">
+                <h2 class="sec-h" data-i18n="sAssess"></h2>
+                <div class="dx-rank" data-i18n="sRank"></div>
+                <div class="dx"><h3 data-i18n="sDx"></h3><span class="tag">ICD-10 L40.0</span></div>
+                <p class="rationale" data-i18n="sWhy"></p>
+              </section>
+              <section class="sec sc" data-reveal style="--a:.44;--b:.58">
+                <h2 class="sec-h" data-i18n="sTx"></h2>
+                <div class="mini-opts">
+                  <div class="mini-opt"><b data-i18n="o1n"></b><span class="tier"><span class="gauge sc" style="--a:.5;--b:.62" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><span data-i18n="evRct"></span></span><p data-i18n="o1p"></p></div>
+                  <div class="mini-opt"><b data-i18n="o2n"></b><span class="tier"><span class="gauge sc" style="--a:.54;--b:.66" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><span data-i18n="evGuideline"></span></span><p data-i18n="o2p"></p></div>
+                </div>
+              </section>
+              <section class="sec sc" data-reveal style="--a:.68;--b:.8">
+                <h2 class="sec-h" data-i18n="sRefs"></h2>
+                <div class="mini-ref"><span class="tier"><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><span data-i18n="evGuideline"></span></span><div><a class="ref-open sc" style="--a:.84;--b:.95" href="https://pubmed.ncbi.nlm.nih.gov/?term=Joint+AAD-NPF+guidelines+of+care+for+the+management+and+treatment+of+psoriasis+with+biologics" target="_blank" rel="noopener noreferrer">Joint AAD-NPF guidelines of care for the management and treatment of psoriasis with biologics</a><span class="pop sc" style="--a:.88;--b:.96" data-i18n="popOpen"></span><small>J Am Acad Dermatol, 2019</small></div></div>
+              </section>
+            </article>
+          </div>
+        </div>
       </div>
     </div>
   </section>
@@ -90,9 +161,9 @@
         <p class="sec-sub" data-i18n="evP"></p>
       </div>
       <div class="tiers">
-        <div class="tier-row"><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t3h"></h3><div class="kinds" data-i18n="t3k"></div><p data-i18n="t3p"></p></div></div>
-        <div class="tier-row"><span class="gauge" data-n="2" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t2h"></h3><div class="kinds" data-i18n="t2k"></div><p data-i18n="t2p"></p></div></div>
-        <div class="tier-row"><span class="gauge" data-n="1" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t1h"></h3><div class="kinds" data-i18n="t1k"></div><p data-i18n="t1p"></p></div></div>
+        <div class="tier-row gv" data-reveal><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t3h"></h3><div class="kinds" data-i18n="t3k"></div><p data-i18n="t3p"></p></div></div>
+        <div class="tier-row gv" data-reveal><span class="gauge" data-n="2" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t2h"></h3><div class="kinds" data-i18n="t2k"></div><p data-i18n="t2p"></p></div></div>
+        <div class="tier-row gv" data-reveal><span class="gauge" data-n="1" aria-hidden="true"><b></b><b></b><b></b></span><div><h3 data-i18n="t1h"></h3><div class="kinds" data-i18n="t1k"></div><p data-i18n="t1p"></p></div></div>
       </div>
     </div>
   </section>
@@ -101,6 +172,17 @@
     <div class="wrap wide">
       <h2 class="h2" data-i18n="prH"></h2>
       <p class="sec-sub" data-i18n="prP"></p>
+      <div class="flow" data-scrub="pass" data-from=".92" data-to=".42">
+        <div class="flow-card flow-photo">
+          <svg class="lens-mini" viewBox="0 0 240 240" aria-hidden="true"><use href="#lens"/></svg>
+          <div><b data-i18n="flPhoto"></b><small data-i18n="flGone"></small></div>
+        </div>
+        <span class="flow-line" aria-hidden="true"></span>
+        <div class="flow-card flow-case">
+          <div class="mini-brief" aria-hidden="true"><i></i><i></i><i></i></div>
+          <div><b data-i18n="flCase"></b><small data-i18n="flKept"></small></div>
+        </div>
+      </div>
       <dl class="facts">
         <div class="fact"><dt data-i18n="f1t"></dt><dd data-i18n="f1d"></dd></div>
         <div class="fact"><dt data-i18n="f2t"></dt><dd data-i18n="f2d"></dd></div>
@@ -111,7 +193,7 @@
   </section>
 
   <div class="wrap wide">
-    <div class="band">
+    <div class="band" data-scrub="pass" data-from=".98" data-to=".5">
       <img class="band-mark" src="/assets/darae-white.svg" alt="" aria-hidden="true">
       <h2 class="h2" data-i18n="ctaH"></h2>
       <p data-i18n="ctaP"></p>
@@ -129,6 +211,7 @@
   </div>
 </footer>
 
+<script src="/assets/motion.js"></script>
 <script>
 var I18N={
 ko:{
@@ -136,7 +219,7 @@ ko:{
  h1:'내 증례를 위해 읽은 문헌.',
  lede:'증례 사진과 몇 가지 정보를 올리면 유력 진단과 치료 선택지의 장단점, 직접 열어 확인할 수 있는 참고문헌을 한 장의 브리프로 정리합니다.',
  ctaOpen:'앱 열기', ctaHow:'작동 방식 보기', assure:'사진은 저장되지 않습니다. 의사 검토용입니다.',
- exTag:'예시', cx1:'47세', cx2:'여성', cx3:'정강이, 팔꿈치', cx4:'8개월',
+ stmt:'답은 대개 문헌 어딘가에 있습니다. 어려운 것은 이 환자에게 맞는 논문을 찾는 일입니다.', lensCap:'일러스트이며 실제 환자가 아닙니다.', popOpen:'PubMed 열림', flPhoto:'내 사진', flGone:'분석 후 폐기됩니다', flCase:'저장한 증례', flKept:'저장을 선택할 때만, 브리프와 메모만 보관됩니다', exTag:'예시', cx1:'47세', cx2:'여성', cx3:'정강이, 팔꿈치', cx4:'8개월',
  sAssess:'임상 평가', sRank:'가능성이 가장 높음', sDx:'판상 건선',
  sWhy:'경계가 분명한 홍반성 판과 두꺼운 은백색 비늘이 있고, 강한 국소 스테로이드에 반응하지 않았습니다.',
  sTx:'치료 옵션', o1n:'IL-17 또는 IL-23 억제제', o1p:'피부 청소율이 가장 높습니다. 투여 전 결핵 검사가 필요합니다.',
@@ -165,7 +248,7 @@ en:{
  h1:'The literature, read for your case.',
  lede:'Upload a case photo and a few details. DermCase returns a brief with the likely diagnosis, treatment trade-offs, and references you can open and check.',
  ctaOpen:'Open the app', ctaHow:'See how it works', assure:'Photos are never stored. For physician review only.',
- exTag:'Example', cx1:'47y', cx2:'Female', cx3:'Shins, elbows', cx4:'8 months',
+ stmt:'The answer is usually somewhere in the literature. The hard part is finding the paper that fits this patient.', lensCap:'Illustration, not a real patient.', popOpen:'Opens PubMed', flPhoto:'Your photo', flGone:'Discarded after analysis', flCase:'Saved case', flKept:'Only if you choose Save, and only the brief and notes', exTag:'Example', cx1:'47y', cx2:'Female', cx3:'Shins, elbows', cx4:'8 months',
  sAssess:'Assessment', sRank:'Most likely', sDx:'Plaque psoriasis',
  sWhy:'Well-demarcated erythematous plaques with thick silvery scale, refractory to potent topical steroids.',
  sTx:'Treatment options', o1n:'IL-17 or IL-23 inhibitor', o1p:'Highest skin clearance. Screen for TB before starting.',
@@ -196,8 +279,9 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});
   document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';
 }
-document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);applyI18n();});
+document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);applyI18n();if(window.dcMotion)dcMotion.refresh();});
 applyI18n();
+if(window.dcMotion)dcMotion.refresh();
 </script>
 </body>
 </html>

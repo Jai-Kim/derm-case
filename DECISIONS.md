@@ -119,3 +119,21 @@ This log exists because the small, day-to-day calls compound into the product's 
 **Rejected:** indigo accent (generic SaaS blue-violet, and the user already flagged purple), DARAE-green on cream (a default for any Korean-medicine brief), Bricolage Grotesque (overused, mismatches Hangul).
 
 **Also changed:** model-generated text is now HTML-escaped before rendering (it was injected raw). References without a direct link now say "Opens a PubMed search" instead of implying a direct link. Fabricated landing stats ("15+ tabs", "20 min") and the unverified "built with practicing dermatologists" claim were removed.
+
+## D-008: Scroll motion is meaningful, scrubbed, and optional
+
+**Date:** October 2026
+**Flagged by:** User ("animation with scroll", "look at this with top class UX/UI designer's eyes")
+
+**Decision:** Add a small scroll-driven motion layer (`assets/motion.js`, `assets/motion.css`) to the landing and About pages only. The app stays still.
+
+**Principle:** Every animation encodes something about the product. No generic fade-up on every section.
+- Pinned "light table" scene: photo, scan, assessment, comparison, a reference opening. Progress is tied to scroll, so it rewinds.
+- Statement that darkens word by word as you read it.
+- The Fitzpatrick strip is the scroll progress bar.
+- Evidence bars grow as you reach them (strength is the point).
+- Privacy shown, not told: the photo dissolves while the saved brief stays solid.
+
+**Engineering:** A small script writes scroll progress into CSS variables rather than native `animation-timeline`, because native support still excludes Firefox stable and older iPhones. Pinning is desktop only (900px and up); phones get the same story stacked, with a gentle reveal. With reduced motion, no motion class is added and every page is fully visible and static.
+
+**Known limit:** Landing and About copy is injected by JS, so without JS the text areas are empty (link previews use the meta description). Pre-rendering the default language is a candidate follow-up.
