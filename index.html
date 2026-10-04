@@ -17,29 +17,6 @@
 </head>
 <body>
 <div class="spectrum" data-progress aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div>
-<svg width="0" height="0" style="position:absolute" aria-hidden="true" focusable="false">
-  <defs>
-    <radialGradient id="lg-skin" cx="50%" cy="42%" r="70%"><stop offset="0" stop-color="#E4B38D"/><stop offset=".65" stop-color="#CF9B73"/><stop offset="1" stop-color="#A97650"/></radialGradient>
-    <radialGradient id="lg-pl" cx="50%" cy="50%" r="50%"><stop offset="0" stop-color="#A94A40" stop-opacity=".95"/><stop offset=".55" stop-color="#C0675A" stop-opacity=".8"/><stop offset="1" stop-color="#C0675A" stop-opacity="0"/></radialGradient>
-    <filter id="lg-soft"><feGaussianBlur stdDeviation="2.4"/></filter>
-    <filter id="lg-grain" x="0" y="0" width="100%" height="100%"><feTurbulence type="fractalNoise" baseFrequency=".85" numOctaves="2" seed="7" result="n"/><feColorMatrix in="n" type="matrix" values="0 0 0 0 .97  0 0 0 0 .96  0 0 0 0 .93  0 0 0 1.5 -.62"/></filter>
-    <clipPath id="lg-clip"><circle cx="120" cy="120" r="112"/></clipPath>
-    <mask id="lg-mask"><g fill="#fff"><ellipse cx="100" cy="104" rx="46" ry="34"/><ellipse cx="152" cy="152" rx="38" ry="28"/></g></mask>
-    <symbol id="lens" viewBox="0 0 240 240">
-      <g clip-path="url(#lg-clip)">
-        <rect width="240" height="240" fill="url(#lg-skin)"/>
-        <g filter="url(#lg-soft)">
-          <ellipse cx="100" cy="104" rx="52" ry="40" fill="url(#lg-pl)"/>
-          <ellipse cx="152" cy="152" rx="44" ry="33" fill="url(#lg-pl)"/>
-          <ellipse cx="172" cy="84" rx="24" ry="18" fill="url(#lg-pl)" opacity=".7"/>
-        </g>
-        <rect width="240" height="240" filter="url(#lg-grain)" mask="url(#lg-mask)" opacity=".8"/>
-        <rect width="240" height="240" filter="url(#lg-grain)" opacity=".1"/>
-      </g>
-      <circle cx="120" cy="120" r="112" fill="none" stroke="#0E1013" stroke-opacity=".55" stroke-width="3"/>
-    </symbol>
-  </defs>
-</svg>
 <header class="nav">
   <div class="wrap wide nav-in">
     <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
@@ -60,7 +37,7 @@
   <section class="hero">
     <div class="wrap wide hero-grid">
       <div>
-        <h1 class="display" data-i18n="h1"></h1>
+        <h1 class="display" data-split data-i18n="h1"></h1>
         <p class="lede" data-i18n="lede"></p>
         <div class="cta-row">
           <a class="btn btn-solid" href="/app" data-i18n="ctaOpen"></a>
@@ -69,6 +46,16 @@
         <p class="assure" data-i18n="assure"></p>
       </div>
 
+      <div class="hero-vis" id="heroVis">
+        <div class="derm-wrap">
+          <p class="derm-cap"><span class="hint" data-i18n="dmHint"></span> <span data-i18n="lensCap"></span></p>
+          <div class="derm" id="derm" role="img" aria-label="Dermatoscope view, interactive illustration">
+            <div class="derm-field"><canvas id="dermBase"></canvas><div class="derm-lens"><canvas id="dermDetail"></canvas></div></div>
+            <span class="derm-ring" aria-hidden="true"></span>
+            <span class="derm-tag" id="dermTag" aria-hidden="true"></span>
+          </div>
+        </div>
+        <div class="card-wrap">
       <article class="brief sample" aria-label="Example brief">
         <div class="brief-head rise">
           <div class="ctx"><span data-i18n="cx1"></span><span data-i18n="cx2"></span><span data-i18n="cx3"></span><span data-i18n="cx4"></span><span><i class="dot" style="background:var(--f3)"></i>Fitzpatrick III</span></div>
@@ -93,6 +80,15 @@
           <div class="mini-ref"><span class="tier"><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span><span data-i18n="evGuideline"></span></span><div><a href="https://pubmed.ncbi.nlm.nih.gov/?term=Joint+AAD-NPF+guidelines+of+care+for+the+management+and+treatment+of+psoriasis+with+systemic+nonbiologic+therapies" target="_blank" rel="noopener noreferrer">Joint AAD-NPF guidelines of care for the management and treatment of psoriasis with systemic nonbiologic therapies <span aria-hidden="true">↗</span></a><small>J Am Acad Dermatol, 2020</small></div></div>
         </section>
       </article>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="ticker" aria-label="Sources">
+    <div class="wrap wide"><p class="ticker-label" data-i18n="tkLabel"></p></div>
+    <div class="ticker-track" data-ticker>
+      <div class="ticker-row"><span>PubMed</span><span>JAAD</span><span>NEJM</span><span>AAD guidelines</span><span>Cochrane</span></div>
     </div>
   </section>
 
@@ -118,7 +114,7 @@
           <div class="scene-vis">
             <div>
               <figure class="bed lens sc" style="--a:-.25;--b:.1" role="img" aria-label="Illustrative case photo">
-                <svg viewBox="0 0 240 240" aria-hidden="true"><use href="#lens"/></svg>
+                <img class="lens-img" src="/assets/lens.jpg" alt="" width="240" height="240" aria-hidden="true">
                 <span class="scan sc" style="--a:.3;--b:.6" aria-hidden="true"></span>
               </figure>
               <ul class="chips">
@@ -154,6 +150,42 @@
     </div>
   </section>
 
+  <section class="section" id="inside">
+    <div class="wrap wide">
+      <h2 class="h2" data-i18n="inH"></h2>
+      <div class="bento">
+        <article class="tile t-cmp rv gv" data-reveal data-spot>
+          <div><h3 data-i18n="tcT"></h3><p data-i18n="tcP"></p></div>
+          <div class="vis"><div class="mt">
+            <div></div><b data-i18n="o1n"></b><b data-i18n="o2n"></b><b data-i18n="o3n"></b>
+            <div class="rl" data-i18n="rEff"></div><div><span class="gauge" data-n="3" aria-hidden="true"><b></b><b></b><b></b></span></div><div><span class="gauge" data-n="2" aria-hidden="true"><b></b><b></b><b></b></span></div><div><span class="gauge" data-n="1" aria-hidden="true"><b></b><b></b><b></b></span></div>
+            <div class="rl" data-i18n="rOn"></div><div><i style="width:58%"></i></div><div><i style="width:84%"></i></div><div><i style="width:70%"></i></div>
+            <div class="rl" data-i18n="rMon"></div><div><i style="width:76%"></i></div><div><i style="width:90%"></i></div><div><i style="width:48%"></i></div>
+          </div></div>
+        </article>
+        <article class="tile t-icd rv" data-reveal data-spot style="--d:.08s">
+          <div><h3 data-i18n="tiT"></h3><p data-i18n="tiP"></p></div>
+          <div class="vis">
+            <div class="icd-row"><span class="r" data-i18n="sRank"></span><b data-i18n="sDx"></b><span class="tag">ICD-10 L40.0</span></div>
+            <div class="icd-row dim"><span class="r" data-i18n="sAlt"></span><b data-i18n="sDx2"></b><span class="tag">ICD-10 L30.0</span></div>
+          </div>
+        </article>
+        <article class="tile t-ref rv" data-reveal data-spot style="--d:.04s">
+          <div><h3 data-i18n="trT"></h3><p data-i18n="trP"></p></div>
+          <div class="vis"><a class="ref-demo" href="https://pubmed.ncbi.nlm.nih.gov/?term=Joint+AAD-NPF+guidelines+of+care+for+the+management+and+treatment+of+psoriasis+with+biologics" target="_blank" rel="noopener noreferrer"><span class="u">Joint AAD-NPF guidelines of care for the management and treatment of psoriasis with biologics</span></a><span class="pop" data-i18n="popOpen"></span></div>
+        </article>
+        <article class="tile t-lang rv" data-reveal data-spot style="--d:.12s">
+          <div><h3 data-i18n="tlT"></h3><p data-i18n="tlP"></p></div>
+          <div class="vis lang-vis"><div><span class="chip">KO</span><b>판상 건선</b></div><div><span class="chip">EN</span><b>Plaque psoriasis</b></div></div>
+        </article>
+        <article class="tile t-pdf rv" data-reveal data-spot style="--d:.2s">
+          <div><h3 data-i18n="tpT"></h3><p data-i18n="tpP"></p></div>
+          <div class="vis"><div class="paper"><div class="spectrum" aria-hidden="true"><i></i><i></i><i></i><i></i><i></i><i></i></div><i class="pl h"></i><i class="pl"></i><i class="pl" style="width:70%"></i><i class="pl"></i><i class="pl" style="width:55%"></i><span class="pdf-chip">PDF</span></div></div>
+        </article>
+      </div>
+    </div>
+  </section>
+
   <section class="section" id="evidence">
     <div class="wrap wide split">
       <div>
@@ -174,7 +206,7 @@
       <p class="sec-sub" data-i18n="prP"></p>
       <div class="flow" data-scrub="pass" data-from=".92" data-to=".42">
         <div class="flow-card flow-photo">
-          <svg class="lens-mini" viewBox="0 0 240 240" aria-hidden="true"><use href="#lens"/></svg>
+          <img class="lens-mini" src="/assets/lens.jpg" alt="" width="84" height="84" aria-hidden="true">
           <div><b data-i18n="flPhoto"></b><small data-i18n="flGone"></small></div>
         </div>
         <span class="flow-line" aria-hidden="true"></span>
@@ -204,6 +236,7 @@
 
 <footer class="foot">
   <div class="wrap wide">
+    <div class="wordmark" aria-hidden="true" data-prox>DermCase</div>
     <div class="foot-in">
       <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="22" height="22"><span data-i18n="footBrand"></span></a>
       <p data-i18n="footDisc"></p>
@@ -212,6 +245,7 @@
 </footer>
 
 <script src="/assets/motion.js"></script>
+<script src="/assets/hero.js"></script>
 <script>
 var I18N={
 ko:{
@@ -239,7 +273,7 @@ ko:{
  f2t:'저장한 증례', f2d:'저장을 선택하면 브리프와 메모만 보관됩니다. 이미지는 포함되지 않습니다.',
  f3t:'접근 권한', f3d:'저장된 증례는 저장한 계정에서만 볼 수 있습니다.',
  f4t:'기기 내 기록', f4d:'계정이 없으면 증례는 이 기기의 브라우저에만 남습니다.',
- ctaH:'직접 찾아봐야 했던 증례를 가져오세요.', ctaP:'비전형적이거나 치료에 저항하는 증례에서 가장 쓸모가 있습니다.',
+ tkLabel:'1차 출처를 우선합니다', dmHint:'렌즈 위로 커서를 움직여 보세요.', dmA:'점상 혈관과 백색 비늘', dmB:'병변이 없는 피부', dmAria:'더모스코프 화면, 상호작용 일러스트', inH:'브리프에 담기는 것', tcT:'나란히 비교하는 장단점', tcP:'선택이 분명하지 않을 때 효능, 발현 시기, 모니터링, 그리고 이 환자에게 가장 중요한 한 가지를 기준으로 옵션을 비교합니다.', tiT:'순위가 매겨진 ICD-10', tiP:'가능성 순으로 정리하고 각각에 가장 구체적인 코드를 붙입니다.', trT:'모든 주장은 출처로 연결', trP:'참고문헌을 누르면 원문으로 이동합니다. 직접 링크가 없으면 정확한 제목으로 PubMed 검색을 엽니다.', tlT:'한국어와 영어', tlP:'화면과 보고서를 두 언어로 받을 수 있습니다.', tpT:'한 장짜리 보고서', tpP:'인쇄하거나 PDF로 저장해 차트에 보관할 수 있습니다.', o3n:'아프레밀라스트', rEff:'효능', rOn:'발현 시기', rMon:'모니터링', sAlt:'함께 고려', sDx2:'화폐상 습진', ctaH:'직접 찾아봐야 했던 증례를 가져오세요.', ctaP:'비전형적이거나 치료에 저항하는 증례에서 가장 쓸모가 있습니다.',
  footBrand:'DermCase by Darae',
  footDisc:'임상 의사결정 지원 목적으로만 사용하세요. 의사의 판단을 대체하지 않으며 응급 상황을 위한 도구가 아닙니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.'
 },
@@ -268,7 +302,7 @@ en:{
  f2t:'Saved case', f2d:'If you choose Save, only the brief and your notes are kept. No image.',
  f3t:'Access', f3d:'A saved case is visible only to the account that saved it.',
  f4t:'On this device', f4d:'Without an account, cases stay in your browser on this device.',
- ctaH:'Bring a case you had to look up.', ctaP:'It is most useful on the atypical and treatment-resistant ones.',
+ tkLabel:'Prefers primary sources', dmHint:'Move your cursor over the lens.', dmA:'Dotted vessels and white scale', dmB:'Uninvolved skin', dmAria:'Dermatoscope view, interactive illustration', inH:'Inside every brief', tcT:'Trade-offs, side by side', tcP:'When the choice is not obvious, options are compared on efficacy, onset, monitoring, and the one factor that matters for this patient.', tiT:'Ranked, with ICD-10', tiP:'Ordered by likelihood, each with the most specific code.', trT:'Every claim opens its source', trP:'Select a reference to read the original. If there is no direct link, it opens a PubMed search for the exact title.', tlT:'Korean and English', tlP:'Read the screen and the report in either language.', tpT:'A one-page report', tpP:'Print it or save it as a PDF for the chart.', o3n:'Apremilast', rEff:'Efficacy', rOn:'Onset', rMon:'Monitoring', sAlt:'Also consider', sDx2:'Nummular eczema', ctaH:'Bring a case you had to look up.', ctaP:'It is most useful on the atypical and treatment-resistant ones.',
  footBrand:'DermCase by Darae',
  footDisc:'For clinical decision support only. Not a substitute for physician judgment and not for emergencies. Validate all findings against current guidelines and patient-specific factors.'
 }};
@@ -279,9 +313,10 @@ function applyI18n(){
   document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});
   document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';
 }
-document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);applyI18n();if(window.dcMotion)dcMotion.refresh();});
+function after(){if(window.dcHero)dcHero.setLabels(t('dmA'),t('dmB'),t('dmAria'));if(window.dcMotion)dcMotion.refresh();}
+document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);applyI18n();after();});
 applyI18n();
-if(window.dcMotion)dcMotion.refresh();
+after();
 </script>
 </body>
 </html>

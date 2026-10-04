@@ -149,3 +149,21 @@ This log exists because the small, day-to-day calls compound into the product's 
 - Example content is qualitative only (no invented efficacy percentages), and its references open a PubMed search rather than claiming direct links.
 
 **Photo:** CDC Public Health Image Library has public-domain psoriasis photographs (IDs 4053 and 4055). They are 1969 to 1977 film photographs, so they read as vintage. Not embedded yet: needs a human to download and review the image. Recommendation: keep the illustrated lens on the landing page, and use a real photo only where realism helps a dermatologist judge the product.
+
+## D-010: Stronger visuals and motion, and two lessons about verification
+
+**Date:** October 2026
+**Flagged by:** User ("the animations and visuals are still a bit weak and not the most trendy", "about section doesn't load anything")
+
+**Shipped:**
+- Hero is an interactive dermatoscope. A loupe follows the cursor (and drifts on its own) and reveals dotted vessels and white scale inside the plaques, naming what is under it. Illustration only, labeled as not a real patient.
+- One orchestrated entrance on load: headline words rise out of masks, the lens pulls into focus, the brief assembles.
+- Sources ticker (outlined type, skin-tone separators) that speeds up with scroll and reverses when you scroll up. Copy says the tool "prefers" primary sources, which is what the prompt instructs, not a guarantee.
+- Bento grid of what is inside every brief, with a cursor spotlight on each tile.
+- Giant footer wordmark whose letters swell as the cursor nears (variable font weight).
+- Measurement ring on the scene lens, film grain on the closing band.
+- Reduced motion: nothing moves on its own; the loupe still answers the cursor.
+
+**Lesson 1: the About page was blank for a while.** An edit to its script deleted the single line that renders its text. Tests checked animation and errors but not that words existed. Added a guard that fails if any text element is empty on any page in either language. About was fixed and shipped on its own first.
+
+**Lesson 2: performance regressions can hide.** The pinned scene stalled (2 fps idle, 1.3 second frames) because the lens illustration used SVG noise and blur filters, which are rasterized on the CPU. Bisecting looked misleading because removing almost anything "fixed" it, which pointed to a one-time first-paint cost. The fix was to pre-render the lens once into a 20KB image (same code as the hero) and remove the filters: 62 fps idle, worst scroll frame 100 ms. Rules going forward: no SVG filters or large background images inside the pinned scene; measure frame rate, not just correctness.
