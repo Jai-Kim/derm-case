@@ -167,3 +167,19 @@ This log exists because the small, day-to-day calls compound into the product's 
 **Lesson 1: the About page was blank for a while.** An edit to its script deleted the single line that renders its text. Tests checked animation and errors but not that words existed. Added a guard that fails if any text element is empty on any page in either language. About was fixed and shipped on its own first.
 
 **Lesson 2: performance regressions can hide.** The pinned scene stalled (2 fps idle, 1.3 second frames) because the lens illustration used SVG noise and blur filters, which are rasterized on the CPU. Bisecting looked misleading because removing almost anything "fixed" it, which pointed to a one-time first-paint cost. The fix was to pre-render the lens once into a 20KB image (same code as the hero) and remove the filters: 62 fps idle, worst scroll frame 100 ms. Rules going forward: no SVG filters or large background images inside the pinned scene; measure frame rate, not just correctness.
+
+## D-011: A cut-off model answer must never become an error screen
+
+**Date:** October 2026
+**Flagged by:** User (real-device test, Korean case: "JSON parse failed", raw output ended mid-word)
+
+**Cause:** The answer hit the 2,600 output-token limit and the JSON was left unfinished. Korean uses far more tokens than English, and the prompt asked for 3 to 5 references plus uncapped treatment fields. My tests used short mocked responses, so they could not see it.
+
+**Fix, in layers:**
+1. Prevent: strict length budget in the prompt (one sentence per rationale and relevance, short phrases per treatment field, 3 to 4 references, 2 to 3 options). `max_tokens` raised only modestly, to 3,000, because the function has a 60 second ceiling and longer answers take longer.
+2. Survive: if the answer is still cut off, keep everything that arrived complete, drop the half-written part, and show a banner ("cut off, some sections may be missing") with a Run again button. Stress-tested at 1,250 cut positions, including Korean text and escaped quotes.
+3. Recover: the error card says plainly that the answer was too long, has a one-tap retry, and no longer dumps raw JSON.
+
+**Still unproven:** the length budget has not been run against the live model. Re-run the failing case to confirm.
+
+**Lesson:** the gap I kept flagging (no run against a live model) is exactly where this bug lived. Any change to the prompt or limits needs a live check.

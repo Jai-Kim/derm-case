@@ -373,3 +373,7 @@ html:lang(ko) .doc-main h1{line-height:1.12;letter-spacing:-.04em}
 .ex-banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 24px;background:var(--inset);border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
 .load-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
 @media(max-width:640px){.ex-banner{padding:12px 20px}}
+
+/* Partial result */
+.warn-banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 24px;background:var(--warn-bg);border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.55;color:var(--warn)}
+@media(max-width:640px){.warn-banner{padding:12px 20px}}

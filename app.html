@@ -138,6 +138,7 @@ const I18N = {
     txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항', rowSource: '출처',
     txDisclaimer: '의사 검토용 문헌 기반 옵션입니다. 처방 권고가 아닙니다.',
     refVerify: 'PubMed에서 확인', refSearch: 'PubMed 검색 결과로 연결됩니다',
+    partialNote: '응답이 길어 일부가 잘렸습니다. 받은 부분까지 표시합니다. 다시 분석하면 전체를 받을 수 있습니다.', rerun: '다시 분석', errCut: '응답이 너무 길어 끝까지 받지 못했습니다. 다시 시도해 주세요.',
     exTag: '예시', exNote: '예시 출력입니다. 내 증례를 분석하려면 사진을 추가하세요.', clearExample: '예시 지우기', seeExample: '예시 브리프 보기', cancel: '취소', canceled: '분석을 취소했습니다', secUnit: '초',
     evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
   },
@@ -185,6 +186,7 @@ const I18N = {
     txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration', rowSource: 'Source',
     txDisclaimer: 'Literature-derived options for physician review. Not a prescribing recommendation.',
     refVerify: 'Check on PubMed', refSearch: 'Opens a PubMed search',
+    partialNote: 'The response was cut off, so some sections may be missing. Run the analysis again for the full brief.', rerun: 'Run again', errCut: 'The response was too long to finish. Please try again.',
     exTag: 'Example', exNote: 'Example output. Add your own photo to analyze a real case.', clearExample: 'Clear example', seeExample: 'See an example brief', cancel: 'Cancel', canceled: 'Analysis canceled', secUnit: 's',
     evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
   }
@@ -355,13 +357,14 @@ ${langInstruction}
 
 Rules:
 - RELEVANCE GATE (decide this FIRST): one or more images may be provided. Determine whether AT LEAST ONE is a clinical photograph of human skin, hair, nails, or mucosa suitable for dermatologic assessment. If NONE are — e.g. unrelated objects, scenery, an animal, a screenshot or document, non-clinical photos, or images too blurry/dark/cropped to assess — set "relevant": false, fill "rejection", and STOP: do NOT search the web and do NOT include assessment, references, or treatment_comparison. If at least one image is a valid clinical photograph, set "relevant": true, omit "rejection", base the assessment on the clinical image(s) and disregard any non-clinical ones. When in doubt about borderline but plausibly-clinical images, proceed with relevant:true but note the image-quality limitation in the rationale.
+- LENGTH BUDGET (strict, the response MUST always finish): keep the whole JSON short. Every rationale and relevance is ONE sentence of at most 25 words (in Korean, at most about 70 characters). Every treatment option field (efficacy, onset, monitoring, key_consideration) is ONE short phrase of at most 15 words (in Korean, at most about 45 characters). treatment_comparison has 2-3 options. Brevity beats completeness. Never trail off: if you are running long, drop the least important reference or option instead of writing more.
 - assessment: 1-2 entries only, ranked by likelihood. No confidence numbers. Include the most specific applicable ICD-10 code in the icd10 field. If no ICD-10 code is confidently applicable, omit the field rather than guessing.
 - treatment_comparison: OPTIONAL. Include ONLY when the case genuinely has 2-4 competing viable treatment paths where the choice is non-obvious (treatment-resistant, off-label question, comorbidity complicating first-line, or biologic selection). If one standard path is clearly correct for a routine case, OMIT this field entirely — do not force a comparison. When included: 2-4 options, each grounded in a real recent citation. Reason step by step internally — confirm the diagnosis, search per-treatment evidence, then synthesize trade-offs. Present options with trade-offs; NEVER rank a single 'best'. This is decision support for physician consideration, not a prescribing recommendation.
 - url fields (references and treatment sources): include a real, resolvable link ONLY if you found it during search — prefer a DOI link (https://doi.org/...) or PubMed (https://pubmed.ncbi.nlm.nih.gov/...). If you are not confident the link is correct, use an empty string "" — NEVER invent a URL. Every citation stays verifiable because the app adds a PubMed search fallback from the title.
-- references: 3-5 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
+- references: 3-4 entries. After identifying the top diagnosis, search specifically for it — e.g. 'psoriasis scalp dermoscopy JAAD 2024' or 'tinea capitis adult treatment guidelines 2023'. Prefer primary sources from PubMed, JAAD, NEJM, AAD, Cochrane published in the last 10 years. Each reference must be directly applicable to this case, not generic.
 - evidence_level on each reference must be one of: 'guideline' (society/national guideline), 'meta-analysis' (systematic review or meta-analysis), 'rct' (randomized controlled trial), 'cohort' (cohort or case-control study), 'review' (narrative review or expert summary), 'case-report' (case report or case series). Pick the single best fit.`;
   try{
-    const resp=await fetch('/api/analyze',{method:'POST',signal:aborter.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:2600,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[...images.map(im=>({type:'image',source:{type:'base64',media_type:im.mime,data:im.base64}})),{type:'text',text:`Assess this dermatology case. One or more case images are provided.\n\nPatient context:\n${ctx}\n\nFirst apply the relevance gate. If at least one image is a valid clinical photograph, search for the most relevant recent published literature and return the full analysis; otherwise return the rejection. Return only the structured JSON.`}]}]})});
+    const resp=await fetch('/api/analyze',{method:'POST',signal:aborter.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({model:'claude-sonnet-4-6',max_tokens:3000,system:sys,tools:[{type:'web_search_20250305',name:'web_search'}],messages:[{role:'user',content:[...images.map(im=>({type:'image',source:{type:'base64',media_type:im.mime,data:im.base64}})),{type:'text',text:`Assess this dermatology case. One or more case images are provided.\n\nPatient context:\n${ctx}\n\nFirst apply the relevance gate. If at least one image is a valid clinical photograph, search for the most relevant recent published literature and return the full analysis; otherwise return the rejection. Return only the structured JSON.`}]}]})});
     let data;
     const contentType=resp.headers.get('content-type')||'';
     if(contentType.includes('application/json')){data=await resp.json();}
@@ -374,16 +377,38 @@ Rules:
     const fenceMatch=clean.match(/```(?:json)?\s*([\s\S]*?)```/);
     if(fenceMatch){clean=fenceMatch[1].trim();}else{const b0=clean.indexOf('{'),b1=clean.lastIndexOf('}');if(b0!==-1&&b1!==-1)clean=clean.slice(b0,b1+1);}
     clean=clean.replace(/[\r\n]/g,' ');
-    let parsed;try{parsed=JSON.parse(clean);}catch(e){throw new Error('JSON parse failed.\n\nRaw:\n'+raw);}
+    let parsed,partial=false;
+    try{parsed=JSON.parse(clean);}
+    catch(e){
+      const fixed=repairJson(clean);
+      if(fixed&&fixed.assessment&&fixed.assessment.length){parsed=fixed;partial=true;}
+      else{const er=new Error('JSON parse failed.\n\nRaw:\n'+raw);er.truncated=(data.stop_reason==='max_tokens');throw er;}
+    }
     if(parsed && parsed.relevant===false){ renderRejection(parsed.rejection||{}); analyzeBtn.disabled=false; return; }
-    renderOutput(parsed);
+    renderOutput(parsed,null,{partial:partial});
   }catch(err){
     if(err&&err.name==='AbortError'){setOutput('');analyzeBtn.disabled=images.length===0;announce(t('canceled'));return;}
-    setOutput(`<div class="notice err" role="alert"><span class="notice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg></span><div><h3>${esc(t('errTitle'))}</h3><p>${esc(t('errHint'))}</p><pre>${esc(err.message)}</pre></div></div>`);
+    setOutput(`<div class="notice err" role="alert"><span class="notice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg></span><div><h3>${esc(t('errTitle'))}</h3><p>${esc(err&&err.truncated?t('errCut'):t('errHint'))}</p><button class="btn btn-solid btn-sm" id="retryBtn" type="button">${esc(t('rerun'))}</button><pre>${esc(String(err&&err.message||err).slice(0,400))}</pre></div></div>`);
     analyzeBtn.disabled=false;
+    const rb=document.getElementById('retryBtn'); if(rb) rb.addEventListener('click',()=>{ analyzeBtn.click(); });
   }finally{stopTimer();aborter=null;}
 }
 
+/*REPAIR_START*/
+function repairJson(s){
+  // A cut-off answer is unfinished JSON. Keep everything up to the last complete value, then close what is still open.
+  var stack=[],inStr=false,esc=false,cut=-1,closers='',i,ch;
+  for(i=0;i<s.length;i++){
+    ch=s.charAt(i);
+    if(inStr){ if(esc)esc=false; else if(ch==='\\')esc=true; else if(ch==='"')inStr=false; continue; }
+    if(ch==='"'){inStr=true;continue;}
+    if(ch==='{')stack.push('}'); else if(ch==='[')stack.push(']');
+    else if(ch==='}'||ch===']'){ stack.pop(); cut=i+1; closers=stack.slice().reverse().join(''); }
+  }
+  if(cut<0)return null;
+  try{ return JSON.parse(s.slice(0,cut)+closers); }catch(e){ return null; }
+}
+/*REPAIR_END*/
 function safeUrl(u){u=(u||'').trim();return /^https?:\/\/[^\s"'<>]+$/i.test(u)?u:'';}
 function pubmedSearch(title){return 'https://pubmed.ncbi.nlm.nih.gov/?term='+encodeURIComponent(String(title||'').replace(/[^\w\s().-]/g,' ').trim());}
 function refHref(r){return safeUrl(r&&r.url)||pubmedSearch(r&&r.title);}
@@ -413,6 +438,7 @@ function ctxHtml(meta){
 
 function renderOutput(d, metaIn, opts){
   opts=opts||{};const ex=!!opts.example;
+  const partialBanner=opts.partial?`<div class="warn-banner" role="status"><span>${esc(t('partialNote'))}</span><button class="btn btn-line btn-sm" id="rerunBtn" type="button">${esc(t('rerun'))}</button></div>`:'';
   const meta=metaIn||readMeta();
   const assessment=d.assessment||[],refs=d.references||[],tc=d.treatment_comparison;
   const assessHtml=assessment.map((item,i)=>`<div><div class="dx-rank">${esc(t(i===0?'dxPrimary':'dxAlt'))}</div><div class="dx"><h3>${esc(item.diagnosis)}</h3>${item.icd10?`<span class="tag">ICD-10 ${esc(item.icd10)}</span>`:''}</div><p class="rationale">${esc(item.rationale)}</p></div>`).join('');
@@ -429,10 +455,11 @@ function renderOutput(d, metaIn, opts){
   const fullActions=`<div class="actions"><button class="btn btn-solid btn-sm" id="saveBtn" type="button">${esc(t('saveCase'))}</button><button class="btn btn-line btn-sm" id="copyBtn" type="button">${esc(t('copyChart'))}</button><button class="btn btn-line btn-sm" id="pdfBtn" type="button">${esc(t('exportPdf'))}</button><button class="btn btn-line btn-sm" id="shareBtn" type="button">${esc(t('shareReport'))}</button><button class="btn btn-quiet btn-sm" id="newBtn" type="button">${esc(t('newCase'))}</button></div>`;
   const exActions=`<div class="actions"><button class="btn btn-quiet btn-sm" id="newBtn" type="button">${esc(t('clearExample'))}</button></div>`;
   const exBanner=`<div class="ex-banner"><span class="ex-tag">${esc(t('exTag'))}</span><span>${esc(t('exNote'))}</span></div>`;
-  setOutput(`<article class="brief" id="brief"><div class="brief-head"><div class="ctx">${ctxHtml(meta)}</div>${ex?exActions:fullActions}</div>${ex?exBanner:''}${assessHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionAssessment'))}</h2><div class="dx-list">${assessHtml}</div></section>`:''}${txHtml}${refHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionLit'))}</h2>${refHtml}</section>`:''}</article>`);
+  setOutput(`<article class="brief" id="brief"><div class="brief-head"><div class="ctx">${ctxHtml(meta)}</div>${ex?exActions:fullActions}</div>${ex?exBanner:''}${partialBanner}${assessHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionAssessment'))}</h2><div class="dx-list">${assessHtml}</div></section>`:''}${txHtml}${refHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionLit'))}</h2>${refHtml}</section>`:''}</article>`);
   analyzeBtn.disabled=images.length===0;
   announce(t('ready'));
   scrollToBrief();
+  const rr=document.getElementById('rerunBtn'); if(rr) rr.addEventListener('click',()=>{ analyzeBtn.click(); });
   if(!ex){
   document.getElementById('shareBtn').addEventListener('click',()=>{
     const url=window.location.origin+'/report#'+payloadFor(d,meta);
