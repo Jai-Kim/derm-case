@@ -377,3 +377,12 @@ html:lang(ko) .doc-main h1{line-height:1.12;letter-spacing:-.04em}
 /* Partial result */
 .warn-banner{display:flex;flex-wrap:wrap;align-items:center;justify-content:space-between;gap:10px 16px;padding:12px 24px;background:var(--warn-bg);border-bottom:1px solid var(--line);font-size:13.5px;line-height:1.55;color:var(--warn)}
 @media(max-width:640px){.warn-banner{padding:12px 20px}}
+
+/* Install button + iPhone how-to */
+#installBtn{display:inline-flex;align-items:center}
+#installBtn[hidden]{display:none}
+@media(max-width:520px){#installBtn .t{display:none}#installBtn svg{margin-right:0!important}#installBtn{padding:0 10px}}
+.pwa-dlg{border:1px solid var(--line-2);border-radius:var(--r-3);padding:24px;max-width:340px;background:var(--surface);color:var(--ink)}
+.pwa-dlg::backdrop{background:rgba(0,0,0,.4)}
+.pwa-dlg h2{font-size:18px;font-weight:700;letter-spacing:-.02em}
+.pwa-dlg p{margin:8px 0 18px;font-size:14.5px;line-height:1.65;color:var(--ink-2)}

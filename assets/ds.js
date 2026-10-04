@@ -14,4 +14,5 @@
     get: function () { var s; try { s = localStorage.getItem('dc_lang'); } catch (e) {} return s === 'en' || s === 'ko' ? s : ((navigator.language || '').toLowerCase().indexOf('en') === 0 ? 'en' : 'ko'); },
     set: function (v) { try { localStorage.setItem('dc_lang', v); } catch (e) {} }
   };
+  if ('serviceWorker' in navigator) { window.addEventListener('load', function () { navigator.serviceWorker.register('/sw.js').catch(function () {}); }); }
 })();

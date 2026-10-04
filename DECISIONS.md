@@ -183,3 +183,18 @@ This log exists because the small, day-to-day calls compound into the product's 
 **Still unproven:** the length budget has not been run against the live model. Re-run the failing case to confirm.
 
 **Lesson:** the gap I kept flagging (no run against a live model) is exactly where this bug lived. Any change to the prompt or limits needs a live check.
+
+## D-012: Android and iPhone access via an installable web app first (route 1)
+
+**Date:** October 2026
+**Flagged by:** User ("what does it take to take this to an Android native app? That's a blocker for usage")
+
+**Decision:** Ship an installable PWA now. Defer a Play Store listing until the pilot shows the tool is useful.
+
+**Why:** The app already runs in Android Chrome. What testers lack is a home-screen icon, full-screen launch and a place to find it. A PWA gives that in a day, on Android and iPhone, with no store. A Play listing needs a $25 account, a health apps declaration and privacy policy, review, and for a new personal account a closed test with 12 testers for 14 continuous days (organization accounts are exempt; internal testing for up to 100 testers has no review and is the pilot path). Those are weeks for something unvalidated.
+
+**Built:** web manifest with 192, 512 and maskable icons (DARAE mark), shortcut to a new case, install button on the app page (native prompt on Android Chrome; a short how-to on iPhone), offline page.
+
+**Service worker rules:** network-first for every same-origin page and asset, so a new deploy always shows up when online and nothing goes stale. Offline it serves the last good copy of pages already visited, or a bilingual offline page. It never touches /api and never caches responses to analysis. Cross-origin requests (fonts, Supabase) are left alone.
+
+**Next if a Play listing is wanted:** wrap this PWA in a Trusted Web Activity (Bubblewrap or PWABuilder), host assetlinks.json under /.well-known on a stable custom domain, distribute to pilot dermatologists through internal testing, and write the privacy policy (it must disclose that photos and health details go to a third-party AI provider).
