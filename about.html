@@ -36,7 +36,7 @@
     </nav>
     <div class="doc-main">
       <section>
-        <h1 data-i18n="h1"></h1>
+        <h1 data-split data-i18n="h1"></h1>
         <p class="sec-sub" data-i18n="lede"></p>
       </section>
       <section id="pipeline">
@@ -153,6 +153,7 @@ var lang=(window.dcLang?dcLang.get():'ko');
 function t(k){return I18N[lang][k]||I18N.en[k]||k;}
 function render(){if(window.dcMotion&&window.__rendered)setTimeout(function(){dcMotion.refresh();},0);window.__rendered=true;document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';}
 document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);render();});
+render();
 if(window.dcMotion)dcMotion.refresh();
 (function(){
   var links=[].slice.call(document.querySelectorAll('.toc a'));
