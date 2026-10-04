@@ -137,3 +137,15 @@ This log exists because the small, day-to-day calls compound into the product's 
 **Engineering:** A small script writes scroll progress into CSS variables rather than native `animation-timeline`, because native support still excludes Firefox stable and older iPhones. Pinning is desktop only (900px and up); phones get the same story stacked, with a gentle reveal. With reduced motion, no motion class is added and every page is fully visible and static.
 
 **Known limit:** Landing and About copy is injected by JS, so without JS the text areas are empty (link previews use the meta description). Pre-rendering the default language is a candidate follow-up.
+
+## D-009: First 60 seconds: instant example brief, and a controllable wait
+
+**Date:** October 2026
+**Flagged by:** User ("what's your thought as a world-class web app designer?")
+
+**Decision:** Treat the first minute of use as the main design risk, not the visual polish.
+- "Load example" (and a button in the empty state) now renders a complete, clearly labeled example brief instantly. No photo, no API call, no cost. This resolves the earlier open question about the half-working sample loader. An example cannot be saved, shared, exported or copied, so it can never be mistaken for a real case. A real analysis replaces it.
+- The wait (up to a minute) shows an honest elapsed-seconds counter and a Cancel button that truly aborts the request. No fake stage-by-stage progress, because the analysis is a single call.
+- Example content is qualitative only (no invented efficacy percentages), and its references open a PubMed search rather than claiming direct links.
+
+**Photo:** CDC Public Health Image Library has public-domain psoriasis photographs (IDs 4053 and 4055). They are 1969 to 1977 film photographs, so they read as vintage. Not embedded yet: needs a human to download and review the image. Recommendation: keep the illustrated lens on the landing page, and use a real photo only where realism helps a dermatologist judge the product.

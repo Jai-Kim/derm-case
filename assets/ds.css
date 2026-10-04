@@ -368,3 +368,8 @@ html:lang(ko) .doc-main h1{line-height:1.12;letter-spacing:-.04em}
   .gauge[data-n] b{background:#c6cac4}
   .gauge[data-n="1"] b:nth-child(1),.gauge[data-n="2"] b:nth-child(-n+2),.gauge[data-n="3"] b{background:#14161A}
 }
+
+/* Example brief + the wait */
+.ex-banner{display:flex;flex-wrap:wrap;align-items:center;gap:8px 12px;padding:12px 24px;background:var(--inset);border-bottom:1px solid var(--line);font-size:13.5px;color:var(--ink-2)}
+.load-foot{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:4px}
+@media(max-width:640px){.ex-banner{padding:12px 20px}}
