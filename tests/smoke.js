@@ -157,6 +157,9 @@ async function browserChecks() {
     ok(/Anthropic/.test(v.text) && /30/.test(v.text), 'privacy [' + lang + '] names Anthropic and the 30 day retention');
     ok(/Supabase/.test(v.text) && /Vercel/.test(v.text), 'privacy [' + lang + '] names Supabase and Vercel');
     ok(lang === 'en' ? /not a medical device/.test(v.text) : /의료기기가 아니며/.test(v.text), 'privacy [' + lang + '] carries the medical-device disclaimer');
+    const contact = await pg.evaluate(() => ({ cfg: window.DERMCASE_CONTACT_EMAIL || '', href: ((document.querySelector('main .l-' + document.documentElement.lang + ' [data-contact] a') || {}).getAttribute || function () { return ''; }).call(document.querySelector('main .l-' + document.documentElement.lang + ' [data-contact] a') || {}, 'href') }));
+    ok(/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(contact.cfg), 'config.js has a valid contact email', contact.cfg);
+    ok(contact.href === 'mailto:' + contact.cfg, 'privacy [' + lang + '] shows the contact email as a mailto link', contact.href);
     await pg.context().close();
   }
   // no JavaScript at all: the policy must still be readable (crawlers and store reviewers)

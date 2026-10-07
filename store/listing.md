@@ -9,7 +9,7 @@ Default language: English. Add Korean as a translation.
 | Short description | Literature briefs for dermatologists. Every reference opens its source. | 피부과 의사를 위한 문헌 브리프. 모든 참고문헌은 원문으로 연결됩니다. |
 | Category | Medical | 의료 |
 | Tags | Medical, Reference | |
-| Contact email | (your public developer email) | |
+| Contact email | jaikyeong.kim@gmail.com | |
 | Website | https://dermcase.jai-kim.com | |
 | Privacy policy | https://dermcase.jai-kim.com/privacy | |
 

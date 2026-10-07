@@ -23,7 +23,7 @@ Why I could not build the Android file myself: the build needs Google's Android 
 | # | Step | Time |
 |---|---|---|
 | 1 | Run the SQL block at the bottom of `supabase-schema.sql` in the Supabase SQL editor. Without it, "Delete account" shows an error | 2 min |
-| 2 | In `config.js`, set `window.DERMCASE_CONTACT_EMAIL = "you@..."`. The privacy page shows it instead of the GitHub issues fallback | 1 min |
+| 2 | Done: `window.DERMCASE_CONTACT_EMAIL` is set in `config.js` and shown on the privacy page | done |
 | 3 | Create a Play developer account at play.google.com/console. $25 once, ID verification. Personal is fine for the pilot | 15 min + Google's wait |
 | 4 | Build the Android App Bundle, option A below | 10 min |
 | 5 | Play Console, Create app, then Testing, Internal testing, upload the `.aab`, add testers by Gmail address, copy the opt-in link | 20 min |
