@@ -40,6 +40,13 @@
   <p id="accountLine" class="acct"></p>
   <div id="state" class="state"></div>
   <div id="list" class="lib-list hide"></div>
+  <section id="acctZone" class="acct-zone hide" aria-labelledby="acctH">
+    <h2 id="acctH" data-i18n="acctH"></h2>
+    <p data-i18n="acctP"></p>
+    <button id="delAcctBtn" class="btn btn-line btn-sm" type="button" data-i18n="acctBtn"></button>
+    <p id="acctMsg" class="fine" role="status" aria-live="polite"></p>
+    <p class="fine"><a class="link" href="/privacy" data-i18n="privLink"></a></p>
+  </section>
 </main>
 <script>
 const I18N = {
@@ -51,6 +58,8 @@ const I18N = {
     empty: '아직 저장된 증례가 없습니다. 앱에서 증례를 분석한 뒤 저장해 보세요.',
     deleteBtn: '삭제', confirmDelete: '이 증례를 삭제하시겠습니까?',
     loadErr: '증례를 불러오지 못했습니다.', ageUnit: '세',
+    acctH: '계정 삭제', acctP: '계정과 저장된 증례를 모두 영구 삭제합니다. 되돌릴 수 없습니다. 기기 안에만 저장된 증례는 앱의 기록에서 따로 삭제하세요.',
+    acctBtn: '계정과 모든 증례 삭제', acctConfirm: '계정과 저장된 모든 증례를 영구 삭제합니다. 계속하시겠습니까?', acctDone: '계정을 삭제했습니다.', acctFail: '삭제하지 못했습니다. 잠시 후 다시 시도하거나 개인정보 처리방침의 연락처로 삭제를 요청해 주세요.', privLink: '개인정보 처리방침',
   },
   en: {
     navApp: 'Open app', signOut: 'Sign out',
@@ -60,6 +69,8 @@ const I18N = {
     empty: 'No saved cases yet. Analyze a case in the app, then save it.',
     deleteBtn: 'Delete', confirmDelete: 'Delete this case?',
     loadErr: 'Could not load your cases.', ageUnit: 'y',
+    acctH: 'Delete account', acctP: 'Permanently deletes your account and every saved case. This cannot be undone. Cases saved only on this device are removed separately from the history in the app.',
+    acctBtn: 'Delete account and all cases', acctConfirm: 'Permanently delete your account and all saved cases. Continue?', acctDone: 'Your account was deleted.', acctFail: 'Could not delete. Try again shortly, or request deletion using the contact in the privacy policy.', privLink: 'Privacy policy',
   }
 };
 let lang = (window.dcLang ? dcLang.get() : 'ko');
@@ -108,6 +119,7 @@ async function load(){
   }
   $('accountLine').textContent = u.email || '';
   $('signOutBtn').classList.remove('hide');
+  $('acctZone').classList.remove('hide');
   $('state').textContent = t('loading');
   try { renderCases(await DermCaseCloud.listCases()); }
   catch(e){ $('state').textContent = t('loadErr') + ' ' + (e.message || ''); }
@@ -115,6 +127,12 @@ async function load(){
 
 $('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; if(window.dcLang) dcLang.set(lang); load(); });
 $('signOutBtn').addEventListener('click', async () => { await DermCaseCloud.signOut(); window.location.href = '/'; });
+$('delAcctBtn').addEventListener('click', async () => {
+  if (!confirm(t('acctConfirm'))) return;
+  const b = $('delAcctBtn'); b.disabled = true;
+  try { await DermCaseCloud.deleteAccount(); $('acctMsg').textContent = t('acctDone'); setTimeout(() => { window.location.href = '/'; }, 1200); }
+  catch(e){ b.disabled = false; $('acctMsg').textContent = t('acctFail'); }
+});
 load();
 </script>
 </body>

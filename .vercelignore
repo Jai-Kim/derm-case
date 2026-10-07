@@ -1,0 +1,7 @@
+# Not part of the website. Kept in git, kept off the deployed domain.
+store
+tests
+android
+*.md
+supabase-schema.sql
+architecture.mermaid

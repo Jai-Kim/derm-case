@@ -22,3 +22,23 @@ create policy "cases_delete_own" on public.cases
   for delete using (auth.uid() = user_id);
 
 create index if not exists cases_user_created_idx on public.cases (user_id, created_at desc);
+
+-- Account deletion (required by Google Play for apps that create accounts).
+-- Lets a signed-in user delete THEIR OWN account. Saved cases go with it via
+-- the on delete cascade above. Run once in the Supabase SQL editor.
+create or replace function public.delete_my_account()
+returns void
+language plpgsql
+security definer
+set search_path = public, auth
+as $$
+begin
+  if auth.uid() is null then
+    raise exception 'not signed in';
+  end if;
+  delete from auth.users where id = auth.uid();
+end;
+$$;
+
+revoke all on function public.delete_my_account() from public, anon;
+grant execute on function public.delete_my_account() to authenticated;

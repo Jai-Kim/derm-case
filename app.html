@@ -77,6 +77,7 @@
     </div>
     <div class="case-sec act">
       <button class="btn btn-solid btn-block" id="analyzeBtn" type="button" disabled data-i18n="analyzeBtn"></button>
+      <p class="fine send-note"><span data-i18n="sendNote"></span> <a class="link" href="/privacy" data-i18n="privacyLink"></a></p>
       <p class="fine" style="margin-top:12px" data-i18n="deid"></p>
     </div>
   </aside>
@@ -95,6 +96,7 @@
     <div id="outputArea"></div>
     <div id="historyArea"></div>
     <p class="page-foot" data-i18n="disclaimer"></p>
+    <p class="page-foot"><a class="link" href="/privacy" data-i18n="privacyLink"></a></p>
   </section>
 </main>
 
@@ -106,7 +108,7 @@ const I18N = {
     trySample: '예시 불러오기',
     sampleLoaded: '예시를 불러왔습니다',
     uploadText: '사진을 끌어다 놓거나 <b>파일 선택</b>',
-    uploadSub: 'JPG, PNG, 최대 3장. 저장되지 않습니다.',
+    uploadSub: 'JPG, PNG, 최대 3장. DermCase는 저장하지 않습니다.',
     patientContext: '환자 정보',
     age: '나이', agePh: '예: 42', ageUnit: '세',
     sex: '성별', sexSelect: '선택', sexMale: '남성', sexFemale: '여성', sexOther: '기타 / 미지정',
@@ -119,7 +121,7 @@ const I18N = {
     notes: '추가 메모 (선택)', notesPh: '증상, 이전 치료, 관련 병력',
     analyzeBtn: '증례 분석',
     deid: '비식별화된 증례만 입력하세요.',
-    disclaimer: '임상 의사결정 지원 목적으로만 사용하세요. 의사의 판단을 대체하지 않습니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.',
+    disclaimer: '임상의를 위한 문헌 참고 도구입니다. DermCase는 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 의사의 판단을 대체하지 않으며 응급 상황을 위한 도구가 아닙니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.',
     emptyTitle: '브리프가 여기에 표시됩니다',
     emptyBody: '사진을 1장에서 3장 올리고 환자 정보를 입력한 뒤 증례 분석을 누르세요. 감별진단과 참고문헌, 선택이 분명하지 않은 경우에는 치료 옵션 비교까지 한 장으로 정리됩니다. 먼저 결과가 어떤 모습인지 보고 싶다면 예시를 열어 보세요.',
     analyzing: '사진을 읽고 문헌을 검색하고 있습니다',
@@ -139,7 +141,9 @@ const I18N = {
     clearAll: '전체 삭제', deleteCase: '삭제',
     storageNote: '증례는 이 기기에만 저장됩니다. 서버로 전송되지 않습니다.',
     confirmClear: '저장된 모든 증례를 삭제하시겠습니까?',
-    sectionAssessment: '임상 평가', sectionLit: '참고문헌', sectionTreatment: '치료 옵션',
+    privacyLink: '개인정보 처리방침',
+    sendNote: '분석하면 사진과 증례 정보가 AI 제공사(Anthropic)로 전송됩니다.',
+    sectionAssessment: '감별 고려 질환', sectionLit: '참고문헌', sectionTreatment: '치료 옵션',
     dxPrimary: '가능성이 가장 높음', dxAlt: '함께 고려',
     txEfficacy: '효능', txOnset: '발현 시기', txMonitoring: '모니터링', txConsideration: '핵심 고려사항', rowSource: '출처',
     txDisclaimer: '의사 검토용 문헌 기반 옵션입니다. 처방 권고가 아닙니다.',
@@ -154,7 +158,7 @@ const I18N = {
     trySample: 'Load example',
     sampleLoaded: 'Example loaded',
     uploadText: 'Drop photos here or <b>browse</b>',
-    uploadSub: 'JPG or PNG, up to 3. Never stored.',
+    uploadSub: 'JPG or PNG, up to 3. DermCase does not save them.',
     patientContext: 'Patient',
     age: 'Age', agePh: 'e.g. 42', ageUnit: 'y',
     sex: 'Sex', sexSelect: 'Select', sexMale: 'Male', sexFemale: 'Female', sexOther: 'Other / Not specified',
@@ -167,7 +171,7 @@ const I18N = {
     notes: 'Additional notes (optional)', notesPh: 'Symptoms, prior treatments, relevant history',
     analyzeBtn: 'Analyze case',
     deid: 'Use de-identified cases only.',
-    disclaimer: 'For clinical decision support only. Not a substitute for physician judgment. Validate all findings against current guidelines and patient-specific factors.',
+    disclaimer: 'A literature reference for clinicians. DermCase is not a medical device and does not diagnose, treat, cure or prevent any medical condition. It does not replace physician judgment and is not for emergencies. Validate all findings against current guidelines and patient-specific factors.',
     emptyTitle: 'Your brief appears here',
     emptyBody: 'Add one to three photos and a few details, then select Analyze case. You get the assessment and references, plus a treatment comparison when the choice is not obvious. Want to see the result first? Open the example.',
     analyzing: 'Reading the photo and searching the literature',
@@ -187,7 +191,9 @@ const I18N = {
     clearAll: 'Clear all', deleteCase: 'Delete',
     storageNote: 'Cases are stored only on this device. Nothing is sent to a server.',
     confirmClear: 'Delete all saved cases?',
-    sectionAssessment: 'Assessment', sectionLit: 'References', sectionTreatment: 'Treatment options',
+    privacyLink: 'Privacy policy',
+    sendNote: 'Analyzing sends the photo and case details to an AI provider (Anthropic).',
+    sectionAssessment: 'Differential to consider', sectionLit: 'References', sectionTreatment: 'Treatment options',
     dxPrimary: 'Most likely', dxAlt: 'Also consider',
     txEfficacy: 'Efficacy', txOnset: 'Onset', txMonitoring: 'Monitoring', txConsideration: 'Key consideration', rowSource: 'Source',
     txDisclaimer: 'Literature-derived options for physician review. Not a prescribing recommendation.',
@@ -284,18 +290,23 @@ function updateBtn(){analyzeBtn.disabled=images.length===0;}
 
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('lang').value = currentLang; applyI18n(); });
 document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; if(window.dcLang) dcLang.set(currentLang); applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); if(window.__renderHistory) window.__renderHistory(); });
+const SAMPLE_TXT = {
+  ko: { area: '양쪽 정강이와 팔꿈치', duration: '8개월, 악화 중',
+        notes: '경계가 분명한 홍반성 판과 두꺼운 은백색 비늘. 고효능 국소 스테로이드와 비타민 D 유도체를 3개월 사용했으나 반응이 없었음. 경증 고혈압 병력. 환자가 전신 치료 옵션을 문의함. Fitzpatrick III.' }
+};
 document.getElementById('sampleBtn').addEventListener('click', () => {
-  document.getElementById('age').value = SAMPLE_CASE.age;
-  document.getElementById('sex').value = SAMPLE_CASE.sex;
-  document.getElementById('area').value = SAMPLE_CASE.area;
-  document.getElementById('duration').value = SAMPLE_CASE.duration;
-  document.getElementById('notes').value = SAMPLE_CASE.notes;
-  fitz = SAMPLE_CASE.fitz || ''; renderFitz();
+  const S = Object.assign({}, SAMPLE_CASE, SAMPLE_TXT[currentLang] || {});
+  document.getElementById('age').value = S.age;
+  document.getElementById('sex').value = S.sex;
+  document.getElementById('area').value = S.area;
+  document.getElementById('duration').value = S.duration;
+  document.getElementById('notes').value = S.notes;
+  fitz = S.fitz || ''; renderFitz();
   const b = document.getElementById('sampleBtn');
   const orig = t('trySample');
   b.textContent = t('sampleLoaded');
   setTimeout(() => { b.textContent = orig; }, 2600);
-  renderOutput(EXAMPLE[currentLang] || EXAMPLE.en, Object.assign({}, SAMPLE_CASE), { example: true });
+  renderOutput(EXAMPLE[currentLang] || EXAMPLE.en, Object.assign({}, S), { example: true });
 });
 
 // Fitzpatrick skin-type picker
@@ -472,7 +483,7 @@ function renderOutput(d, metaIn, opts){
     navigator.clipboard.writeText(url).then(()=>{const btn=document.getElementById('shareBtn');btn.textContent=t('linkCopied');setTimeout(()=>btn.textContent=t('shareReport'),2000);});
   });
   document.getElementById('pdfBtn').addEventListener('click',()=>{ window.open('/report?print=1#'+payloadFor(d,meta),'_blank'); });
-  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=['CLINICAL ASSESSMENT'];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''}: ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\nTREATMENT OPTIONS');if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\nLITERATURE');refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev}: ${r.relevance} [${r.source}] ${refHref(r)}`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
+  document.getElementById('copyBtn').addEventListener('click',()=>{const lines=[t('sectionAssessment').toUpperCase()];assessment.forEach(x=>lines.push(`• ${x.diagnosis}${x.icd10?` (ICD-10 ${x.icd10})`:''}: ${x.rationale}`));if(tc&&Array.isArray(tc.options)&&tc.options.length){lines.push('\n'+t('sectionTreatment').toUpperCase());if(tc.rationale)lines.push(tc.rationale);tc.options.forEach(o=>{const ev=o.evidence_level?` [${o.evidence_level}]`:'';lines.push(`• ${o.name}${ev}`);if(o.efficacy)lines.push(`   Efficacy: ${o.efficacy}`);if(o.onset)lines.push(`   Onset: ${o.onset}`);if(o.monitoring)lines.push(`   Monitoring: ${o.monitoring}`);if(o.key_consideration)lines.push(`   Key: ${o.key_consideration}`);if(o.source)lines.push(`   [${o.source}]`);});}lines.push('\n'+t('sectionLit').toUpperCase());refs.forEach((r,i)=>{const ev=r.evidence_level?` [${r.evidence_level}]`:'';lines.push(`${i+1}. ${r.title}${ev}: ${r.relevance} [${r.source}] ${refHref(r)}`);});navigator.clipboard.writeText(lines.join('\n')).then(()=>{const btn=document.getElementById('copyBtn');btn.textContent=t('copied');setTimeout(()=>btn.textContent=t('copyChart'),2000);});});
   document.getElementById('saveBtn').addEventListener('click',async ()=>{const btn=document.getElementById('saveBtn');const u=window.__getCloudUser&&window.__getCloudUser();const m=Object.assign({},meta);if(u){try{const dx=(d.assessment&&d.assessment[0]&&d.assessment[0].diagnosis)||'-';await DermCaseCloud.saveCase({dx,meta:m,result:d});btn.textContent=t('savedCloud');}catch(e){saveCase(d,m);btn.textContent=t('caseSaved');}}else{saveCase(d,m);btn.textContent=t('caseSaved');}setTimeout(()=>btn.textContent=t('saveCase'),2000);});
   }
   document.getElementById('newBtn').addEventListener('click',()=>{resetImages();['age','sex','area','duration','notes'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});setOutput('');fitz='';if(window.__renderFitz)window.__renderFitz();window.scrollTo({top:0,behavior:'smooth'});});

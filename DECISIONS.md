@@ -198,3 +198,28 @@ This log exists because the small, day-to-day calls compound into the product's 
 **Service worker rules:** network-first for every same-origin page and asset, so a new deploy always shows up when online and nothing goes stale. Offline it serves the last good copy of pages already visited, or a bilingual offline page. It never touches /api and never caches responses to analysis. Cross-origin requests (fonts, Supabase) are left alone.
 
 **Next if a Play listing is wanted:** wrap this PWA in a Trusted Web Activity (Bubblewrap or PWABuilder), host assetlinks.json under /.well-known on a stable custom domain, distribute to pilot dermatologists through internal testing, and write the privacy policy (it must disclose that photos and health details go to a third-party AI provider).
+
+## D-013: Play Store package prepared, and the privacy claims corrected
+
+**Date:** October 2026
+**Flagged by:** User ("proceed with installable version"; read as the Play Store app, since the installable web app shipped in D-012)
+
+**Correction first.** The landing, About, login and app copy said photos are "discarded" and "not saved on any server". That overclaimed. DermCase stores no photos, but each photo is sent to Anthropic's API, which states it deletes API inputs and outputs within 30 days (up to 2 years if flagged for a usage policy violation) and does not train on them by default. The copy also said notes are saved; they are not. All reworded. A conservative physician in the simulated replies asked exactly "are patient images stored, is PHI retained", so this matters for the pilot as much as for Play.
+
+**Built:**
+1. `/privacy`, English and Korean, in the HTML itself so it reads with JavaScript off (store reviewers and crawlers). Linked from every page and from the app next to the Analyze button.
+2. Account deletion (Play requires it when accounts exist): a Delete account button in the library, backed by `delete_my_account()` in `supabase-schema.sql`. The function must be run once in Supabase.
+3. "Assessment" and the Korean equivalent became "Differential to consider" (copy-out text too). Footers now carry Google's required wording: not a medical device, does not diagnose, treat, cure or prevent, consult a professional.
+4. Play package: `/.well-known/assetlinks.json` (empty until fingerprints exist), `android/twa-manifest.json`, store listing in both languages, icon, feature graphics, real phone screenshots, answer sheet for Data safety and Health apps, and a step runbook (`store/`). Package name `com.jai_kim.dermcase`, host `dermcase.jai-kim.com`.
+5. `tests/smoke.js` in the repo, 194 checks: files and config, secret scan, claim guard (old overclaims cannot return), both languages at 1280 and 360 wide, the analysis path with a mocked model (complete, cut-off, rejected, server error), account zone.
+
+**Bugs found while capturing screenshots:** the Korean sample case showed English site and duration; the English landing nav overlapped the brand at 360px; the Copy button always wrote English headings.
+
+**Not done:** the Android file itself. The build needs Google's SDK and Maven and this sandbox's network policy blocks them. PWABuilder produces it in about ten minutes (`store/README.md`).
+
+**Risks, stated once:**
+- Regulatory. The app analyzes a clinical photo and proposes a differential. Regulators can treat that as a medical device regardless of disclaimers (the US decision-support exemption excludes image analysis; Korea's MFDS regulates AI image-analysis software). Internal or closed testing for the pilot is low exposure. Get a short regulatory consult before any public production listing.
+- The Data safety "shared" answer depends on Google's definition of service providers. Read it before submitting.
+- The privacy page falls back to the GitHub issues link until `DERMCASE_CONTACT_EMAIL` is set in `config.js`.
+
+**Lesson:** the earlier test suites lived outside the repo and were lost when the sandbox reset. Tests that matter live in `tests/`.

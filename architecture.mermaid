@@ -1,47 +1,40 @@
-flowchart TB
-    subgraph V1["● v1 — LIVE TODAY (single-file app)"]
+flowchart LR
+    subgraph CLIENT["Client (no build step)"]
         direction TB
-        U[Dermatologist]
-        B["index.html<br/>UI · i18n · image resize · render<br/>Tailwind/DaisyUI via CDN, no build step"]
-        RPT["report.html<br/>shareable read-only view"]
-        LS[("localStorage<br/>case history — device only")]
-        PROXY["api/analyze.js<br/>Vercel serverless proxy"]
-        CLAUDE["Anthropic API<br/>Claude Sonnet 4 + web_search<br/>diagnosis + search + synthesis in one call"]
-
-        U -->|image + patient context| B
-        B -->|POST /api/analyze| PROXY
-        PROXY -->|x-api-key| CLAUDE
-        CLAUDE -->|structured JSON:<br/>assessment · ICD-10 · treatment comparison · references| PROXY
-        PROXY --> B
-        B -->|render brief| U
-        B -.->|save / reopen| LS
-        B -.->|share via URL hash| RPT
+        WEB["Web pages on one design system<br/>landing · app · library · report · about · privacy · login"]
+        PWA["Installable web app<br/>manifest · network-first service worker · offline page"]
+        TWA["Android app (Trusted Web Activity)<br/>thin shell, opens the same site full screen"]
+        LS[("This device<br/>saved cases · language · theme")]
+        WEB --- PWA
+        TWA -.opens.-> WEB
+        WEB -.-> LS
     end
 
-    subgraph P2["○ Phase 2 — gated on validation (multi-route, still no backend)"]
+    subgraph HOST["Vercel"]
         direction TB
-        LAND[/" / landing"/]
-        APP2[/" /app — analysis"/]
-        LIB2[/" /library — history"/]
-        ABT[/" /about — methodology + privacy"/]
-        BUILD["Vite build · shared components"]
-        LAND --- APP2 --- LIB2 --- ABT
-        APP2 -.reuses.-> PROXY
+        STATIC["Static site<br/>cleanUrls · /.well-known/assetlinks.json"]
+        PROXY["api/analyze.js<br/>forwards the request, stores nothing"]
     end
 
-    subgraph P3["○ Phase 3 — gated on compliance review (backend + accounts)"]
-        direction TB
-        AUTH["Auth provider"]
-        API3["API layer · case CRUD"]
-        DB[("Postgres<br/>structured result + context<br/>NEVER the raw image")]
-        AUTH --> DB
-        API3 --> DB
+    subgraph AI["Anthropic API"]
+        MODEL["Claude + web search<br/>photo check · differential · literature · brief<br/>deletes inputs and outputs within 30 days (their policy)"]
     end
 
-    V1 ==>|"when premise validates"| P2
-    P2 ==>|"when retention proven + compliance cleared"| P3
+    subgraph CLOUD["Supabase (optional, signed-in only)"]
+        AUTH["Auth"]
+        DB[("cases table<br/>brief + age, sex, site, duration, skin type<br/>never the photo, never the notes<br/>row level security · delete_my_account()")]
+        AUTH --- DB
+    end
 
-    classDef live fill:#1A6640,stroke:#0D3D22,color:#fff;
-    classDef planned fill:#F5F4F0,stroke:#C5C2B8,color:#68655C,stroke-dasharray: 4 3;
-    class U,B,RPT,LS,PROXY,CLAUDE live;
-    class LAND,APP2,LIB2,ABT,BUILD,AUTH,API3,DB planned;
+    WEB -->|"photo + case details"| PROXY
+    PROXY -->|"x-api-key (server only)"| MODEL
+    MODEL -->|"structured JSON"| PROXY
+    PROXY --> WEB
+    WEB -.->|"Save, if signed in"| DB
+    WEB -.->|"Share link: brief in the URL fragment"| WEB
+    STATIC --- WEB
+
+    classDef live fill:#17181B,stroke:#17181B,color:#fff;
+    classDef ext fill:#F4F5F3,stroke:#B9BDC2,color:#4B4F55;
+    class WEB,PWA,PROXY,STATIC live;
+    class TWA,MODEL,AUTH,DB,LS ext;

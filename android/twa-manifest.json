@@ -1,0 +1,43 @@
+{
+  "packageId": "com.jai_kim.dermcase",
+  "host": "dermcase.jai-kim.com",
+  "name": "DermCase",
+  "launcherName": "DermCase",
+  "display": "standalone",
+  "orientation": "default",
+  "themeColor": "#F4F5F3",
+  "themeColorDark": "#0C0E11",
+  "navigationColor": "#F4F5F3",
+  "navigationColorDark": "#0C0E11",
+  "navigationDividerColor": "#F4F5F3",
+  "navigationDividerColorDark": "#0C0E11",
+  "backgroundColor": "#F4F5F3",
+  "enableNotifications": false,
+  "startUrl": "/app?source=twa",
+  "fullScopeUrl": "https://dermcase.jai-kim.com/",
+  "webManifestUrl": "https://dermcase.jai-kim.com/manifest.webmanifest",
+  "iconUrl": "https://dermcase.jai-kim.com/assets/icons/icon-512.png",
+  "maskableIconUrl": "https://dermcase.jai-kim.com/assets/icons/maskable-512.png",
+  "splashScreenFadeOutDuration": 300,
+  "signingKey": { "path": "./android.keystore", "alias": "dermcase" },
+  "appVersionName": "1.0.0",
+  "appVersionCode": 1,
+  "shortcuts": [
+    {
+      "name": "New case",
+      "short_name": "New case",
+      "url": "/app?source=shortcut",
+      "chosenIconUrl": "https://dermcase.jai-kim.com/assets/icons/icon-192.png"
+    }
+  ],
+  "generatorApp": "bubblewrap-cli",
+  "fallbackType": "customtabs",
+  "features": {},
+  "alphaDependencies": { "enabled": false },
+  "enableSiteSettingsShortcut": true,
+  "isChromeOSOnly": false,
+  "isMetaQuest": false,
+  "minSdkVersion": 21,
+  "additionalTrustedOrigins": [],
+  "retainedBundles": []
+}

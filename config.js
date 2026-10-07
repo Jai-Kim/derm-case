@@ -6,6 +6,9 @@
 window.SUPABASE_URL = "https://lecbcrqkxtxcbgmxewov.supabase.co";       // e.g. https://abcdefgh.supabase.co
 window.SUPABASE_ANON_KEY = "sb_publishable_bd5W6c_JFchtpjxBInyrzQ_ca8cnxYt";  // your project's anon / public key
 
+// Public contact address shown on the privacy page. Leave blank until you have one.
+window.DERMCASE_CONTACT_EMAIL = "";
+
 window.DERMCASE_CLOUD_ENABLED = function () {
   return !!(window.SUPABASE_URL && window.SUPABASE_ANON_KEY && window.supabase);
 };

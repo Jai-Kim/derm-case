@@ -1,0 +1,10 @@
+
+# Signing material must never be committed
+*.keystore
+*.jks
+*.p12
+*.pem
+android/build/
+android/.gradle/
+android/app/
+node_modules/

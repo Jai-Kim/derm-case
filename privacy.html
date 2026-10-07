@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>DermCase | Privacy policy · 개인정보 처리방침</title>
+<meta name="description" content="What DermCase does with case photos, case details and account data, who else handles them, and how to delete them.">
+<meta name="theme-color" content="#F4F5F3">
+<meta name="theme-color" content="#0C0E11" media="(prefers-color-scheme: dark)">
+<link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
+<link rel="apple-touch-icon" href="/assets/favicon-180.png">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/ds.css">
+<script src="/assets/ds.js"></script>
+<script src="/config.js"></script>
+</head>
+<body>
+<header class="nav">
+  <div class="wrap wide nav-in">
+    <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="26" height="26"><span>DermCase</span></a>
+    <nav class="nav-links" aria-label="Main">
+      <a class="nav-link hide-sm" href="/about"><span class="l-en">About</span><span class="l-ko">소개</span></a>
+      <button class="nav-link" id="langBtn" type="button">EN</button>
+      <button class="icon-btn" type="button" data-theme-toggle aria-label="Toggle theme">
+        <svg class="ico-moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M20 14.5A8 8 0 0 1 9.5 4a8 8 0 1 0 10.5 10.5z"/></svg>
+        <svg class="ico-sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+      </button>
+      <a class="btn btn-solid btn-sm nav-cta" href="/app"><span class="l-en">Open app</span><span class="l-ko">앱 열기</span></a>
+    </nav>
+  </div>
+</header>
+
+<main class="wrap legal">
+
+<!-- ============================ ENGLISH ============================ -->
+<div class="l-en" lang="en">
+  <h1>Privacy policy</h1>
+  <p class="meta">DermCase by Darae, operated by Jai Kim. Last updated October 6, 2026.</p>
+  <p class="lede">DermCase is a literature tool for clinicians. This page says what happens to the photo, the case details and the account data you give it, who else handles them, and how to delete them. It is written to be read, not skimmed past.</p>
+
+  <section id="short">
+    <h2>The short version</h2>
+    <dl class="facts">
+      <div class="fact"><dt>Photos</dt><dd>Sent once to our AI provider, Anthropic, through DermCase&rsquo;s own server for analysis. DermCase does not store them. Anthropic states that it deletes API inputs and outputs within 30 days, and keeps them up to 2 years only if a request is flagged for a usage policy violation.</dd></div>
+      <div class="fact"><dt>Case details</dt><dd>Age, sex, body site, duration, skin type and notes travel with the photo. DermCase stores them only if you press Save, and notes are never stored.</dd></div>
+      <div class="fact"><dt>Saved cases</dt><dd>With an account, in our database (Supabase), visible only to you. Without an account, only in this browser on this device.</dd></div>
+      <div class="fact"><dt>Model training</dt><dd>Anthropic states that by default it does not use API inputs or outputs to train its models.</dd></div>
+      <div class="fact"><dt>Tracking</dt><dd>None. No analytics, no advertising, no advertising identifiers, no tracking cookies. Nothing is sold.</dd></div>
+      <div class="fact"><dt>Pilot</dt><dd>Use de-identified cases only. See &ldquo;Patient information&rdquo; below.</dd></div>
+    </dl>
+  </section>
+
+  <section id="collect">
+    <h2>What is collected, and why</h2>
+    <h3>When you run an analysis</h3>
+    <p>Up to three photos, which your browser resizes to at most 1200 pixels on the long side and re-encodes as JPEG, plus the details you type: age, sex, body site, duration, skin type and notes. They are used for one purpose: to produce the literature brief you asked for. While it works, the AI may run web searches. The search queries are written by the model from the case, and they run through Anthropic&rsquo;s search tool.</p>
+    <h3>When you save a case</h3>
+    <p>The structured brief (differential, references, treatment options) and the case details: age, sex, body site, duration and skin type. Never the photo and never the notes.</p>
+    <h3>If you create an account</h3>
+    <p>Your email address and a password, which our authentication provider stores in hashed form. An account is optional. The app works without one.</p>
+    <h3>On your device</h3>
+    <p>Saved cases when you are not signed in (up to 50), your language and theme choice, your sign-in session if you have an account, and a cache of the app&rsquo;s own pages so it opens offline. You control all of it from your browser or Android app storage settings.</p>
+    <h3>Share links</h3>
+    <p>&ldquo;Share link&rdquo; puts the brief and the case details into the part of the link after the <code>#</code>. Your browser does not send that part to any server, but anyone who has the link can read everything in it. Share only de-identified content.</p>
+    <h3>Server records</h3>
+    <p>Our host, Vercel, records standard request metadata such as IP address, time and URL to run the service. DermCase&rsquo;s own code does not log or store the contents of an analysis request.</p>
+  </section>
+
+  <section id="others">
+    <h2>Who else handles data</h2>
+    <dl class="facts">
+      <div class="fact"><dt>Anthropic</dt><dd>Runs the AI analysis and literature search. Receives the photos and case details of every analysis. <a class="link" href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">Retention</a> · <a class="link" href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training" rel="noopener">Training</a> · <a class="link" href="https://www.anthropic.com/legal/privacy" rel="noopener">Privacy policy</a></dd></div>
+      <div class="fact"><dt>Vercel</dt><dd>Hosts the site and the small server function that forwards your analysis request to Anthropic.</dd></div>
+      <div class="fact"><dt>Supabase</dt><dd>Accounts and saved cases for people who sign in. Not used if you stay signed out.</dd></div>
+      <div class="fact"><dt>jsDelivr</dt><dd>A public content network that serves the Pretendard font and the Supabase browser library. It can see your IP address and browser details when a page loads.</dd></div>
+      <div class="fact"><dt>PubMed, DOI, journals</dt><dd>Reference links open the publisher&rsquo;s own site. Their policies apply once you leave DermCase.</dd></div>
+    </dl>
+    <p>These providers may process data outside your country, including in the United States. We do not sell personal data and we do not share it for advertising.</p>
+  </section>
+
+  <section id="patient">
+    <h2>Patient information</h2>
+    <p>During the pilot, use de-identified cases only: no names, record numbers or birth dates, and crop out identifying features such as faces and tattoos. DermCase does not yet have the agreements that rules such as HIPAA require for identifiable patient data, and it should not be given any.</p>
+  </section>
+
+  <section id="delete">
+    <h2>Keeping and deleting your data</h2>
+    <ul>
+      <li><b>Cases on this device.</b> In the app, delete one case or clear them all from the history list. Clearing the browser&rsquo;s site data, or the Android app&rsquo;s storage, removes everything stored locally.</li>
+      <li><b>Cases in your account.</b> Sign in, open Library and press Delete next to a case.</li>
+      <li><b>Your whole account.</b> Sign in at <a class="link" href="/login">dermcase.jai-kim.com/login</a>, open Library and press &ldquo;Delete account and all cases.&rdquo; The account and every saved case are removed immediately and cannot be recovered. If you cannot sign in, ask for deletion using the contact below and we will delete it within 30 days.</li>
+      <li><b>Copies at Anthropic.</b> They delete on their own schedule, within 30 days as they state. We cannot delete them sooner.</li>
+    </ul>
+  </section>
+
+  <section id="rights">
+    <h2>Your rights</h2>
+    <p>You can ask for a copy of the data tied to your account, ask us to correct it, or ask us to delete it. Where laws such as the EU GDPR, the Korean Personal Information Protection Act or the California CCPA apply to you, you also have the rights they give. DermCase is for licensed healthcare professionals aged 18 or over and is not directed to children.</p>
+  </section>
+
+  <section id="medical">
+    <h2>Medical disclaimer</h2>
+    <p>DermCase is a literature reference for clinicians. It is not a medical device and does not diagnose, treat, cure or prevent any medical condition. Its output can be wrong or incomplete and does not replace physician judgment. Consult a qualified healthcare professional and current guidelines before making clinical decisions. It is not for emergencies.</p>
+  </section>
+
+  <section id="contact">
+    <h2>Contact and changes</h2>
+    <p>Privacy contact: Jai Kim, DermCase by Darae. <span data-contact>Until a dedicated address is published here, open an issue at <a class="link" href="https://github.com/Jai-Kim/derm-case/issues" rel="noopener">github.com/Jai-Kim/derm-case/issues</a> and do not include any patient information.</span></p>
+    <p>If this policy changes in a way that matters, the date at the top changes and the app will say so.</p>
+  </section>
+</div>
+
+<!-- ============================ KOREAN ============================ -->
+<div class="l-ko" lang="ko">
+  <h1>개인정보 처리방침</h1>
+  <p class="meta">DermCase by Darae, 운영자 Jai Kim. 최종 수정일 2026년 10월 6일.</p>
+  <p class="lede">DermCase는 임상의를 위한 문헌 검토 도구입니다. 이 문서는 사진, 증례 정보, 계정 정보가 어떻게 처리되는지, 누가 함께 다루는지, 어떻게 삭제하는지를 설명합니다.</p>
+
+  <section id="short-ko">
+    <h2>요약</h2>
+    <dl class="facts">
+      <div class="fact"><dt>사진</dt><dd>분석을 위해 DermCase 서버를 거쳐 AI 제공사인 Anthropic으로 한 번 전송됩니다. DermCase는 저장하지 않습니다. Anthropic은 API 입력과 출력을 30일 이내에 삭제한다고 밝히고 있으며, 이용 정책 위반으로 분류된 요청만 최대 2년 보관합니다.</dd></div>
+      <div class="fact"><dt>증례 정보</dt><dd>나이, 성별, 부위, 기간, 피부 유형, 메모가 사진과 함께 전송됩니다. 저장 버튼을 누를 때만 DermCase에 보관되며, 메모는 저장되지 않습니다.</dd></div>
+      <div class="fact"><dt>저장한 증례</dt><dd>계정이 있으면 데이터베이스(Supabase)에 보관되고 본인만 볼 수 있습니다. 계정이 없으면 이 기기의 브라우저에만 남습니다.</dd></div>
+      <div class="fact"><dt>모델 학습</dt><dd>Anthropic은 기본적으로 API 입력과 출력을 모델 학습에 사용하지 않는다고 밝히고 있습니다.</dd></div>
+      <div class="fact"><dt>추적</dt><dd>없음. 분석 도구, 광고, 광고 식별자, 추적 쿠키를 쓰지 않으며 데이터를 판매하지 않습니다.</dd></div>
+      <div class="fact"><dt>파일럿</dt><dd>비식별화된 증례만 사용하세요. 아래 &ldquo;환자 정보&rdquo;를 확인하세요.</dd></div>
+    </dl>
+  </section>
+
+  <section id="collect-ko">
+    <h2>수집하는 정보와 이유</h2>
+    <h3>분석을 실행할 때</h3>
+    <p>사진 최대 3장(브라우저가 긴 변 기준 최대 1200픽셀로 줄여 JPEG으로 변환합니다)과 입력한 나이, 성별, 부위, 기간, 피부 유형, 메모입니다. 요청하신 문헌 브리프를 만드는 한 가지 목적으로만 쓰입니다. 작업 중 AI가 웹 검색을 실행할 수 있으며, 검색어는 모델이 증례를 바탕으로 작성하고 Anthropic의 검색 도구를 통해 실행됩니다.</p>
+    <h3>증례를 저장할 때</h3>
+    <p>구조화된 브리프(감별 고려 질환, 참고문헌, 치료 옵션)와 나이, 성별, 부위, 기간, 피부 유형입니다. 사진과 메모는 저장하지 않습니다.</p>
+    <h3>계정을 만들 때</h3>
+    <p>이메일 주소와 비밀번호이며, 비밀번호는 인증 제공사가 해시 형태로 보관합니다. 계정은 선택 사항이며 계정 없이도 앱을 쓸 수 있습니다.</p>
+    <h3>이 기기에서</h3>
+    <p>로그인하지 않았을 때 저장한 증례(최대 50개), 언어와 테마 설정, 계정이 있으면 로그인 세션, 오프라인에서 열리도록 하는 앱 페이지 캐시입니다. 브라우저 또는 안드로이드 앱의 저장소 설정에서 직접 지울 수 있습니다.</p>
+    <h3>공유 링크</h3>
+    <p>&ldquo;링크 공유&rdquo;는 브리프와 증례 정보를 링크의 <code>#</code> 뒷부분에 담습니다. 브라우저는 그 부분을 서버로 보내지 않지만, 링크를 가진 사람은 안의 내용을 모두 읽을 수 있습니다. 비식별화된 내용만 공유하세요.</p>
+    <h3>서버 기록</h3>
+    <p>호스팅 제공사인 Vercel이 서비스 운영을 위해 IP 주소, 시각, URL 같은 표준 요청 정보를 기록합니다. DermCase의 코드는 분석 요청의 내용을 기록하거나 저장하지 않습니다.</p>
+  </section>
+
+  <section id="others-ko">
+    <h2>함께 처리하는 제3자</h2>
+    <dl class="facts">
+      <div class="fact"><dt>Anthropic</dt><dd>AI 분석과 문헌 검색을 수행하며, 모든 분석의 사진과 증례 정보를 받습니다. <a class="link" href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">보관 기간</a> · <a class="link" href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training" rel="noopener">학습 사용</a> · <a class="link" href="https://www.anthropic.com/legal/privacy" rel="noopener">개인정보 처리방침</a></dd></div>
+      <div class="fact"><dt>Vercel</dt><dd>사이트와, 분석 요청을 Anthropic으로 전달하는 작은 서버 함수를 호스팅합니다.</dd></div>
+      <div class="fact"><dt>Supabase</dt><dd>로그인한 사용자의 계정과 저장한 증례를 보관합니다. 로그인하지 않으면 사용되지 않습니다.</dd></div>
+      <div class="fact"><dt>jsDelivr</dt><dd>Pretendard 글꼴과 Supabase 브라우저 라이브러리를 제공하는 공개 콘텐츠 전송망입니다. 페이지를 불러올 때 IP 주소와 브라우저 정보를 볼 수 있습니다.</dd></div>
+      <div class="fact"><dt>PubMed, DOI, 학술지</dt><dd>참고문헌 링크는 발행처 사이트로 이동합니다. DermCase를 벗어나면 해당 사이트의 정책이 적용됩니다.</dd></div>
+    </dl>
+    <p>이 제공사들은 미국을 포함해 거주 국가 밖에서 데이터를 처리할 수 있습니다. 개인정보를 판매하지 않으며 광고 목적으로 공유하지 않습니다.</p>
+  </section>
+
+  <section id="patient-ko">
+    <h2>환자 정보</h2>
+    <p>파일럿 동안에는 비식별화된 증례만 사용하세요. 이름, 의무기록번호, 생년월일을 넣지 말고 얼굴이나 문신 같은 식별 가능한 부분은 잘라 내세요. DermCase는 HIPAA 등이 식별 가능한 환자 정보에 요구하는 계약을 아직 갖추지 못했으므로 그런 정보를 입력해서는 안 됩니다.</p>
+  </section>
+
+  <section id="delete-ko">
+    <h2>보관과 삭제</h2>
+    <ul>
+      <li><b>이 기기의 증례.</b> 앱의 기록 목록에서 증례를 하나씩 삭제하거나 전체 삭제할 수 있습니다. 브라우저의 사이트 데이터나 안드로이드 앱 저장소를 지우면 기기에 저장된 모든 것이 삭제됩니다.</li>
+      <li><b>계정의 증례.</b> 로그인한 뒤 내 증례에서 증례 옆의 삭제를 누르세요.</li>
+      <li><b>계정 전체.</b> <a class="link" href="/login">dermcase.jai-kim.com/login</a>에서 로그인하고 내 증례에서 &ldquo;계정과 모든 증례 삭제&rdquo;를 누르세요. 계정과 저장된 모든 증례가 즉시 삭제되며 복구할 수 없습니다. 로그인할 수 없다면 아래 연락처로 삭제를 요청하세요. 30일 이내에 삭제합니다.</li>
+      <li><b>Anthropic의 사본.</b> Anthropic이 밝힌 대로 30일 이내에 자체 일정으로 삭제되며, 더 빨리 삭제할 수는 없습니다.</li>
+    </ul>
+  </section>
+
+  <section id="rights-ko">
+    <h2>이용자의 권리</h2>
+    <p>계정과 연결된 데이터의 사본을 요청하거나, 정정 또는 삭제를 요청할 수 있습니다. EU GDPR, 대한민국 개인정보 보호법, 미국 캘리포니아 CCPA 등이 적용되는 경우 해당 법이 보장하는 권리도 가집니다. DermCase는 만 18세 이상의 의료인을 위한 도구이며 아동을 대상으로 하지 않습니다.</p>
+  </section>
+
+  <section id="medical-ko">
+    <h2>의료 관련 고지</h2>
+    <p>DermCase는 임상의를 위한 문헌 참고 도구입니다. 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 결과는 틀리거나 불완전할 수 있고 의사의 판단을 대체하지 않습니다. 임상적 결정을 내리기 전에 자격을 갖춘 의료인과 최신 가이드라인을 확인하세요. 응급 상황을 위한 도구가 아닙니다.</p>
+  </section>
+
+  <section id="contact-ko">
+    <h2>연락처와 변경</h2>
+    <p>개인정보 보호책임자: Jai Kim, DermCase by Darae. <span data-contact>전용 주소가 이곳에 게시되기 전까지는 <a class="link" href="https://github.com/Jai-Kim/derm-case/issues" rel="noopener">github.com/Jai-Kim/derm-case/issues</a>에 이슈를 남겨 주세요. 환자 정보는 절대 적지 마세요.</span></p>
+    <p>중요한 변경이 있으면 맨 위의 날짜가 바뀌고 앱에서 안내합니다.</p>
+  </section>
+</div>
+
+</main>
+
+<footer class="foot"><div class="wrap wide"><div class="foot-in">
+  <a class="brand" href="/"><img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="22" height="22"><span>DermCase by Darae</span></a>
+  <p class="l-en">A literature reference for clinicians. DermCase is not a medical device and does not diagnose, treat, cure or prevent any medical condition. It does not replace physician judgment and is not for emergencies.</p>
+  <p class="l-ko">임상의를 위한 문헌 참고 도구입니다. DermCase는 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 의사의 판단을 대체하지 않으며 응급 상황을 위한 도구가 아닙니다.</p>
+</div></div></footer>
+
+<script>
+(function(){
+  var de=document.documentElement,btn=document.getElementById('langBtn');
+  var lang=(window.dcLang&&dcLang.get())||((navigator.language||'').slice(0,2)==='ko'?'ko':'en');
+  function apply(){de.setAttribute('data-lang',lang);de.lang=lang;btn.textContent=lang==='ko'?'EN':'한국어';
+    document.title=lang==='ko'?'DermCase | 개인정보 처리방침':'DermCase | Privacy policy';}
+  btn.addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);apply();});
+  apply();
+  if(location.hash==='#delete'&&lang==='ko'){var d=document.getElementById('delete-ko');if(d)d.scrollIntoView();}
+  var m=window.DERMCASE_CONTACT_EMAIL;
+  if(m&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){
+    [].forEach.call(document.querySelectorAll('[data-contact]'),function(el){
+      var a=document.createElement('a');a.className='link';a.href='mailto:'+m;a.textContent=m;
+      el.textContent='';el.appendChild(a);
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -27,6 +27,15 @@
       if (error) throw error; return data;
     },
     async signOut() { const c = client(); if (c) await c.auth.signOut(); },
+    // Deletes the signed-in account and, by cascade, every saved case.
+    // Needs delete_my_account() from supabase-schema.sql to exist in the project.
+    async deleteAccount() {
+      const c = client(); if (!c) throw new Error('Cloud is not configured.');
+      const u = await this.user(); if (!u) throw new Error('Not signed in.');
+      const { error } = await c.rpc('delete_my_account');
+      if (error) throw error;
+      try { await c.auth.signOut(); } catch (e) {}
+    },
     async saveCase(record) {
       const c = client(); if (!c) throw new Error('Cloud is not configured.');
       const u = await this.user(); if (!u) throw new Error('Not signed in.');

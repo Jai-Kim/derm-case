@@ -34,6 +34,10 @@ _Last updated: May 2026_
 | 3 | Commit ROADMAP.md + CONVERSATIONS.md | ✅ done | Commit 45d2ccd. Updated this commit with sharpened criteria. |
 | 4 | Recruit 5 dermatologists (lead: clinical partner) | 🔄 in progress | Email sent. Need 4 more via brother. |
 | 5 | Run 5 conversations, log in CONVERSATIONS.md | 🔲 open | Gate: prototype + recruits ready. Each derm must bring at least one non-trivial case. |
+| 6 | Installable web app (Android and iPhone) | ✅ done | D-012. Manifest, service worker, offline page, install button. |
+| 7 | Privacy policy, account deletion, honest data-handling copy | ✅ done | D-013. Run the SQL in `supabase-schema.sql` once. |
+| 8 | Play Store package (TWA) | 🔄 prepared | D-013, `store/README.md`. Needs your developer account and a PWABuilder build. Internal testing is the pilot channel. |
+| 9 | Regulatory read before any public listing | 🔲 open | Image analysis plus a differential can count as a medical device. See D-013. |
 
 ### Where the brief is most likely to win (from pre-conversation feedback)
 Concentrate test cases here, not on routine derm:

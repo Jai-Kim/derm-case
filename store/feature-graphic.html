@@ -1,0 +1,27 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><title>DermCase feature graphic</title>
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/ds.css">
+<style>
+html,body{margin:0;width:1024px;height:500px;overflow:hidden;background:#0C0E11;color:#F4F5F3;font-family:var(--font)}
+.fg{position:relative;width:1024px;height:500px;display:flex;flex-direction:column;justify-content:center;padding:0 72px;box-sizing:border-box}
+.brand{display:flex;align-items:center;gap:16px;font-size:30px;font-weight:700;letter-spacing:-.03em}
+.brand img{width:52px;height:52px}
+h1{margin:34px 0 0;font-size:62px;line-height:1.08;letter-spacing:-.045em;font-weight:700;max-width:13em;text-wrap:balance}
+html[lang=ko] h1{font-size:56px;line-height:1.2;letter-spacing:-.035em;word-break:keep-all}
+p{margin:22px 0 0;font-size:24px;color:#B9BDC2;letter-spacing:-.01em}
+.sp{position:absolute;left:0;right:0;bottom:0;height:12px;display:grid;grid-template-columns:repeat(6,1fr)}
+.sp i{display:block;background:var(--c)}
+</style></head>
+<body>
+<div class="fg">
+  <div class="brand"><img src="/assets/darae-white.svg" alt=""><span>DermCase</span></div>
+  <h1 id="h"></h1>
+  <p id="s"></p>
+  <div class="sp"><i style="--c:var(--f1)"></i><i style="--c:var(--f2)"></i><i style="--c:var(--f3)"></i><i style="--c:var(--f4)"></i><i style="--c:var(--f5)"></i><i style="--c:var(--f6)"></i></div>
+</div>
+<script>
+var L=location.hash==='#ko'?'ko':'en';document.documentElement.lang=L;
+document.getElementById('h').textContent=L==='ko'?'어려운 증례를 위한 문헌 브리프.':'Literature briefs for the hard cases.';
+document.getElementById('s').textContent=L==='ko'?'모든 참고문헌은 원문으로 연결됩니다.':'Every reference opens its source.';
+</script></body></html>
