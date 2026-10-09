@@ -175,12 +175,15 @@ as $$
   select p_key is not null and exists (select 1 from private.usage_key k where k.key = p_key);
 $$;
 
-revoke all on function public.usage_gate(text, text, integer) from public;
-revoke all on function public.usage_hit(text, text, text, integer) from public;
-revoke all on function public.usage_check(text) from public;
-grant execute on function public.usage_gate(text, text, integer) to anon, authenticated;
-grant execute on function public.usage_hit(text, text, text, integer) to anon, authenticated;
-grant execute on function public.usage_check(text) to anon, authenticated;
+-- Only the server proxy calls these, using the publishable key (role anon) plus the secret in private.usage_key.
+-- Signed-in users never need them, so 'authenticated' gets nothing. The Security Advisor still lists the anon grant:
+-- that is deliberate (a wrong key raises an error and does nothing; the key is 64 random hex characters).
+revoke all on function public.usage_gate(text, text, integer) from public, authenticated;
+revoke all on function public.usage_hit(text, text, text, integer) from public, authenticated;
+revoke all on function public.usage_check(text) from public, authenticated;
+grant execute on function public.usage_gate(text, text, integer) to anon;
+grant execute on function public.usage_hit(text, text, text, integer) to anon;
+grant execute on function public.usage_check(text) to anon;
 
 -- =====================================================================================
 -- Next steps (run these separately in the SQL editor)

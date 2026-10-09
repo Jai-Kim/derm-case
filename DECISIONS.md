@@ -246,3 +246,60 @@ This log exists because the small, day-to-day calls compound into the product's 
 
 **Lesson:** a working demo that is public is already a production system. The expensive mistake was a relay that trusted the browser.
 
+## D-015: The wait is streamed, honest and 100 seconds long
+
+**Date:** October 2026
+**Flagged by:** User ("fix the 55 s cutoff"; "you make the decision based on the behavioral science research")
+
+**Problem.** A real clinical photo takes about 30 to 55 seconds (the model reads the photo, runs up to 8 literature searches, then writes). The server gave up at 55 seconds, so a slow run could throw away a paid analysis. The old loading screen was generic gray bars and a seconds counter.
+
+**Decision.**
+1. The model call is streamed. The time budget is 100 seconds inside a 120 second function limit (Vercel Hobby with Fluid compute allows up to 300). A browser that sends `Accept: application/x-ndjson` receives one JSON object per line: `ready`, `hb` (every 8 s), `search` (cleaned query), `found` (a count), `w` (characters written so far), then `done` or `error`. Any other caller still gets the single JSON body.
+2. What may leave the server is fixed: the search query as plain printable text (markup characters, control and bidi characters removed, 110 characters at most), a number of sources, and a character count. Result titles, URLs, citations and ids never do. A test fails if they do.
+3. If the browser goes away (Cancel, closed tab) the server aborts the model call, so a canceled run stops costing money. The slot stays used, because the model may already have run.
+4. The browser gives up after 40 seconds of silence (heartbeats make that a real fault) and shows the timeout message instead of spinning.
+5. The loading screen is a light table: the user's photo in a dermatoscope ring with a slow scan line, the case details pinned beside it, three stages that follow real server events, the real search queries as they happen, and a progress bar drawn with the Fitzpatrick spectrum that eases forward and never goes back. It states "usually 30 to 60 seconds", keeps Cancel, switches to "taking longer than usual" after 75 seconds, ends with the bar filling and every step ticked, then the brief appears. With reduced motion every animation is off and the bar updates in calm steps.
+
+**Supersedes** the "no stage-by-stage progress" line in D-009: the stages are now real events, not a guess.
+
+**Why it looks this way (research, and its limits).**
+
+| Finding | Source | Used as |
+|---|---|---|
+| People value a result more, and tolerate waiting more, when they can see the work being done | Buell and Norton 2011, Management Science (the labor illusion) | Real search queries and source counts, never invented steps |
+| Waits feel shorter when occupied, explained and finite | Maister 1985, The Psychology of Waiting Lines | Case details pinned, named stages, "usually 30 to 60 seconds" |
+| A bar that keeps moving is judged faster than one that stalls | Harrison et al., CHI 2010 | Eased, monotonic progress; real events only ever push it forward |
+| Over about 10 seconds users need a progress indicator and a way out | Nielsen, response time limits | Bar, elapsed seconds, Cancel |
+| People remember the peak and the end of an experience | Kahneman et al. 1993 (peak-end) | The bar completes and every step ticks before the brief rises in |
+
+These are lab and online studies of generic waits, not of clinicians. "30 to 60 seconds" comes from measured runs; the daily counters keep total milliseconds, so the real average can be checked after the pilot.
+
+**Deliberately not done.** No partial differential is shown while the answer is still being written: half a differential invites anchoring on the first line. No fake progress: if the server sends nothing, the bar only drifts on time and the screen says so after 75 seconds.
+
+**Tests.** 641 checks, including incremental streaming in a real browser, Cancel, an error inside the stream, a 40 second silence (fake clock), reduced motion, a 360 px phone with a long query, and mutation checks (sanitizer removed, disconnect abort removed, result titles leaked: each is caught).
+
+## D-016: Supabase sign-in settings, and why there is no CAPTCHA
+
+**Date:** October 2026
+**Flagged by:** User ("you drive supabase auth settings")
+
+| Setting | Before | Now |
+|---|---|---|
+| Site URL | `http://localhost:3000` (every confirmation email would have linked to a dead page) | `https://dermcase.jai-kim.com` |
+| Redirect URLs | empty | empty, on purpose: the app passes no redirect, so only the Site URL can ever be used |
+| Email confirmation | on | on |
+| Minimum password length | 6 | 10, with upper case, lower case and digits required |
+| Secure password change, require current password | off | on (the app has no change-password screen, so nothing breaks) |
+| One-time code and link expiry | 3600 s | 900 s |
+| Anonymous sign-ins, manual linking, phone, SAML, Web3 and all social providers | off | off |
+| Leaked-password check | off | not available on the Free plan (Pro). Covered by the length and character rules |
+| Usage counter functions | callable by anon and signed-in users | anon only (the proxy uses the public key plus the 64-character secret). Signed-in users cannot call them |
+
+**CAPTCHA: skipped.** Turnstile or hCaptcha would load a third-party script and frame, which breaks the strict CSP and the "no third-party code" promise, and the app works without an account. Sign-up and sign-in are limited to 30 per 5 minutes per IP, confirmation is required, and the email sender will be capped. Revisit if the Auth log shows sign-up abuse.
+
+**Security Advisor, after:** 0 errors. The remaining items are deliberate: `delete_my_account()` is meant for signed-in users; the three usage functions are callable by `anon` but do nothing without the secret; the two counter tables have row security on and no policy, which means nobody can read them through the API.
+
+**Open, found while checking:** Supabase's built-in email service only delivers to members of your own Supabase organization and sends 2 emails an hour, so a dermatologist who signs up would never receive the confirmation email. Fix: a real email sender (custom SMTP, planned with Resend on jai-kim.com). Until then, accounts work only for the owner. The app itself does not need an account.
+
+**Also noted:** there is no "forgot password" flow in the app yet. With confirmation on, a user who forgets a password has no way back in except a new address.
+

@@ -22,7 +22,7 @@ const I18N = {
     emptyTitle: '브리프가 여기에 표시됩니다',
     emptyBody: '사진을 1장에서 3장 올리고 환자 정보를 입력한 뒤 증례 분석을 누르세요. 감별진단과 참고문헌, 선택이 분명하지 않은 경우에는 치료 옵션 비교까지 한 장으로 정리됩니다. 먼저 결과가 어떤 모습인지 보고 싶다면 예시를 열어 보세요.',
     analyzing: '사진을 읽고 문헌을 검색하고 있습니다',
-    analyzingNote: '최대 1분 정도 걸릴 수 있습니다.',
+    ldTitle: '증례를 분석하고 있습니다', ldRead: '사진 읽는 중', ldSearch: '문헌 검색 중', ldWrite: '브리프 작성 중', ldSources: '출처 {n}건', ldSourcesTotal: '출처 {n}건 확인', ldUsually: '보통 30초에서 60초 걸립니다', ldLong: '평소보다 오래 걸리고 있습니다. 계속 진행 중입니다.',
     ready: '브리프가 준비되었습니다',
     optimizing: '이미지 처리 중',
     removePhoto: '사진 삭제', addPhoto: '사진 추가',
@@ -73,7 +73,7 @@ const I18N = {
     emptyTitle: 'Your brief appears here',
     emptyBody: 'Add one to three photos and a few details, then select Analyze case. You get the assessment and references, plus a treatment comparison when the choice is not obvious. Want to see the result first? Open the example.',
     analyzing: 'Reading the photo and searching the literature',
-    analyzingNote: 'This can take up to a minute.',
+    ldTitle: 'Working on your case', ldRead: 'Reading the photo', ldSearch: 'Searching the literature', ldWrite: 'Writing the brief', ldSources: '{n} sources', ldSourcesTotal: '{n} sources checked', ldUsually: 'Usually 30 to 60 seconds', ldLong: 'Taking longer than usual. Still working.',
     ready: 'Brief ready',
     optimizing: 'Processing image',
     removePhoto: 'Remove photo', addPhoto: 'Add photo',
@@ -232,14 +232,19 @@ dropZone.addEventListener('drop',e=>{e.preventDefault();dropZone.classList.remov
 updateBtn();
 analyzeBtn.addEventListener('click',runAnalysis);
 
-let aborter = null, timerId = null;
-function stopTimer(){ if(timerId){ clearInterval(timerId); timerId = null; } }
+let aborter = null, loader = null, stalled = false;
+function caseChips(){
+  const val=id=>{const e=document.getElementById(id);return e?e.value.trim():'';};
+  const sexEl=document.getElementById('sex');
+  const sexTxt=sexEl&&sexEl.value&&sexEl.selectedIndex>=0?sexEl.options[sexEl.selectedIndex].text:'';
+  const age=val('age');
+  return [age?age+t('ageUnit'):'',sexTxt,val('area'),val('duration'),fitz?'Fitzpatrick '+fitz:''].filter(Boolean);
+}
 function showProgress(){
-  setOutput(`<div class="loadcard"><p>${esc(t('analyzing'))}. ${esc(t('analyzingNote'))}</p><div class="skel"><i class="h"></i><i class="w"></i><i class="n"></i></div><div class="skel"><i class="h" style="width:34%"></i><i class="w"></i><i class="w"></i><i class="n"></i></div><div class="load-foot"><span class="fine" id="elapsed" aria-hidden="true">0${esc(t('secUnit'))}</span><button class="btn btn-line btn-sm" id="cancelBtn" type="button">${esc(t('cancel'))}</button></div></div>`);
+  setOutput('<div id="loaderRoot"></div>');
   announce(t('analyzing'));
-  stopTimer(); const t0 = Date.now();
-  timerId = setInterval(()=>{ const el = document.getElementById('elapsed'); if(el) el.textContent = Math.floor((Date.now()-t0)/1000) + t('secUnit'); }, 1000);
-  const cb = document.getElementById('cancelBtn'); if(cb) cb.addEventListener('click', ()=>{ if(aborter) aborter.abort(); });
+  if(loader){loader.stop();loader=null;}
+  loader=window.DermLoader.mount(document.getElementById('loaderRoot'),{t:t,photo:images[0]&&images[0].dataUrl,chips:caseChips(),onCancel:function(){if(aborter)aborter.abort();},announce:announce});
 }
 function scrollToBrief(){
   if(window.matchMedia('(max-width: 999px)').matches){const el=document.getElementById('brief')||outputArea;el.scrollIntoView({behavior:'smooth',block:'start'});}
@@ -251,16 +256,45 @@ function errHint(err){
   const map={rate_limited:'errRate',daily_cap:'errCap',busy:'errBusy',timeout:'errTimeout',too_large:'errBig',invalid_request:'errBad'};
   return t((err&&err.api&&map[err.code])||'errHint');
 }
+// The server streams one JSON object per line: progress events, then {t:'done',content,stop_reason} or {t:'error',code}.
+async function readAnalysis(resp){
+  const reader=resp.body.getReader(),dec=new TextDecoder();
+  let buf='',result=null,dog=null;
+  const arm=()=>{clearTimeout(dog);dog=setTimeout(()=>{stalled=true;if(aborter)aborter.abort();},40000);};   // the server sends a heartbeat every 8 s
+  arm();
+  try{
+    while(!result){
+      const r=await reader.read();
+      if(r.done)break;
+      arm();
+      buf+=dec.decode(r.value,{stream:true});
+      let i;
+      while((i=buf.indexOf('\n'))>=0){
+        const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
+        if(!line)continue;
+        let ev;try{ev=JSON.parse(line);}catch(e){continue;}
+        if(ev.t==='done'){result={content:ev.content,stop_reason:ev.stop_reason};break;}
+        if(ev.t==='error')throw apiError(ev.code);
+        if(loader)loader.event(ev);
+      }
+    }
+  }finally{clearTimeout(dog);try{reader.cancel();}catch(e){}}
+  if(!result)throw apiError('upstream_error');
+  return result;
+}
 async function runAnalysis(){
   const age=document.getElementById('age').value.trim(),sex=document.getElementById('sex').value,area=document.getElementById('area').value.trim(),duration=document.getElementById('duration').value.trim(),notes=document.getElementById('notes').value.trim(),lang=document.getElementById('lang').value;currentLang=lang;
-  analyzeBtn.disabled=true;showProgress();scrollToBrief();aborter=new AbortController();
+  analyzeBtn.disabled=true;stalled=false;showProgress();scrollToBrief();aborter=new AbortController();
   try{
     // The server owns the model, the prompt and the limits. The browser sends only the photos and the case fields.
-    const resp=await fetch('/api/analyze',{method:'POST',signal:aborter.signal,headers:{'Content-Type':'application/json'},body:JSON.stringify({lang:lang,images:images.map(im=>({mime:im.mime,data:im.base64})),case:{age:age,sex:sex,area:area,duration:duration,fitz:fitz,notes:notes}})});
+    const resp=await fetch('/api/analyze',{method:'POST',signal:aborter.signal,headers:{'Content-Type':'application/json','Accept':'application/x-ndjson'},body:JSON.stringify({lang:lang,images:images.map(im=>({mime:im.mime,data:im.base64})),case:{age:age,sex:sex,area:area,duration:duration,fitz:fitz,notes:notes}})});
+    const ctype=resp.headers.get('content-type')||'';
     let data;
-    if((resp.headers.get('content-type')||'').includes('application/json')){data=await resp.json();}
-    else{throw apiError('upstream_error');}
-    if(!resp.ok||data.error)throw apiError(data&&data.error&&data.error.code);
+    if(resp.ok&&ctype.includes('application/x-ndjson')&&resp.body){data=await readAnalysis(resp);}
+    else if(ctype.includes('application/json')){
+      data=await resp.json();
+      if(!resp.ok||data.error)throw apiError(data&&data.error&&data.error.code);
+    }else{throw apiError('upstream_error');}
     let raw='';
     for(const b of(data.content||[])){if(b.type==='text')raw+=b.text;}
     if(!raw)throw new Error('No text in response.\n\n'+JSON.stringify(data,null,2));
@@ -275,14 +309,17 @@ async function runAnalysis(){
       if(fixed&&fixed.assessment&&fixed.assessment.length){parsed=fixed;partial=true;}
       else{const er=new Error('JSON parse failed.\n\nRaw:\n'+raw);er.truncated=(data.stop_reason==='max_tokens');throw er;}
     }
+    // the answer is in: finish the loading screen (bar to 100%, every step ticked), then show the brief
+    if(loader){await new Promise(r=>loader.finish(r));}
     if(parsed && parsed.relevant===false){ renderRejection(parsed.rejection||{}); analyzeBtn.disabled=false; return; }
     renderOutput(parsed,null,{partial:partial});
   }catch(err){
+    if(err&&err.name==='AbortError'&&stalled){err=apiError('timeout');}
     if(err&&err.name==='AbortError'){setOutput('');analyzeBtn.disabled=images.length===0;announce(t('canceled'));return;}
     setOutput(`<div class="notice err" role="alert"><span class="notice-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg></span><div><h3>${esc(t('errTitle'))}</h3><p>${esc(errHint(err))}</p><button class="btn btn-solid btn-sm" id="retryBtn" type="button">${esc(t('rerun'))}</button><pre>${esc(String(err&&err.message||err).slice(0,400))}</pre></div></div>`);
     analyzeBtn.disabled=false;
     const rb=document.getElementById('retryBtn'); if(rb) rb.addEventListener('click',()=>{ analyzeBtn.click(); });
-  }finally{stopTimer();aborter=null;}
+  }finally{if(loader){loader.stop();loader=null;}aborter=null;}
 }
 
 /*REPAIR_START*/

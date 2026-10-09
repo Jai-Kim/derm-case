@@ -42,6 +42,11 @@ await t('gate after refund (cap 5)', () => as('anon', () => q("select public.usa
 await t('hit junk event ignored', () => as('anon', () => q("select public.usage_hit($1,'DROP TABLE','ko',1)", [key])));
 console.log(await q('select * from public.usage_daily order by evt, lang'));
 
+// signed-in users have no business calling the usage functions (the proxy uses the anon role)
+await t('authenticated cannot call usage_gate', () => as('authenticated', () => q('select public.usage_gate($1,\'ko\',5)', [key])), true);
+await t('authenticated cannot call usage_hit', () => as('authenticated', () => q("select public.usage_hit($1,'analyze_ok','ko',1)", [key])), true);
+await t('authenticated cannot call usage_check', () => as('authenticated', () => q('select public.usage_check($1)', [key])), true);
+
 // cases: RLS, size caps, row cap, no update
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222';
 await db.exec(`insert into auth.users(id) values ('${A}'),('${B}')`);
