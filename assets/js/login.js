@@ -12,6 +12,7 @@ const I18N = {
     checkEmail: '확인 이메일을 보냈습니다. 메일함을 확인해 주세요.',
     notConfigured: '클라우드 계정이 아직 설정되지 않았습니다. 로그인 없이 앱을 사용할 수 있습니다.',
     working: '처리 중',
+    pwHint: '비밀번호는 10자 이상이어야 하며 영문 소문자, 영문 대문자, 숫자를 각각 1개 이상 포함해야 합니다.',
   },
   en: {
     navApp: 'Open app',
@@ -26,12 +27,15 @@ const I18N = {
     checkEmail: 'Check your email to confirm your account.',
     notConfigured: 'Cloud accounts aren\u2019t set up yet. You can use the app without signing in.',
     working: 'Working',
+    pwHint: 'Use at least 10 characters, with a lowercase letter, an uppercase letter and a number.',
   }
 };
 let lang = (window.dcLang ? dcLang.get() : 'ko');
 let mode = 'signin';
 function t(k){ return I18N[lang][k] || I18N.en[k] || k; }
 const $ = id => document.getElementById(id);
+// The same rule the server enforces for new accounts (D-016): 10 or more characters with a lowercase letter, an uppercase letter and a digit.
+function passwordOk(pw){ return typeof pw === 'string' && pw.length >= 10 && /[a-z]/.test(pw) && /[A-Z]/.test(pw) && /[0-9]/.test(pw); }
 
 function render(){
   document.documentElement.lang = lang;
@@ -42,6 +46,9 @@ function render(){
   $('submitBtn').textContent = mode === 'signin' ? t('signInBtn') : t('signUpBtn');
   $('toggleMode').textContent = mode === 'signin' ? t('toSignUp') : t('toSignIn');
   $('password').autocomplete = mode === 'signin' ? 'current-password' : 'new-password';
+  $('pwHint').textContent = t('pwHint');
+  $('pwHint').classList.toggle('hide', mode === 'signin');
+  if (mode === 'signin') $('password').removeAttribute('aria-describedby'); else $('password').setAttribute('aria-describedby', 'pwHint');
 }
 function setMsg(text, kind){
   const el = $('msg');
@@ -57,6 +64,7 @@ $('submitBtn').addEventListener('click', async () => {
   if (!window.DermCaseCloud || !DermCaseCloud.enabled()) { setMsg(t('notConfigured'), 'error'); return; }
   const email = $('email').value.trim(), pw = $('password').value;
   if (!email || !pw) return;
+  if (mode === 'signup' && !passwordOk(pw)) { setMsg(t('pwHint'), 'error'); $('password').focus(); return; }   // saves a round trip and shows the rule in the user's language
   $('submitBtn').disabled = true; const orig = $('submitBtn').textContent; $('submitBtn').textContent = t('working');
   try {
     if (mode === 'signin') {

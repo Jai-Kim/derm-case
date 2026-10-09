@@ -885,6 +885,35 @@ async function browserChecks() {
     await ctx.close();
   }
 
+  console.log('Sign-up password hint');
+  for (const lang of ['en', 'ko']) {
+    const pg = await newPage(browser, lang, 1280, 900);
+    let reqs = 0; await pg.route(/\.supabase\.co/, r => { reqs++; r.abort(); });
+    await pg.goto(BASE + '/login', { waitUntil: 'load' });
+    await pg.waitForTimeout(300);
+    const hint = () => pg.evaluate(() => { const h = document.getElementById('pwHint'); return { shown: getComputedStyle(h).display !== 'none', text: h.textContent, desc: document.getElementById('password').getAttribute('aria-describedby') }; });
+    let h = await hint();
+    ok(!h.shown && h.desc === null, 'sign-in mode shows no password rule [' + lang + ']', JSON.stringify(h));
+    await pg.click('#toggleMode');
+    h = await hint();
+    const hintRe = lang === 'en' ? /at least 10 characters.*lowercase.*uppercase.*number/ : /10자 이상.*소문자.*대문자.*숫자/;
+    ok(h.shown && hintRe.test(h.text) && h.desc === 'pwHint', 'sign-up shows the password rule and ties it to the field [' + lang + ']', JSON.stringify(h));
+    for (const w of ['Short1a', 'alllowercase1234', 'ALLUPPERCASE1234', 'NoDigitsHereAtAll', '한글비밀번호만있습니다1']) {
+      await pg.fill('#email', 'a@b.co'); await pg.fill('#password', w); await pg.click('#submitBtn');
+      await pg.waitForTimeout(120);
+      const m = await pg.evaluate(() => ({ msg: document.getElementById('msg').textContent, cls: document.getElementById('msg').className }));
+      ok(hintRe.test(m.msg) && /error/.test(m.cls), 'the weak password "' + w + '" is explained on the page [' + lang + ']', m.msg);
+    }
+    ok(reqs === 0, 'a password that breaks the rule never reaches the server [' + lang + ']', String(reqs));
+    await pg.fill('#password', 'Abcdefghi1'); await pg.click('#submitBtn'); await pg.waitForTimeout(500);
+    ok(reqs >= 1, 'a password that follows the rule is sent on [' + lang + ']', String(reqs));
+    await pg.click('#toggleMode');
+    const before = reqs; await pg.fill('#password', 'abc'); await pg.click('#submitBtn'); await pg.waitForTimeout(500);
+    ok(reqs > before && !(await hint()).shown, 'signing in is never blocked by the rule (older accounts) [' + lang + ']', before + ' -> ' + reqs);
+    ok(pg.errs.length === 0, 'the login page raises no script error [' + lang + ']', pg.errs.join(' | '));
+    await pg.context().close();
+  }
+
   console.log('Library: account zone');
   {
     const pg = await newPage(browser, 'en', 1280, 900);
