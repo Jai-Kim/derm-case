@@ -279,6 +279,18 @@ async function serverChecks() {
   ok((await call(goodReq({ body: { images: [] } }))).code === 400 && calls.length === 0, 'an invalid request never reaches the model');
   ok(JSON.stringify((await call(goodReq({ body: { images: [] } }))).body) === '{"error":{"code":"invalid_request","detail":"images"}}', 'validation error body is a fixed code, no echo of input');
 
+  // hostile text is refused fast: the tag-removal loop is quadratic, so the raw length is capped before any regex runs
+  { const timed = c => { const t0 = Date.now(); const v = validate({ lang: 'en', images: [{ mime: 'image/jpeg', data: JPG }], case: c }); return { ms: Date.now() - t0, v }; };
+    const sp = timed({ notes: '<' + ' '.repeat(60000) }), nest = timed({ notes: '<patient_'.repeat(12000) + 'context>'.repeat(12000) }), area = timed({ area: '<' + ' '.repeat(60000) });
+    ok(!sp.v.ok && sp.v.detail === 'notes' && sp.ms < 300, 'notes of "<" plus 60 000 spaces are refused at once (no ReDoS)', sp.ms + ' ms');
+    ok(!nest.v.ok && nest.v.detail === 'notes' && nest.ms < 300, 'nested "<patient_context>" fragments cannot keep the server busy', nest.ms + ' ms');
+    ok(!area.v.ok && area.v.detail === 'area' && area.ms < 300, 'a hostile one-line field is refused at once too', area.ms + ' ms');
+    ok(timed({ notes: 'ok' + '​'.repeat(900) }).v.ok, 'notes with some invisible characters are still accepted after cleaning');
+    ok(!timed({ notes: 'x'.repeat(4600) }).v.ok, 'notes far over the limit are refused');
+    calls = [];
+    const hr0 = Date.now(); const rr = await call(goodReq({ body: { case: { notes: '<' + ' '.repeat(60000) } } }));
+    ok(rr.code === 400 && rr.body.error.detail === 'notes' && calls.length === 0 && Date.now() - hr0 < 500, 'the endpoint answers a hostile notes field with a quick 400 and never calls the model', rr.code + ' ' + (Date.now() - hr0) + ' ms'); }
+
   // failures are generic and leak nothing
   const leak = 'SECRET-UPSTREAM-DETAIL sk-ant-api03-abcdefghijklmnop';
   globalThis.fetch = async () => ({ ok: false, status: 400, json: async () => ({ error: { type: 'invalid_request_error', message: leak } }) });

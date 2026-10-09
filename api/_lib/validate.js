@@ -21,10 +21,16 @@ function bad(detail) { return { ok: false, status: 400, code: 'invalid_request',
 // C0/C1 controls (except tab and newline), zero-width and direction-override characters, line/paragraph separators, BOM.
 const CTRL = new RegExp('[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u200B-\\u200F\\u2028-\\u202E\\u2060-\\u2069\\uFEFF]', 'g');
 
+// Cleaning can only shorten a string, so a raw value far longer than the limit can never become valid. It is refused
+// before any regular expression runs: the tag-removal loop below is quadratic on hostile input (a few hundred KB of
+// "<patient_" and "context>" pairs, or "<" followed by spaces, would otherwise keep one server instance busy for minutes).
+const RAW_LIMIT_FACTOR = 3;
+
 // Control characters and invisible direction overrides are removed. Tabs and newlines survive in notes.
 function clean(v, max, multiline) {
   if (v === undefined || v === null) return '';
   if (typeof v !== 'string') return null;
+  if (v.length > max * RAW_LIMIT_FACTOR) return null;
   let s = v.replace(/\r\n?/g, '\n').replace(CTRL, '');
   // remove our delimiter tag, repeating so that nested fragments cannot rebuild it
   for (let prev = null; prev !== s;) { prev = s; s = s.replace(/<\s*\/?\s*patient_context[^>]*>/gi, ''); }
