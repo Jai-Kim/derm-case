@@ -190,6 +190,10 @@ async function serverChecks() {
   ok(up.model === 'claude-sonnet-4-6' && up.max_tokens === 3000, 'model and token limit are owned by the server, client values ignored', up.model + ' ' + up.max_tokens);
   ok(up.tools.length === 1 && up.tools[0].name === 'web_search' && up.tools[0].max_uses <= 8, 'only the capped web search tool is allowed upstream', JSON.stringify(up.tools));
   ok(up.system === systemPrompt('en') && !/ignore all rules/.test(up.system) && /untrusted DATA/.test(up.system), 'system prompt is the server copy with the injection guard');
+  { const en = systemPrompt('en'), ko = systemPrompt('ko');
+    ok(!/[\uAC00-\uD7A3]/.test(en) && !/Korean/i.test(en.replace(/Do not use Korean[^.]*\./, '')), 'English prompt carries no Korean wording that could steer the report language');
+    ok(/in English/.test(en) && /Do not use Korean/.test(en), 'English prompt states the language rule explicitly');
+    ok(/Korean \(\uD55C\uAD6D\uC5B4\)/.test(ko) && /in Korean, at most about 70 characters/.test(ko) && /in Korean, at most about 45 characters/.test(ko), 'Korean prompt keeps the Korean rule and length hints'); }
   ok(up.messages.length === 1 && up.messages[0].content.length === 2 && up.messages[0].content[1].text === userText({ age: '45', sex: 'Female', area: 'scalp', duration: '8 months', fitz: 'III', notes: 'itchy' }), 'user message is built by the server from validated fields');
   ok(calls[0].opt.headers['x-api-key'] === 'sk-test-not-real' && !JSON.stringify(r.body).includes('sk-test'), 'API key is sent upstream only');
   ok(/<patient_context>[\s\S]*Notes: itchy[\s\S]*<\/patient_context>/.test(up.messages[0].content[1].text), 'case text is wrapped as data in <patient_context>');
