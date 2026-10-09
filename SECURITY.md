@@ -16,7 +16,7 @@ Email jaikyeong.kim@gmail.com (also in `/.well-known/security.txt`). Please do n
 | User's browser (XSS) | Hostile model output, a hostile shared link or a hostile saved case running script | `script-src 'self'` with no inline scripts and no eval; all dynamic text escaped; links followed only to an allowlist of publishers over https; `/report` shows an "unverified source" notice |
 | Page integrity | Framing, MIME sniffing, downgrade, plugin content | `frame-ancestors 'none'`, `X-Frame-Options`, `nosniff`, HSTS, `object-src 'none'`, `base-uri 'none'`, `Permissions-Policy`, COOP |
 | Supply chain | A CDN or package serving altered code | `supabase-js` and the Pretendard font are vendored with pinned hashes (`assets/vendor/VENDOR.md`); the API has no npm dependencies; no build step |
-| Secrets | Committed keys | `.gitignore` blocks keystores; the test suite scans every tracked file for key patterns; git history was checked |
+| Secrets | Committed keys | `.gitignore` blocks keystores, `signing-key-info.txt` and env files, and `.vercelignore` keeps them off deployments; the test suite scans every tracked file for key patterns; git history was checked |
 | Usage counters | Someone inflating or exhausting them | The two counter functions only work with a 64-character secret held in a private table and in Vercel (`USAGE_KEY`). That secret can only add to the counters; it cannot read cases or users |
 
 ## What is deliberately not here
@@ -57,5 +57,5 @@ The Anthropic API key (`dermcase`) expires on 31 December 2027. Put a calendar r
 
 ## What the streaming endpoint may send the browser
 
-Only: a status line, a heartbeat, a cleaned search query (plain printable text, 110 characters), a count of sources, a character count, the final text blocks, or a fixed error code. Never result titles, URLs, citations, ids, usage figures or upstream error text. `tests/smoke.js` fails if any of that appears.
+Only: a status line, a heartbeat, a cleaned search query (plain printable text, 110 characters; every control, invisible and direction-changing character is removed), a count of sources, a character count, the final text blocks with a stop reason from a fixed list, or a fixed error code. Never result titles, URLs, citations, ids, usage figures or upstream error text. `tests/smoke.js` fails if any of that appears.
 
