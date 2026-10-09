@@ -143,6 +143,12 @@ function fileChecks() {
   });
   const vend = crypto.createHash('sha256').update(fs.readFileSync(path.join(ROOT, 'assets/vendor/supabase-js-2.117.1.min.js'))).digest('hex');
   ok(vend === 'dff1e545f4f35bd42895cd6f46431e56137dd13031e46a9759c446447c11a567', 'vendored supabase-js matches the pinned hash', vend);
+  { const fd = path.join(ROOT, 'assets/fonts/pretendard-1.3.9'), sha = b => crypto.createHash('sha256').update(b).digest('hex');
+    ok(sha(fs.readFileSync(path.join(fd, 'pretendardvariable-dynamic-subset.css'))) === '2973bcae80262dcb630cfb793fbf6af29bd986c769ee54953fb3e5b3e32323ca', 'vendored Pretendard CSS matches the pinned hash');
+    const wd = path.join(fd, 'woff2-dynamic-subset'), names = fs.readdirSync(wd).filter(f => /\.woff2$/.test(f)).sort();
+    const combined = sha(names.map(n => sha(fs.readFileSync(path.join(wd, n))) + '  ' + n + '\n').join(''));
+    ok(names.length === 92 && combined === '9f28beca6e2e6dd15466fe6aefa01d11ab09c2803155153ebaa8b80af615bbd3', 'the 92 vendored Pretendard font files match the pinned combined hash', names.length + ' files, ' + combined);
+    ok(!/access-control-/i.test(read('vercel.json')), 'vercel.json sets no CORS header anywhere'); }
   { const ut = Number((read('api/analyze.js').match(/UPSTREAM_TIMEOUT_MS = (\d+)/) || [])[1]), md = vj.functions['api/analyze.js'].maxDuration;
     ok(ut >= 90000 && ut + 10000 <= md * 1000 && /maxDuration: 120/.test(read('api/analyze.js')), 'the model timeout leaves at least 10 s inside the function limit', ut + ' vs ' + md); }
   ok(!/Access-Control-Allow-Origin/i.test(read('api/analyze.js')), 'API sets no CORS headers');
@@ -217,10 +223,14 @@ function goodReq(over) {
   const body = Object.assign({ lang: 'en', images: [{ mime: 'image/jpeg', data: JPG }], case: { age: '45', sex: 'Female', area: 'scalp', duration: '8 months', fitz: 'III', notes: 'itchy' } }, over && over.body);
   return Object.assign({ method: 'POST', headers: Object.assign({ host: 'dermcase.example', origin: 'https://dermcase.example', 'content-type': 'application/json', 'sec-fetch-site': 'same-origin', 'x-real-ip': '10.0.0.' + (++ipN) }, over && over.headers), body }, over && over.req);
 }
-async function call(req) { const res = fakeRes(); await handler(req, res); return res; }
+const seenResponses = [];   // every response the handler produced in the server checks, to look at all of their headers together
+async function call(req) { const res = fakeRes(); await handler(req, res); seenResponses.push(res); return res; }
 let handler;
 async function serverChecks() {
   console.log('API proxy');
+  // Everything the server code prints is recorded (and still shown), so secrets and request content can be searched for at the end.
+  const logged = [], realConsole = {};
+  ['log', 'info', 'warn', 'error', 'debug'].forEach(k => { realConsole[k] = console[k]; console[k] = (...a) => { logged.push(a.map(x => typeof x === 'string' ? x : JSON.stringify(x)).join(' ')); realConsole[k].apply(console, a); }; });
   handler = require(path.join(ROOT, 'api/analyze.js'));
   const { validate } = require(path.join(ROOT, 'api/_lib/validate.js'));
   const { systemPrompt, userText } = require(path.join(ROOT, 'api/_lib/prompt.js'));
@@ -458,6 +468,15 @@ async function serverChecks() {
   ok(hp.code === 405, 'health is GET only');
   globalThis.fetch = realFetch;
   Object.keys(env0).forEach(k => { const n = { a: 'ANTHROPIC_API_KEY', u: 'USAGE_KEY', c: 'DAILY_ANALYSIS_CAP' }[k]; if (env0[k] === undefined) delete process.env[n]; else process.env[n] = env0[k]; });
+
+  // what the server prints must never include a key, a photo, case text or upstream error text; and no response may carry a CORS header
+  ['log', 'info', 'warn', 'error', 'debug'].forEach(k => { console[k] = realConsole[k]; });
+  { const txt = logged.join('\n');
+    const secrets = ['sk-test-not-real', 'k'.repeat(64), 'itchy', 'scalp', '8 months', 'AAAAAAAAAAAA', 'SECRET-UPSTREAM-DETAIL', 'SECRET-TITLE', 'sk-ant-api03', 'evil.example'];
+    const found = secrets.filter(x => txt.indexOf(x) >= 0);
+    ok(logged.length > 0 && found.length === 0, 'server logs carry no API key, usage secret, photo data, case text or upstream error text', found.join(', ') || (logged.length + ' lines'));
+    const cors = seenResponses.concat([hr, hp]).filter(r => Object.keys(r.headers).some(k => /^access-control-/.test(k)));
+    ok(seenResponses.length > 30 && cors.length === 0, 'no response from the analysis or health endpoints carries a CORS header', seenResponses.length + ' responses, ' + cors.length + ' with CORS'); }
 
   console.log('Service worker');
   { const vm = require('vm'), listeners = {}, puts = [];
