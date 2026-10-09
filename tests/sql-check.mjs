@@ -62,6 +62,15 @@ await t('oversize dx rejected', () => asUser(A, () => q("insert into public.case
 await db.exec(`insert into public.cases(user_id,dx) select '${B}','x' from generate_series(1,199)`);
 await t('B 200th case allowed', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])));
 await t('B 201st case blocked', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])), true);
+await t('inserting a case takes a per-user lock (parallel inserts cannot slip past the 200 cap)', () => asUser(A, async () => {
+  await db.exec('begin');
+  try {
+    await q("insert into public.cases(user_id,dx) values ($1,'lock probe')", [A]);
+    const n = (await q("select count(*)::int as n from pg_locks where locktype = 'advisory' and pid = pg_backend_pid()"))[0].n;
+    if (n < 1) throw new Error('no advisory lock held after an insert');
+    return { advisory_locks_held: n };
+  } finally { await db.exec('rollback'); }
+}));
 await t('oversize meta rejected', () => asUser(A, () => q("insert into public.cases(user_id,meta) values ($1, to_jsonb(repeat('x',3000)))", [A])), true);
 await t('result under the limit accepted', () => asUser(A, () => q("insert into public.cases(user_id,result) values ($1, to_jsonb(repeat('x',30000))) returning 1", [A])));
 await t('B deletes own', () => asUser(B, () => q("delete from public.cases returning 1")).then(r => r.length));

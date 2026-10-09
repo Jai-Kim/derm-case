@@ -49,6 +49,8 @@ language plpgsql
 set search_path = ''
 as $$
 begin
+  -- One insert at a time per user. Without this, parallel inserts all count 199 rows and all succeed.
+  perform pg_advisory_xact_lock(hashtextextended(new.user_id::text, 0));
   if (select count(*) from public.cases c where c.user_id = new.user_id) >= 200 then
     raise exception 'case limit reached (200)' using errcode = '54000';
   end if;
