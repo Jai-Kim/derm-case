@@ -761,6 +761,38 @@ async function browserChecks() {
     ok(m.anim === 'none' && m.ring === 'none' && m.dot === 'none', 'reduced motion switches every loading animation off', JSON.stringify(m));
     await pg.context().close(); }
 
+  { // hostile or malformed progress events cannot put markup, bidi tricks or unbounded rows on the loading screen
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await startStreamed(pg, 'en');
+    await pg.evaluate(() => {
+      window.__push({ t: 'ready' });
+      for (let i = 0; i < 60; i++) window.__push({ t: 'search', n: i + 1, q: i === 0 ? '<img src=x onerror=window.__xss=1><b>bold</b> \u202e\u2067 end' : 'query ' + i });
+      window.__push({ t: 'found', n: 1e9 }); window.__push({ t: 'found', n: -5 }); window.__push({ t: 'found', n: 'abc' }); window.__push({ t: 'found', n: {} });
+      window.__push({ t: 'w', n: 1e12 }); window.__push({ t: '__proto__', n: 1 }); window.__push({ t: 'search', n: 'x', q: { a: 1 } }); window.__push({ t: 'search', q: 42 }); window.__push(null); window.__push([1, 2]); window.__push('str');
+    });
+    await pg.waitForTimeout(700);
+    const m = await pg.evaluate(() => ({ items: document.querySelectorAll('.lt-q li').length, first: (document.querySelector('.lt-q li') || {}).textContent || '', markup: document.querySelectorAll('.lt-q img, .lt-q b, .lt img[src="x"]').length, xss: typeof window.__xss, sub: (document.querySelector('[data-s=search] .lt-sub') || {}).textContent || '', p: parseFloat((document.querySelector('.lt-bar i') || { style: { getPropertyValue: () => 'NaN' } }).style.getPropertyValue('--p')), fits: document.documentElement.scrollWidth <= window.innerWidth + 1, busy: !!document.querySelector('.lt') }));
+    ok(m.items <= 8 && m.busy, 'sixty search events show at most eight query rows', String(m.items));
+    ok(m.first.indexOf('<img src=x onerror=window.__xss=1><b>bold</b>') === 0 && m.markup === 0 && m.xss === 'undefined', 'a hostile query is shown as plain text, never as markup', m.first);
+    ok(/^20 sources/.test(m.sub), 'a huge or malformed source count is clamped to 20', m.sub);
+    ok(m.p >= 0 && m.p <= 1 && m.fits, 'malformed events leave the progress bar and the layout intact', m.p + ' ' + m.fits);
+    ok(pg.errs.length === 0 && (await pg.evaluate(() => window.__csp.length)) === 0, 'malformed events raise no script error or CSP violation', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // the answer line can arrive in pieces (split inside a Korean character), after junk lines, with CRLF endings
+    const pg = await newPage(browser, 'ko', 1280, 900);
+    await startStreamed(pg, 'ko');
+    const full = await pg.evaluate(() => JSON.stringify(EXAMPLE.ko));
+    await pg.evaluate(txt => {
+      const bytes = window.__enc.encode(JSON.stringify({ t: 'done', content: [{ type: 'text', text: txt }], stop_reason: 'end_turn' }) + '\r\n');
+      window.__ctl.enqueue(window.__enc.encode('not json at all\n{"t":\n\n'));
+      const cut = [Math.floor(bytes.length * 0.31) + 1, Math.floor(bytes.length * 0.67) + 2];
+      window.__ctl.enqueue(bytes.slice(0, cut[0])); window.__ctl.enqueue(bytes.slice(cut[0], cut[1])); window.__ctl.enqueue(bytes.slice(cut[1]));
+    }, full);
+    await pg.waitForFunction(() => document.querySelectorAll('#brief .sec').length >= 3, null, { timeout: 4000 }).catch(() => { });
+    const r = await pg.evaluate(() => ({ secs: document.querySelectorAll('#brief .sec').length, head: (document.querySelector('#brief .sec-h') || {}).textContent, bad: /\uFFFD/.test(document.getElementById('outputArea').innerText) }));
+    ok(r.secs >= 3 && r.head === '감별 고려 질환' && !r.bad, 'the answer is read correctly when split across chunks, inside a character, after junk lines', JSON.stringify(r));
+    await pg.context().close(); }
+
   console.log('Security: hostile content and CSP');
   const HOSTILE = { result: { assessment: [{ diagnosis: '<img src=x onerror="window.__xss=1">', icd10: '"><script>window.__xss=2</script>', rationale: '<svg onload=window.__xss=3>' }],
       references: [{ title: '<img src=x onerror=window.__xss=4>', relevance: 'r', source: 's', url: 'javascript:window.__xss=5', evidence_level: '__proto__' },

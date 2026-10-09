@@ -273,6 +273,7 @@ async function readAnalysis(resp){
         const line=buf.slice(0,i).trim();buf=buf.slice(i+1);
         if(!line)continue;
         let ev;try{ev=JSON.parse(line);}catch(e){continue;}
+        if(!ev||typeof ev!=='object')continue;   // a line such as null or 42 is not an event
         if(ev.t==='done'){result={content:ev.content,stop_reason:ev.stop_reason};break;}
         if(ev.t==='error')throw apiError(ev.code);
         if(loader)loader.event(ev);
