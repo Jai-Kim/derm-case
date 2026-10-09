@@ -416,6 +416,11 @@ async function serverChecks() {
     const rs = fakeRes(); const pr = handler(goodReq({ headers: { accept: 'application/x-ndjson' } }), rs);
     await new Promise(x => setTimeout(x, 80)); (rs.handlers.close || []).forEach(f => f()); await pr;
     ok(rpcs.map(x => x.body.p_evt || x.name).join() === 'usage_gate', 'a canceled analysis keeps its slot and is not counted as an error', rpcs.map(x => x.body.p_evt || x.name).join()); }
+  { // the browser leaves while the daily-cap check is still running: a close event that already fired is never delivered to a listener added later
+    rpcs.length = 0; anthropicCalls = 0;
+    globalThis.fetch = async (url, opt) => { if (/rpc\/usage_gate/.test(String(url))) { rsGone.destroyed = true; (rsGone.handlers.close || []).forEach(f => f()); } return fetch0(url, opt); };
+    const rsGone = fakeRes(); await handler(goodReq({ headers: { accept: 'application/x-ndjson' } }), rsGone);
+    ok(anthropicCalls === 0 && rsGone.chunks.length === 0 && rpcs.map(x => x.body.p_evt || x.name).join() === 'usage_gate,analyze_refund', 'a browser that leaves during the cap check never starts the paid model call, and its slot is refunded', 'model calls ' + anthropicCalls + ', ' + rpcs.map(x => x.body.p_evt || x.name).join()); }
   rpcs.length = 0;
   globalThis.fetch = async (url, opt) => { if (/rpc\//.test(String(url))) return fetch0(url, opt); return upstreamOk({ errorAfter: 'overloaded_error', text: '', searches: [] }); };
   await call(goodReq());

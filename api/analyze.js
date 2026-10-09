@@ -46,14 +46,20 @@ async function handler(req, res) {
   const wantsStream = /application\/x-ndjson/i.test(String(req.headers.accept || ''));
 
   const t0 = Date.now();
-  const g = await usage.gate(lang);
-  if (!g.allowed) { res.setHeader('Retry-After', '3600'); return fail(res, 429, 'daily_cap'); }
-
   const ac = new AbortController();
   let timedOut = false, clientGone = false, finished = false, heartbeat = null;
-  const timer = setTimeout(() => { timedOut = true; ac.abort(); }, UPSTREAM_TIMEOUT_MS);
-  // If the browser goes away (Cancel, closed tab), stop paying for the answer.
+  // If the browser goes away (Cancel, closed tab), stop paying for the answer. This is watched from the start, before the
+  // daily-cap check: a close event that has already fired is never delivered to a listener added later.
   if (typeof res.on === 'function') res.on('close', () => { if (!finished) { clientGone = true; ac.abort(); } });
+  const g = await usage.gate(lang);
+  if (!g.allowed) { finished = true; res.setHeader('Retry-After', '3600'); return fail(res, 429, 'daily_cap'); }
+  if (clientGone) {
+    finished = true;   // the browser left before the model was called, so nothing billable happened: give the slot back
+    await usage.refund(lang);
+    return;
+  }
+
+  const timer = setTimeout(() => { timedOut = true; ac.abort(); }, UPSTREAM_TIMEOUT_MS);
   const cleanup = () => { clearTimeout(timer); if (heartbeat) clearInterval(heartbeat); heartbeat = null; };
 
   let upstream;
