@@ -18,8 +18,10 @@ const B64 = /^[A-Za-z0-9+/]+={0,2}$/;
 
 function bad(detail) { return { ok: false, status: 400, code: 'invalid_request', detail }; }
 
-// C0/C1 controls (except tab and newline), zero-width and direction-override characters, line/paragraph separators, BOM.
-const CTRL = new RegExp('[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u200B-\\u200F\\u2028-\\u202E\\u2060-\\u2069\\uFEFF]', 'g');
+// C0/C1 controls (except tab and newline), zero-width and direction-override characters, line/paragraph separators, BOM,
+// soft hyphen, Arabic letter mark, Mongolian vowel separator, interlinear annotation marks, and the invisible "tag" and
+// variation-selector-supplement blocks (U+E0000 to U+E01EF), which can carry hidden text that a reader cannot see but a model can.
+const CTRL = new RegExp('[\\u0000-\\u0008\\u000B\\u000C\\u000E-\\u001F\\u007F-\\u009F\\u00AD\\u061C\\u180E\\u200B-\\u200F\\u2028-\\u202E\\u2060-\\u2069\\uFEFF\\uFFF9-\\uFFFB\\u{E0000}-\\u{E007F}\\u{E0100}-\\u{E01EF}]', 'gu');
 
 // Cleaning can only shorten a string, so a raw value far longer than the limit can never become valid. It is refused
 // before any regular expression runs: the tag-removal loop below is quadratic on hostile input (a few hundred KB of

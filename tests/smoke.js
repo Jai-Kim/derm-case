@@ -287,6 +287,8 @@ async function serverChecks() {
     ok(!area.v.ok && area.v.detail === 'area' && area.ms < 300, 'a hostile one-line field is refused at once too', area.ms + ' ms');
     ok(timed({ notes: 'ok' + '​'.repeat(900) }).v.ok, 'notes with some invisible characters are still accepted after cleaning');
     ok(!timed({ notes: 'x'.repeat(4600) }).v.ok, 'notes far over the limit are refused');
+    { const hid = String.fromCodePoint(0xE0049, 0xE0067, 0xE006E, 0xE0001), v = timed({ notes: 'itch\u00ADy\u061C\u180E\uFFF9' + hid + ' ok', area: 'arm' + String.fromCodePoint(0xE0100) }).v;
+      ok(v.ok && v.value.c.notes === 'itchy ok' && v.value.c.area === 'arm', 'invisible tag characters and other hidden format characters are stripped from case text', v.ok && JSON.stringify(v.value.c)); }
     calls = [];
     const hr0 = Date.now(); const rr = await call(goodReq({ body: { case: { notes: '<' + ' '.repeat(60000) } } }));
     ok(rr.code === 400 && rr.body.error.detail === 'notes' && calls.length === 0 && Date.now() - hr0 < 500, 'the endpoint answers a hostile notes field with a quick 400 and never calls the model', rr.code + ' ' + (Date.now() - hr0) + ' ms'); }
@@ -334,7 +336,11 @@ async function serverChecks() {
     let threw = false; try { for await (const ev of sseEvents(null)) { } } catch (e) { threw = true; }
     ok(threw, 'SSE parser refuses a missing body');
     ok(cleanQuery('psoriasis <b>"biologic"</b>\u0000‮ guideline\n\t2024') === 'psoriasis bbiologic/b guideline 2024', 'cleanQuery removes markup characters, control and bidi characters, collapses space', cleanQuery('psoriasis <b>"biologic"</b>\u0000‮ guideline\n\t2024'));
-    ok(cleanQuery('x'.repeat(400)).length === 110 && cleanQuery(42) === '' && cleanQuery(null) === '' && cleanQuery({}) === '', 'cleanQuery caps length and ignores non-strings'); }
+    ok(cleanQuery('x'.repeat(400)).length === 110 && cleanQuery(42) === '' && cleanQuery(null) === '' && cleanQuery({}) === '', 'cleanQuery caps length and ignores non-strings');
+    { const hid = String.fromCodePoint(0xE0041, 0xE0042, 0xE0001), junk = 'a\u2066b\u2067c\u2068d\u2069e\u061Cf\u2028g\u2029h\u180Ei\u00ADj' + hid + 'k\uFFF9l\u200Em\uD800n' + String.fromCodePoint(0xE0100) + 'o';
+      const out = cleanQuery(junk);
+      ok(/^[\x20-\x7e]+$/.test(out) && out.replace(/ /g, '') === 'abcdefghijklmno', 'cleanQuery removes bidi isolates, the Arabic letter mark, soft hyphen, invisible tag characters and lone surrogates', JSON.stringify(out));
+      ok(cleanQuery('psoriasis 건선 治療 naïve café') === 'psoriasis 건선 治療 naïve café', 'cleanQuery keeps Korean, Chinese and accented letters'); } }
   calls = [];
   { const longText = '{"relevant":true,"note":"' + 'a'.repeat(400) + '"}';
     globalThis.fetch = async (url, opt) => { calls.push({ url: String(url), opt }); return upstreamOk({ text: longText, searches: [{ q: 'psoriasis <b>biologic</b> "2024"\u0000', found: 4 }, { q: 'nummular eczema', found: 2 }] }); };
