@@ -53,7 +53,7 @@ Definitions that matter. "Collect" means data leaves the device to you or a serv
 | Security practices | Answer |
 |---|---|
 | Data encrypted in transit | Yes (HTTPS only) |
-| Security notes for the reviewer | Strict content-security policy, no third-party scripts, API accepts only the app's own requests with a daily limit, security.txt published |
+| Security notes for the reviewer | Strict content-security policy, no third-party scripts, API checks requests come from the app's own pages and applies rate and daily limits, security.txt published |
 | Users can request data deletion | Yes |
 | Follows Families policy | Not applicable (adults only) |
 | Independent security review | No |

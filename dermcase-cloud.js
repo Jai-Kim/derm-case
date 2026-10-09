@@ -6,7 +6,8 @@
   function client() {
     if (_sb) return _sb;
     if (!window.DERMCASE_CLOUD_ENABLED || !window.DERMCASE_CLOUD_ENABLED()) return null;
-    _sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY);
+    // Never adopt a session from the page address (a crafted link could sign a visitor in as someone else), and use PKCE.
+    _sb = window.supabase.createClient(window.SUPABASE_URL, window.SUPABASE_ANON_KEY, { auth: { detectSessionInUrl: false, flowType: 'pkce' } });
     return _sb;
   }
   const Cloud = {

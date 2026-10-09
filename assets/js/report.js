@@ -1,7 +1,7 @@
 const L = {
   en: {
     title:'Clinical Literature Brief', sub:'AI-assisted, de-identified, for physician review',
-    back:'Back to DermCase', pdf:'Save as PDF', generated:'Generated', ageUnit:'y',
+    back:'Back to DermCase', pdf:'Save as PDF', generated:'Date stated in link', ageUnit:'y',
     sAssess:'Differential to consider', sTx:'Treatment options', sLit:'References',
     dxPrimary:'Most likely', dxAlt:'Also consider',
     axEff:'Efficacy', axOns:'Onset', axMon:'Monitoring', axKey:'Key consideration', axSrc:'Source',
@@ -13,7 +13,7 @@ const L = {
   },
   ko: {
     title:'임상 문헌 브리프', sub:'AI 보조, 비식별, 의사 검토용',
-    back:'DermCase 앱으로', pdf:'PDF로 저장', generated:'생성일', ageUnit:'세',
+    back:'DermCase 앱으로', pdf:'PDF로 저장', generated:'링크에 기재된 날짜', ageUnit:'세',
     sAssess:'감별 고려 질환', sTx:'치료 옵션', sLit:'참고문헌',
     dxPrimary:'가능성이 가장 높음', dxAlt:'함께 고려',
     axEff:'효능', axOns:'발현 시기', axMon:'모니터링', axKey:'핵심 고려사항', axSrc:'출처',
@@ -63,7 +63,7 @@ function render(data, lang){
   const dateStr = new Date(meta.sharedAt || Date.now()).toLocaleDateString(lang==='ko'?'ko-KR':'en-US',{year:'numeric',month:'short',day:'numeric'});
 
   document.getElementById('content').innerHTML = `
-    <div class="warn-banner no-print" role="note"><span>${esc(t.unverified)}</span></div>
+    <div class="warn-banner" role="note"><span>${esc(t.unverified)}</span></div>
     <div class="report-head">
       <div style="display:flex;align-items:flex-start;gap:14px">
         <img class="mark mark-ink" src="/assets/darae-ink.svg" alt="" width="34" height="34" style="width:34px;height:34px;margin-top:2px">

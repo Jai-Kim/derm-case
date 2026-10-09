@@ -22,11 +22,11 @@ function renderHistory(){
     const m = x.meta || {};
     const ctx = [m.age && (m.age + t('ageUnit')), m.area, m.fitz && ('Fitzpatrick ' + m.fitz)].filter(Boolean).join(', ');
     return `<div class="hist-row">
-      <button class="open" type="button" data-open="${x.id}">
+      <button class="open" type="button" data-open="${esc(x.id)}">
         <div class="dx-n">${esc(x.dx)}</div>
         <div class="dx-s">${esc(ctx ? ctx + ', ' : '')}${esc(dateStr)}</div>
       </button>
-      <button class="hist-del" type="button" data-del="${x.id}">${esc(t('deleteCase'))}</button>
+      <button class="hist-del" type="button" data-del="${esc(x.id)}">${esc(t('deleteCase'))}</button>
     </div>`;
   }).join('');
   el.innerHTML = `<div class="hist">

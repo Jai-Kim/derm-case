@@ -70,7 +70,8 @@ async function handler(req, res) {
   } catch (e) {
     clearTimeout(timer);
     const timedOut = e && e.name === 'AbortError';
-    await usage.hit(timedOut ? 'analyze_timeout' : 'analyze_error', lang, Date.now() - t0);
+    if (timedOut) await usage.hit('analyze_timeout', lang, Date.now() - t0);   // may have cost money, so the slot stays used
+    else { await usage.hit('analyze_error', lang, Date.now() - t0); await usage.refund(lang); }
     return fail(res, timedOut ? 504 : 502, timedOut ? 'timeout' : 'upstream_error');
   }
   clearTimeout(timer);
@@ -79,12 +80,14 @@ async function handler(req, res) {
     // Log the error type only, never any request content.
     console.error('[analyze] upstream', upstream.status, data && data.error && data.error.type);
     await usage.hit('analyze_error', lang, Date.now() - t0);
+    await usage.refund(lang);   // the model did no billable work, so the slot goes back to the day's cap
     const busy = upstream.status === 429 || upstream.status === 529 || upstream.status === 503;
     return fail(res, busy ? 503 : 502, busy ? 'busy' : 'upstream_error');
   }
 
   // Return the model's text and nothing else (no tool traffic, no request ids, no usage figures).
-  const content = (Array.isArray(data && data.content) ? data.content : [])
+  data = data && typeof data === 'object' ? data : {};
+  const content = (Array.isArray(data.content) ? data.content : [])
     .filter(b => b && b.type === 'text' && typeof b.text === 'string')
     .map(b => ({ type: 'text', text: b.text }));
   const stop = typeof data.stop_reason === 'string' ? data.stop_reason : null;

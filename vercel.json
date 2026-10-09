@@ -128,5 +128,13 @@
         }
       ]
     }
-  ]
+  ],
+  "functions": {
+    "api/analyze.js": {
+      "maxDuration": 60
+    },
+    "api/health.js": {
+      "maxDuration": 10
+    }
+  }
 }

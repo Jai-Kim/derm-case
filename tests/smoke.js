@@ -80,6 +80,9 @@ function fileChecks() {
   const vj = JSON.parse(read('vercel.json'));
   const hdr = (vj.headers || []).map(h => h.source);
   ok(vj.cleanUrls === true, 'vercel cleanUrls on');
+  ok(vj.functions && vj.functions['api/analyze.js'] && vj.functions['api/analyze.js'].maxDuration === 60, 'vercel.json sets the analysis function to 60 s');
+  ok(!/jsDelivr/i.test(read('privacy.html')), 'privacy page lists no CDN that is no longer used');
+  ok(/detectSessionInUrl:\s*false/.test(read('dermcase-cloud.js')) && /flowType:\s*'pkce'/.test(read('dermcase-cloud.js')), 'Supabase client ignores session tokens in the URL and uses PKCE');
   ok(hdr.indexOf('/.well-known/assetlinks.json') >= 0, 'vercel serves assetlinks as JSON');
   ok(/\/\.well-known\//.test(read('sw.js')), 'service worker never touches /.well-known/');
 
@@ -277,9 +280,31 @@ async function serverChecks() {
   anthropicCalls = 0; gateAnswer = false; rpcs.length = 0;
   r = await call(goodReq());
   ok(r.code === 429 && r.body.error.code === 'daily_cap' && anthropicCalls === 0, 'when the cap is reached the model is not called (429 daily_cap)');
-  gateAnswer = true; rpcFail = true; anthropicCalls = 0;
+  // a model failure that did no billable work gives the slot back; a timeout does not
+  gateAnswer = true; rpcs.length = 0;
+  const fetch0 = globalThis.fetch;
+  globalThis.fetch = async (url, opt) => /rpc\//.test(String(url)) ? fetch0(url, opt) : ({ ok: false, status: 400, json: async () => ({ error: { type: 'invalid_request_error' } }) });
+  await call(goodReq());
+  ok(rpcs.map(x => x.body.p_evt || x.name).join() === 'usage_gate,analyze_error,analyze_refund', 'a rejected model call is refunded to the daily cap', rpcs.map(x => x.body.p_evt || x.name).join());
+  rpcs.length = 0;
+  globalThis.fetch = async (url, opt) => { if (/rpc\//.test(String(url))) return fetch0(url, opt); const e = new Error('t'); e.name = 'AbortError'; throw e; };
+  await call(goodReq());
+  ok(rpcs.map(x => x.body.p_evt || x.name).join() === 'usage_gate,analyze_timeout', 'a timeout keeps its slot (it may have cost money)', rpcs.map(x => x.body.p_evt || x.name).join());
+  globalThis.fetch = async (url, opt) => /rpc\//.test(String(url)) ? fetch0(url, opt) : ({ ok: true, status: 200, json: async () => null });
+  r = await call(goodReq());
+  ok(r.code === 200 && Array.isArray(r.body.content) && r.body.content.length === 0, 'a null upstream body does not crash the handler');
+  globalThis.fetch = fetch0;
+  rpcFail = true; anthropicCalls = 0;
   r = await call(goodReq());
   ok(r.code === 200 && anthropicCalls === 1, 'if the counter service is down, analysis still works (fails open)');
+  // health endpoint
+  const health = require(path.join(ROOT, 'api/health.js'));
+  globalThis.fetch = async () => ({ status: 200, json: async () => true });
+  const hr = fakeRes(); await health({ method: 'GET', headers: {} }, hr);
+  ok(hr.code === 200 && hr.body.ok === true && hr.body.counters === true && hr.body.model === true, 'health reports counters live', JSON.stringify(hr.body));
+  ok(!/sk-|kkkk|USAGE/.test(JSON.stringify(hr.body)), 'health reveals no secret');
+  const hp = fakeRes(); await health({ method: 'POST', headers: {} }, hp);
+  ok(hp.code === 405, 'health is GET only');
   globalThis.fetch = realFetch;
   Object.keys(env0).forEach(k => { const n = { a: 'ANTHROPIC_API_KEY', u: 'USAGE_KEY', c: 'DAILY_ANALYSIS_CAP' }[k]; if (env0[k] === undefined) delete process.env[n]; else process.env[n] = env0[k]; });
 
@@ -521,6 +546,36 @@ async function browserChecks() {
     await pg.context().close();
   }
 
+
+
+  console.log('Security: session fixation, print notice, stored ids');
+  {
+    const pg = await newPage(browser, 'en', 1280, 900);
+    const b64u = o => Buffer.from(JSON.stringify(o)).toString('base64').replace(/=+$/, '').replace(/\+/g, '-').replace(/\//g, '_');
+    const jwt = b64u({ alg: 'HS256', typ: 'JWT' }) + '.' + b64u({ sub: '00000000-0000-0000-0000-000000000001', role: 'authenticated', aud: 'authenticated', exp: Math.floor(Date.now() / 1000) + 3600 }) + '.' + 'x'.repeat(20);
+    await pg.route(/\.supabase\.co\/auth\/v1\/user/, r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ id: '00000000-0000-0000-0000-000000000001', aud: 'authenticated', role: 'authenticated', email: 'attacker@example.com' }) }));
+    await pg.goto(BASE + '/app#access_token=' + jwt + '&refresh_token=abc&expires_in=3600&token_type=bearer', { waitUntil: 'load' });
+    await pg.waitForTimeout(900);
+    const st = await pg.evaluate(async () => ({ keys: Object.keys(localStorage).filter(k => /^sb-/.test(k)), user: await window.DermCaseCloud.user() }));
+    ok(st.keys.length === 0 && st.user === null, 'a crafted link cannot sign the visitor in as someone else', JSON.stringify(st));
+    await pg.context().close();
+
+    const pr = await newPage(browser, 'en', 1280, 900);
+    const hash = Buffer.from(JSON.stringify(Object.assign({}, HOSTILE, { lang: 'en' })), 'utf8').toString('base64');
+    await pr.goto(BASE + '/report#' + hash, { waitUntil: 'load' });
+    await pr.emulateMedia({ media: 'print' });
+    const shown = await pr.evaluate(() => { const b = document.querySelector('.warn-banner'); return !!b && getComputedStyle(b).display !== 'none' && b.getBoundingClientRect().height > 0; });
+    ok(shown, 'the unverified-source notice also appears in the printed PDF');
+    await pr.context().close();
+
+    const ph = await newPage(browser, 'en', 1280, 900);
+    await ph.addInitScript(() => { try { localStorage.setItem('dermcase_history', JSON.stringify([{ id: '"><img src=x onerror=window.__xss=9>', dx: 'x', savedAt: Date.now(), meta: {}, result: { assessment: [] } }])); } catch (e) { } });
+    await ph.goto(BASE + '/app', { waitUntil: 'load' });
+    await ph.waitForTimeout(500);
+    const hi = await ph.evaluate(() => ({ img: document.querySelectorAll('img[src="x"]').length, rows: document.querySelectorAll('.hist-row').length, xss: typeof window.__xss }));
+    ok(hi.img === 0 && hi.xss === 'undefined', 'a hostile id in stored history cannot break out of its attribute', JSON.stringify(hi));
+    await ph.context().close();
+  }
 
   console.log('Usage counting');
   for (const p of ['/', '/app', '/about', '/privacy', '/report', '/login', '/library']) {

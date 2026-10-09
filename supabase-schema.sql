@@ -33,27 +33,24 @@ grant select, insert, delete on public.cases to authenticated;
 
 create index if not exists cases_user_created_idx on public.cases (user_id, created_at desc);
 
--- Size limits so a signed-in user cannot use the table as free storage.
--- NOT VALID: applies to every new row without failing on rows that already exist.
-do $$ begin
-  alter table public.cases add constraint cases_result_size check (result is null or octet_length(result::text) <= 200000) not valid;
-exception when duplicate_object then null; end $$;
-do $$ begin
-  alter table public.cases add constraint cases_meta_size check (meta is null or octet_length(meta::text) <= 4096) not valid;
-exception when duplicate_object then null; end $$;
-do $$ begin
-  alter table public.cases add constraint cases_dx_size check (dx is null or char_length(dx) <= 300) not valid;
-exception when duplicate_object then null; end $$;
+-- Size limits so a signed-in user cannot use the table as free storage (a real brief is about 5 KB).
+-- NOT VALID: applies to every new row without failing on rows that already exist. Dropped first so the limits can change on re-run.
+alter table public.cases drop constraint if exists cases_result_size;
+alter table public.cases drop constraint if exists cases_meta_size;
+alter table public.cases drop constraint if exists cases_dx_size;
+alter table public.cases add constraint cases_result_size check (result is null or octet_length(result::text) <= 40000) not valid;
+alter table public.cases add constraint cases_meta_size check (meta is null or octet_length(meta::text) <= 2048) not valid;
+alter table public.cases add constraint cases_dx_size check (dx is null or char_length(dx) <= 200) not valid;
 
--- At most 500 saved cases per user.
+-- At most 200 saved cases per user (about 8 MB at the size limit above).
 create or replace function public.cases_row_cap()
 returns trigger
 language plpgsql
 set search_path = ''
 as $$
 begin
-  if (select count(*) from public.cases c where c.user_id = new.user_id) >= 500 then
-    raise exception 'case limit reached (500)' using errcode = '54000';
+  if (select count(*) from public.cases c where c.user_id = new.user_id) >= 200 then
+    raise exception 'case limit reached (200)' using errcode = '54000';
   end if;
   return new;
 end;
@@ -111,6 +108,8 @@ insert into private.usage_key (key)
 values (replace(gen_random_uuid()::text || gen_random_uuid()::text, '-', ''))
 on conflict (id) do nothing;
 
+-- Reserves one of today's slots if any are left. 'analyze_start' therefore means "reached the model":
+-- the server gives the slot back (usage_hit 'analyze_refund') when the model call fails before doing billable work.
 create or replace function public.usage_gate(p_key text, p_lang text, p_cap integer)
 returns boolean
 language plpgsql
@@ -125,6 +124,7 @@ begin
   if p_key is null or not exists (select 1 from private.usage_key k where k.key = p_key) then
     raise exception 'forbidden' using errcode = '42501';
   end if;
+  perform pg_advisory_xact_lock(hashtext('dermcase_usage_gate'));   -- one at a time, so parallel requests cannot overshoot the cap
   select coalesce(sum(u.n), 0) into v_used from public.usage_daily u where u.day = v_day and u.evt = 'analyze_start';
   if v_used >= greatest(coalesce(p_cap, 150), 1) then
     insert into public.usage_daily as u (day, evt, lang, n) values (v_day, 'analyze_capped', v_lang, 1)
@@ -151,6 +151,11 @@ begin
   if p_key is null or not exists (select 1 from private.usage_key k where k.key = p_key) then
     raise exception 'forbidden' using errcode = '42501';
   end if;
+  if p_evt = 'analyze_refund' then
+    perform pg_advisory_xact_lock(hashtext('dermcase_usage_gate'));
+    update public.usage_daily u set n = greatest(u.n - 1, 0) where u.day = v_day and u.evt = 'analyze_start' and u.lang = v_lang;
+    return;
+  end if;
   if p_evt not in ('analyze_ok', 'analyze_rejected', 'analyze_truncated', 'analyze_error', 'analyze_timeout') then
     return;
   end if;
@@ -159,10 +164,23 @@ begin
 end;
 $$;
 
+-- Side-effect-free check that the secret is the right one. Used by /api/health to show whether counting and the cap are live.
+create or replace function public.usage_check(p_key text)
+returns boolean
+language sql
+security definer
+set search_path = ''
+stable
+as $$
+  select p_key is not null and exists (select 1 from private.usage_key k where k.key = p_key);
+$$;
+
 revoke all on function public.usage_gate(text, text, integer) from public;
 revoke all on function public.usage_hit(text, text, text, integer) from public;
+revoke all on function public.usage_check(text) from public;
 grant execute on function public.usage_gate(text, text, integer) to anon, authenticated;
 grant execute on function public.usage_hit(text, text, text, integer) to anon, authenticated;
+grant execute on function public.usage_check(text) to anon, authenticated;
 
 -- =====================================================================================
 -- Next steps (run these separately in the SQL editor)
@@ -176,7 +194,7 @@ grant execute on function public.usage_hit(text, text, text, integer) to anon, a
 --
 -- C. Read the usage numbers any time (last 30 days, newest first):
 --      select day,
---             sum(n) filter (where evt = 'analyze_start')     as started,
+--             sum(n) filter (where evt = 'analyze_start')     as reached_model,
 --             sum(n) filter (where evt = 'analyze_ok')        as ok,
 --             sum(n) filter (where evt = 'analyze_rejected')  as rejected,
 --             sum(n) filter (where evt = 'analyze_truncated') as cut_off,

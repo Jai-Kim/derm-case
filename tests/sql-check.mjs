@@ -35,6 +35,10 @@ await t('authenticated cannot read private key', () => as('authenticated', () =>
 for (let i = 1; i <= 6; i++) await t('gate call ' + i + ' (cap 5)', () => as('anon', () => q("select public.usage_gate($1,'ko',5) as g", [key])));
 await t('hit ok', () => as('anon', () => q("select public.usage_hit($1,'analyze_ok','ko',20000)", [key])));
 await t('hit ok again', () => as('anon', () => q("select public.usage_hit($1,'analyze_ok','ko',30000)", [key])));
+await t('usage_check right key', () => as('anon', () => q('select public.usage_check($1) as v', [key])));
+await t('usage_check wrong key is false, no error', () => as('anon', () => q("select public.usage_check('nope') as v")));
+await t('refund gives a slot back', () => as('anon', () => q("select public.usage_hit($1,'analyze_refund','ko',0)", [key])));
+await t('gate after refund (cap 5)', () => as('anon', () => q("select public.usage_gate($1,'ko',5) as g", [key])));
 await t('hit junk event ignored', () => as('anon', () => q("select public.usage_hit($1,'DROP TABLE','ko',1)", [key])));
 console.log(await q('select * from public.usage_daily order by evt, lang'));
 
@@ -49,10 +53,12 @@ await t('A sees own', () => asUser(A, () => q('select count(*)::int as n from pu
 await t('A cannot update', () => asUser(A, () => q("update public.cases set dx='hack'")), true);
 await t('anon cannot select cases', () => as('anon', () => q('select * from public.cases')), true);
 await t('oversize result rejected', () => asUser(A, () => q("insert into public.cases(user_id,result) values ($1, to_jsonb(repeat('x',250000)))", [A])), true);
-await t('oversize dx rejected', () => asUser(A, () => q("insert into public.cases(user_id,dx) values ($1, repeat('x',400))", [A])), true);
-await db.exec(`insert into public.cases(user_id,dx) select '${B}','x' from generate_series(1,499)`);
-await t('B 500th case allowed', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])));
-await t('B 501st case blocked', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])), true);
+await t('oversize dx rejected', () => asUser(A, () => q("insert into public.cases(user_id,dx) values ($1, repeat('x',250))", [A])), true);
+await db.exec(`insert into public.cases(user_id,dx) select '${B}','x' from generate_series(1,199)`);
+await t('B 200th case allowed', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])));
+await t('B 201st case blocked', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])), true);
+await t('oversize meta rejected', () => asUser(A, () => q("insert into public.cases(user_id,meta) values ($1, to_jsonb(repeat('x',3000)))", [A])), true);
+await t('result under the limit accepted', () => asUser(A, () => q("insert into public.cases(user_id,result) values ($1, to_jsonb(repeat('x',30000))) returning 1", [A])));
 await t('B deletes own', () => asUser(B, () => q("delete from public.cases returning 1")).then(r => r.length));
 await t('anon cannot delete_my_account', () => as('anon', () => q('select public.delete_my_account()')), true);
 await t('A deletes account', () => asUser(A, () => q('select public.delete_my_account()')));

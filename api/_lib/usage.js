@@ -43,7 +43,7 @@ async function gate(lang) {
   return { allowed: true, tracked: false };
 }
 
-// Records how an analysis ended. Never throws.
+// Records how an analysis ended (or gives a slot back). Never throws.
 async function hit(evt, lang, ms) {
   const c = cfg();
   if (!c.key) return;
@@ -53,4 +53,18 @@ async function hit(evt, lang, ms) {
   } catch (e) { console.warn('[usage] hit failed', e && e.name); }
 }
 
-module.exports = { gate, hit, cfg };
+// Gives the reserved slot back when the model call failed before doing billable work.
+async function refund(lang) { return hit('analyze_refund', lang, 0); }
+
+// Is counting live? Used by /api/health. true / false / null (not configured or unreachable).
+async function check() {
+  const c = cfg();
+  if (!c.key) return null;
+  try {
+    const r = await rpc('usage_check', { p_key: c.key }, 2000);
+    if (r.status === 200) return (await r.json()) === true;
+  } catch (e) { /* fall through */ }
+  return null;
+}
+
+module.exports = { gate, hit, refund, check, cfg };
