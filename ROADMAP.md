@@ -20,7 +20,7 @@ _Last updated: May 2026_
 **Timeline:** ~4 weeks from first conversation
 
 **Constraints:**
-- No auth, persistence, or analytics
+- No auth, persistence, or analytics (superseded: accounts, saved cases and anonymous usage counts now exist, see D-013 and D-014)
 - No visual UI redesign
 - Prototype output = literature brief only (not teaching-tool output)
 - 5 hrs/week available
@@ -38,6 +38,8 @@ _Last updated: May 2026_
 | 7 | Privacy policy, account deletion, honest data-handling copy | ✅ done | D-013. Run the SQL in `supabase-schema.sql` once. |
 | 8 | Play Store package (TWA) | 🔄 prepared | D-013, `store/README.md`. Needs your developer account and a PWABuilder build. Internal testing is the pilot channel. |
 | 9 | Regulatory read before any public listing | 🔲 open | Image analysis plus a differential can count as a medical device. See D-013. |
+| 10 | Security hardening: locked API proxy, CSP, vendored scripts, link allowlist, hardened SQL | ✅ done | D-014, `SECURITY.md`. Owner actions in the SECURITY.md checklist. |
+| 11 | Anonymous usage counts (page views, analysis outcomes, daily cap) | ✅ done | D-014. Needs `USAGE_KEY` in Vercel and Web Analytics switched on. |
 
 ### Where the brief is most likely to win (from pre-conversation feedback)
 Concentrate test cases here, not on routine derm:

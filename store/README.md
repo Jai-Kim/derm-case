@@ -22,7 +22,7 @@ Why I could not build the Android file myself: the build needs Google's Android 
 
 | # | Step | Time |
 |---|---|---|
-| 1 | Run the SQL block at the bottom of `supabase-schema.sql` in the Supabase SQL editor. Without it, "Delete account" shows an error | 2 min |
+| 1 | Run the whole of `supabase-schema.sql` in the Supabase SQL editor (safe to re-run). It sets up saved cases, account deletion and the usage counters. Then follow "Next steps" at the bottom of that file (copy the usage secret into Vercel as `USAGE_KEY`). Without the file, "Delete account" shows an error | 5 min |
 | 2 | Done: `window.DERMCASE_CONTACT_EMAIL` is set in `config.js` and shown on the privacy page | done |
 | 3 | Create a Play developer account at play.google.com/console. $25 once, ID verification. Personal is fine for the pilot | 15 min + Google's wait |
 | 4 | Build the Android App Bundle, option A below | 10 min |

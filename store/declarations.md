@@ -8,7 +8,7 @@ Drafted from what the code actually does. You sign these forms, so read each ans
 |---|---|---|
 | Privacy policy | https://dermcase.jai-kim.com/privacy | Required, and for health apps also required inside the app (linked from the app page, footer and login) |
 | App access | All functionality available without login | Account is optional. "Load example" shows a full brief with no photo |
-| Ads | No | No ads, no ad SDKs |
+| Ads | No | No ads, no ad SDKs. Anonymous usage counts exist (see Data safety), they are not advertising |
 | Content rating | Utility / reference. No violence, sexual content, language, gambling. No user-to-user interaction, no user-generated content shared with others, no location sharing, no purchases | Questionnaire answers; result should be low |
 | Target audience | 18 and over only | Tool for licensed professionals. Avoids the Families policy |
 | News app | No | |
@@ -47,11 +47,13 @@ Definitions that matter. "Collect" means data leaves the device to you or a serv
 | Health info (case details: age, sex, site, duration, skin type, notes) | Yes | No | Required for analysis | App functionality | Only if the user saves: case details except notes |
 | Email address | Yes | No | Optional (account) | App functionality, account management | Yes, until the account is deleted |
 | Other user-generated content (saved brief) | Yes | No | Optional | App functionality | Yes, until deleted |
+| App interactions (page views, and how many analyses run and how they end) | Yes | No | Required | Analytics, app functionality | Page views: Vercel Web Analytics, cookie-free, no persistent ID, off when Do Not Track or Global Privacy Control is on. Analysis tally: anonymous daily counts in our database with no ID, IP, photo or case text |
 | Device or other IDs (IP address in host logs) | Yes | No | Required | Security, app functionality | Per host log retention. Declare conservatively |
 
 | Security practices | Answer |
 |---|---|
 | Data encrypted in transit | Yes (HTTPS only) |
+| Security notes for the reviewer | Strict content-security policy, no third-party scripts, API accepts only the app's own requests with a daily limit, security.txt published |
 | Users can request data deletion | Yes |
 | Follows Families policy | Not applicable (adults only) |
 | Independent security review | No |

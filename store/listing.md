@@ -28,7 +28,7 @@ BUILT FOR THE HARD CASES
 Atypical presentations, treatment-resistant disease, off-label questions, pregnancy and immunosuppression, newer biologics. The places where the answer is in the literature but finding it takes time.
 
 YOUR DATA
-DermCase does not save your photos. They are sent once to an AI provider (Anthropic) to produce the brief, and Anthropic states that it deletes API inputs and outputs within 30 days. Saving a case is optional, and so is an account. Delete any case, or your whole account, inside the app. No ads and no tracking. Details: dermcase.jai-kim.com/privacy
+DermCase does not save your photos. They are sent once to an AI provider (Anthropic) to produce the brief, and Anthropic states that it deletes API inputs and outputs within 30 days. Saving a case is optional, and so is an account. Delete any case, or your whole account, inside the app. No ads and no ad tracking; only anonymous usage counts. Details: dermcase.jai-kim.com/privacy
 
 IMPORTANT
 For licensed healthcare professionals. DermCase is not a medical device and does not diagnose, treat, cure or prevent any medical condition. Its output can be wrong or incomplete and does not replace physician judgment. Check every finding against the original source and current guidelines. Not for emergencies. During the pilot, use de-identified cases only.
@@ -48,7 +48,7 @@ DermCase는 피부과 의사와 임상의를 위한 문헌 참고 도구입니�
 비전형적인 발현, 치료에 저항하는 질환, 적응증 외 사용 질문, 임신과 면역억제, 새로운 생물학적 제제. 답은 문헌 어딘가에 있지만 찾는 데 시간이 드는 경우입니다.
 
 데이터
-DermCase는 사진을 저장하지 않습니다. 브리프를 만들기 위해 AI 제공사(Anthropic)로 한 번 전송되며, Anthropic은 API 입력과 출력을 30일 이내에 삭제한다고 밝히고 있습니다. 증례 저장도 계정도 선택 사항입니다. 앱 안에서 증례나 계정 전체를 삭제할 수 있습니다. 광고와 추적이 없습니다. 자세한 내용: dermcase.jai-kim.com/privacy
+DermCase는 사진을 저장하지 않습니다. 브리프를 만들기 위해 AI 제공사(Anthropic)로 한 번 전송되며, Anthropic은 API 입력과 출력을 30일 이내에 삭제한다고 밝히고 있습니다. 증례 저장도 계정도 선택 사항입니다. 앱 안에서 증례나 계정 전체를 삭제할 수 있습니다. 광고와 광고 추적이 없고, 익명 이용 집계만 합니다. 자세한 내용: dermcase.jai-kim.com/privacy
 
 중요
 의료인을 위한 도구입니다. DermCase는 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 결과는 틀리거나 불완전할 수 있으며 의사의 판단을 대체하지 않습니다. 모든 결과는 원문과 최신 가이드라인으로 확인하세요. 응급 상황을 위한 도구가 아닙니다. 파일럿 동안에는 비식별화된 증례만 사용하세요.

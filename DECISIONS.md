@@ -223,3 +223,24 @@ This log exists because the small, day-to-day calls compound into the product's 
 - The privacy page falls back to the GitHub issues link until `DERMCASE_CONTACT_EMAIL` is set in `config.js`.
 
 **Lesson:** the earlier test suites lived outside the repo and were lost when the sandbox reset. Tests that matter live in `tests/`.
+
+## D-014: Security hardening before the Play listing, and anonymous usage counts
+
+**Date:** October 2026
+**Flagged by:** User ("let's really tighten as much as possible"; asked for basic usage tracking once the app is ready)
+
+**Audit findings that drove this.** `/api/analyze` was an open relay onto the Anthropic key: any caller on any website could choose the model, prompt, tools and token count (CORS was `*`). The page had no CSP and loaded code from a CDN. Model output and shared links reached the DOM with only a weak URL check. The Supabase file lacked size limits, table-level revokes and a pinned `search_path`.
+
+**Built:**
+1. Proxy locked to one job. The server owns the model (`claude-sonnet-4-6`), the full system prompt (moved out of `app.js` into `api/_lib/prompt.js`, verbatim plus a prompt-injection guard), 3000 tokens and a web search capped at 8 uses. The browser sends only `lang`, `images` and `case`. Strict validation (types, enums, sizes, base64, magic bytes), same-origin check, no CORS, generic error codes, 55 s upstream timeout, text blocks only in the response.
+2. Daily cap and counters in Supabase through two functions that need a private 64-character secret (`USAGE_KEY`). Chosen over a service-role key so a leaked secret cannot read any saved case. Fails open if unset or down.
+3. Strict CSP (`script-src 'self'`, no inline script, no eval), HSTS, framing, nosniff, referrer, permissions and COOP headers in `vercel.json`. Every inline script moved to `assets/js/`. `supabase-js` and Pretendard vendored (hashes in `assets/vendor/VENDOR.md`).
+4. `assets/safe.js`: links from the model or a shared report are followed only on a publisher allowlist over https, else the PubMed search. `/report` is `noindex` and shows an "unverified source" notice.
+5. Supabase schema rewritten to be idempotent: owner-only select, insert, delete; revoked table privileges; size limits; 500-case cap; `search_path` pinned. Tested against a real Postgres (PGlite), including re-runs.
+6. Usage counts: Vercel Web Analytics on four pages (cookie-free, skipped for Do Not Track and Global Privacy Control, never on report, login or library), plus the anonymous daily tally. The privacy page, listing, Data safety sheet and pilot kit changed from "no tracking" to the accurate wording; a test blocks the old claim.
+7. `SECURITY.md`, `security.txt`, tests grown from 198 to 558 checks, including hostile-link and injected-HTML attacks and proof that the CSP blocks inline script and eval.
+
+**Not covered, stated once:** the same-origin check is not authentication, so determined direct callers are limited by the daily cap, the Vercel firewall rule and the Anthropic spend limit, not by code. Supabase dashboard settings (CAPTCHA, password policy, redirect list) and two-factor on every account are owner actions listed in `SECURITY.md`.
+
+**Lesson:** a working demo that is public is already a production system. The expensive mistake was a relay that trusted the browser.
+

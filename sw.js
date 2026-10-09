@@ -1,5 +1,5 @@
 /* DermCase service worker. Network-first: online you always get the latest deploy;
-   offline you get the last good copy, or a friendly offline page. Never touches /api. */
+   offline you get the last good copy, or a friendly offline page. Never touches /api or /_vercel. */
 const CACHE = 'dc-shell-v1';
 const PRECACHE = ['/offline', '/assets/ds.css', '/assets/ds.js', '/assets/darae-ink.svg', '/manifest.webmanifest'];
 
@@ -16,7 +16,7 @@ self.addEventListener('fetch', function (e) {
   if (req.method !== 'GET') return;
   var url = new URL(req.url);
   if (url.origin !== location.origin) return;
-  if (url.pathname.indexOf('/api/') === 0 || url.pathname.indexOf('/.well-known/') === 0 || url.pathname === '/sw.js') return;
+  if (url.pathname.indexOf('/api/') === 0 || url.pathname.indexOf('/_vercel/') === 0 || url.pathname.indexOf('/.well-known/') === 0 || url.pathname === '/sw.js') return;
   e.respondWith(networkFirst(req));
 });
 

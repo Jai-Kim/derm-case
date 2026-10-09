@@ -12,8 +12,9 @@ flowchart LR
 
     subgraph HOST["Vercel"]
         direction TB
-        STATIC["Static site<br/>cleanUrls · /.well-known/assetlinks.json"]
-        PROXY["api/analyze.js<br/>forwards the request, stores nothing"]
+        STATIC["Static site<br/>strict CSP · self-hosted scripts and fonts<br/>/.well-known/assetlinks.json · security.txt"]
+        VA["Web Analytics<br/>cookie-free page views"]
+        PROXY["api/analyze.js<br/>one fixed job: validates, owns the prompt and limits,<br/>same-origin only, daily cap, stores nothing"]
     end
 
     subgraph AI["Anthropic API"]
@@ -24,6 +25,7 @@ flowchart LR
         AUTH["Auth"]
         DB[("cases table<br/>brief + age, sex, site, duration, skin type<br/>never the photo, never the notes<br/>row level security · delete_my_account()")]
         AUTH --- DB
+        USE[("usage_daily<br/>anonymous counts + daily cap<br/>no IDs, no IP, no photo, no text")]
     end
 
     WEB -->|"photo + case details"| PROXY
@@ -33,8 +35,10 @@ flowchart LR
     WEB -.->|"Save, if signed in"| DB
     WEB -.->|"Share link: brief in the URL fragment"| WEB
     STATIC --- WEB
+    PROXY -.->|"gate + tally (private secret)"| USE
+    WEB -.->|"page views (skipped if Do Not Track)"| VA
 
     classDef live fill:#17181B,stroke:#17181B,color:#fff;
     classDef ext fill:#F4F5F3,stroke:#B9BDC2,color:#4B4F55;
     class WEB,PWA,PROXY,STATIC live;
-    class TWA,MODEL,AUTH,DB,LS ext;
+    class TWA,MODEL,AUTH,DB,LS,USE,VA ext;

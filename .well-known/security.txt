@@ -1,0 +1,5 @@
+Contact: mailto:jaikyeong.kim@gmail.com
+Expires: 2027-09-30T00:00:00.000Z
+Preferred-Languages: en, ko
+Canonical: https://dermcase.jai-kim.com/.well-known/security.txt
+Policy: https://github.com/Jai-Kim/derm-case/blob/main/SECURITY.md

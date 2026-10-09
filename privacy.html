@@ -10,7 +10,7 @@
 <link rel="icon" type="image/svg+xml" href="/assets/darae-ink.svg">
 <link rel="apple-touch-icon" href="/assets/favicon-180.png">
 <link rel="manifest" href="/manifest.webmanifest">
-<link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/orioncactus/pretendard@v1.3.9/dist/web/variable/pretendardvariable-dynamic-subset.css">
+<link rel="stylesheet" href="/assets/fonts/pretendard-1.3.9/pretendardvariable-dynamic-subset.css">
 <link rel="stylesheet" href="/assets/ds.css">
 <script src="/assets/ds.js"></script>
 <script src="/config.js"></script>
@@ -36,7 +36,7 @@
 <!-- ============================ ENGLISH ============================ -->
 <div class="l-en" lang="en">
   <h1>Privacy policy</h1>
-  <p class="meta">DermCase by Darae, operated by Jai Kim. Last updated October 6, 2026.</p>
+  <p class="meta">DermCase by Darae, operated by Jai Kim. Last updated October 8, 2026.</p>
   <p class="lede">DermCase is a literature tool for clinicians. This page says what happens to the photo, the case details and the account data you give it, who else handles them, and how to delete them. It is written to be read, not skimmed past.</p>
 
   <section id="short">
@@ -46,7 +46,8 @@
       <div class="fact"><dt>Case details</dt><dd>Age, sex, body site, duration, skin type and notes travel with the photo. DermCase stores them only if you press Save, and notes are never stored.</dd></div>
       <div class="fact"><dt>Saved cases</dt><dd>With an account, in our database (Supabase), visible only to you. Without an account, only in this browser on this device.</dd></div>
       <div class="fact"><dt>Model training</dt><dd>Anthropic states that by default it does not use API inputs or outputs to train its models.</dd></div>
-      <div class="fact"><dt>Tracking</dt><dd>None. No analytics, no advertising, no advertising identifiers, no tracking cookies. Nothing is sold.</dd></div>
+      <div class="fact"><dt>Tracking</dt><dd>Anonymous counts only. Page views are counted without cookies or any persistent ID, and the app counts how many analyses run and how they end, with no photo, case text, account or IP address in the count. No advertising, no advertising identifiers, no tracking cookies. Nothing is sold. Details under &ldquo;Usage counts&rdquo;.</dd></div>
+      <div class="fact"><dt>Security</dt><dd>HTTPS only, a strict content-security policy, no third-party scripts, and a server that accepts only the app&rsquo;s own requests with a daily limit. To report a vulnerability, see <a href="/.well-known/security.txt">security.txt</a>.</dd></div>
       <div class="fact"><dt>Pilot</dt><dd>Use de-identified cases only. See &ldquo;Patient information&rdquo; below.</dd></div>
     </dl>
   </section>
@@ -65,13 +66,15 @@
     <p>&ldquo;Share link&rdquo; puts the brief and the case details into the part of the link after the <code>#</code>. Your browser does not send that part to any server, but anyone who has the link can read everything in it. Share only de-identified content.</p>
     <h3>Server records</h3>
     <p>Our host, Vercel, records standard request metadata such as IP address, time and URL to run the service. DermCase&rsquo;s own code does not log or store the contents of an analysis request.</p>
+    <h3>Usage counts</h3>
+    <p>To learn whether the tool is useful and stable, DermCase keeps two kinds of anonymous counts. First, page views on the home, about, app and privacy pages, counted by Vercel Web Analytics. It sets no cookies and builds no profile of you. It is not loaded at all if your browser sends Do Not Track or Global Privacy Control, and it never runs on shared reports, the sign-in page or your library. Second, a daily tally in our own database of how many analyses started, how each ended (finished, not a clinical photo, cut off, failed), the report language and the total time taken. That tally contains no account, IP address, device identifier, photo or case text, so it cannot be tied back to you. The tally also lets us set a daily limit so the service stays available.</p>
   </section>
 
   <section id="others">
     <h2>Who else handles data</h2>
     <dl class="facts">
       <div class="fact"><dt>Anthropic</dt><dd>Runs the AI analysis and literature search. Receives the photos and case details of every analysis. <a class="link" href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">Retention</a> · <a class="link" href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training" rel="noopener">Training</a> · <a class="link" href="https://www.anthropic.com/legal/privacy" rel="noopener">Privacy policy</a></dd></div>
-      <div class="fact"><dt>Vercel</dt><dd>Hosts the site and the small server function that forwards your analysis request to Anthropic.</dd></div>
+      <div class="fact"><dt>Vercel</dt><dd>Hosts the site and the small server function that forwards your analysis request to Anthropic. Also provides the cookie-free page-view counts.</dd></div>
       <div class="fact"><dt>Supabase</dt><dd>Accounts and saved cases for people who sign in. Not used if you stay signed out.</dd></div>
       <div class="fact"><dt>jsDelivr</dt><dd>A public content network that serves the Pretendard font and the Supabase browser library. It can see your IP address and browser details when a page loads.</dd></div>
       <div class="fact"><dt>PubMed, DOI, journals</dt><dd>Reference links open the publisher&rsquo;s own site. Their policies apply once you leave DermCase.</dd></div>
@@ -114,7 +117,7 @@
 <!-- ============================ KOREAN ============================ -->
 <div class="l-ko" lang="ko">
   <h1>개인정보 처리방침</h1>
-  <p class="meta">DermCase by Darae, 운영자 Jai Kim. 최종 수정일 2026년 10월 6일.</p>
+  <p class="meta">DermCase by Darae, 운영자 Jai Kim. 최종 수정일 2026년 10월 8일.</p>
   <p class="lede">DermCase는 임상의를 위한 문헌 검토 도구입니다. 이 문서는 사진, 증례 정보, 계정 정보가 어떻게 처리되는지, 누가 함께 다루는지, 어떻게 삭제하는지를 설명합니다.</p>
 
   <section id="short-ko">
@@ -124,7 +127,8 @@
       <div class="fact"><dt>증례 정보</dt><dd>나이, 성별, 부위, 기간, 피부 유형, 메모가 사진과 함께 전송됩니다. 저장 버튼을 누를 때만 DermCase에 보관되며, 메모는 저장되지 않습니다.</dd></div>
       <div class="fact"><dt>저장한 증례</dt><dd>계정이 있으면 데이터베이스(Supabase)에 보관되고 본인만 볼 수 있습니다. 계정이 없으면 이 기기의 브라우저에만 남습니다.</dd></div>
       <div class="fact"><dt>모델 학습</dt><dd>Anthropic은 기본적으로 API 입력과 출력을 모델 학습에 사용하지 않는다고 밝히고 있습니다.</dd></div>
-      <div class="fact"><dt>추적</dt><dd>없음. 분석 도구, 광고, 광고 식별자, 추적 쿠키를 쓰지 않으며 데이터를 판매하지 않습니다.</dd></div>
+      <div class="fact"><dt>추적</dt><dd>익명 집계만 합니다. 페이지 조회는 쿠키나 지속적인 식별자 없이 세고, 분석이 몇 번 실행되고 어떻게 끝나는지를 세며, 이 집계에는 사진, 증례 내용, 계정, IP 주소가 들어 있지 않습니다. 광고, 광고 식별자, 추적 쿠키는 쓰지 않으며 데이터를 판매하지 않습니다. 자세한 내용은 &ldquo;이용 집계&rdquo;를 보세요.</dd></div>
+      <div class="fact"><dt>보안</dt><dd>HTTPS만 사용하고, 엄격한 콘텐츠 보안 정책을 적용하며, 외부 스크립트를 쓰지 않습니다. 서버는 앱 자체의 요청만 받고 하루 사용 한도를 둡니다. 취약점은 <a href="/.well-known/security.txt">security.txt</a>로 알려 주세요.</dd></div>
       <div class="fact"><dt>파일럿</dt><dd>비식별화된 증례만 사용하세요. 아래 &ldquo;환자 정보&rdquo;를 확인하세요.</dd></div>
     </dl>
   </section>
@@ -143,13 +147,15 @@
     <p>&ldquo;링크 공유&rdquo;는 브리프와 증례 정보를 링크의 <code>#</code> 뒷부분에 담습니다. 브라우저는 그 부분을 서버로 보내지 않지만, 링크를 가진 사람은 안의 내용을 모두 읽을 수 있습니다. 비식별화된 내용만 공유하세요.</p>
     <h3>서버 기록</h3>
     <p>호스팅 제공사인 Vercel이 서비스 운영을 위해 IP 주소, 시각, URL 같은 표준 요청 정보를 기록합니다. DermCase의 코드는 분석 요청의 내용을 기록하거나 저장하지 않습니다.</p>
+    <h3>이용 집계</h3>
+    <p>도구가 유용하고 안정적인지 알기 위해 두 가지 익명 집계를 둡니다. 첫째, 홈, 소개, 앱, 개인정보 페이지의 조회수를 Vercel Web Analytics로 셉니다. 쿠키를 설정하지 않고 사용자의 프로필을 만들지 않습니다. 브라우저가 Do Not Track 또는 Global Privacy Control 신호를 보내면 아예 불러오지 않으며, 공유 리포트, 로그인 페이지, 라이브러리에서는 실행되지 않습니다. 둘째, 자체 데이터베이스에 하루 단위로 분석이 몇 번 시작되었는지, 어떻게 끝났는지(완료, 임상 사진 아님, 중간에 잘림, 실패), 리포트 언어, 총 소요 시간을 기록합니다. 이 집계에는 계정, IP 주소, 기기 식별자, 사진, 증례 내용이 없어 개인과 연결할 수 없습니다. 이 집계는 서비스가 계속 이용 가능하도록 하루 한도를 두는 데에도 쓰입니다.</p>
   </section>
 
   <section id="others-ko">
     <h2>함께 처리하는 제3자</h2>
     <dl class="facts">
       <div class="fact"><dt>Anthropic</dt><dd>AI 분석과 문헌 검색을 수행하며, 모든 분석의 사진과 증례 정보를 받습니다. <a class="link" href="https://privacy.claude.com/en/articles/7996866-how-long-do-you-store-my-organization-s-data" rel="noopener">보관 기간</a> · <a class="link" href="https://privacy.claude.com/en/articles/7996868-is-my-data-used-for-model-training" rel="noopener">학습 사용</a> · <a class="link" href="https://www.anthropic.com/legal/privacy" rel="noopener">개인정보 처리방침</a></dd></div>
-      <div class="fact"><dt>Vercel</dt><dd>사이트와, 분석 요청을 Anthropic으로 전달하는 작은 서버 함수를 호스팅합니다.</dd></div>
+      <div class="fact"><dt>Vercel</dt><dd>사이트와, 분석 요청을 Anthropic으로 전달하는 작은 서버 함수를 호스팅합니다. 쿠키 없는 페이지 조회 집계도 제공합니다.</dd></div>
       <div class="fact"><dt>Supabase</dt><dd>로그인한 사용자의 계정과 저장한 증례를 보관합니다. 로그인하지 않으면 사용되지 않습니다.</dd></div>
       <div class="fact"><dt>jsDelivr</dt><dd>Pretendard 글꼴과 Supabase 브라우저 라이브러리를 제공하는 공개 콘텐츠 전송망입니다. 페이지를 불러올 때 IP 주소와 브라우저 정보를 볼 수 있습니다.</dd></div>
       <div class="fact"><dt>PubMed, DOI, 학술지</dt><dd>참고문헌 링크는 발행처 사이트로 이동합니다. DermCase를 벗어나면 해당 사이트의 정책이 적용됩니다.</dd></div>
@@ -197,23 +203,7 @@
   <p class="l-ko">임상의를 위한 문헌 참고 도구입니다. DermCase는 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 의사의 판단을 대체하지 않으며 응급 상황을 위한 도구가 아닙니다.</p>
 </div></div></footer>
 
-<script>
-(function(){
-  var de=document.documentElement,btn=document.getElementById('langBtn');
-  var lang=(window.dcLang&&dcLang.get())||((navigator.language||'').slice(0,2)==='ko'?'ko':'en');
-  function apply(){de.setAttribute('data-lang',lang);de.lang=lang;btn.textContent=lang==='ko'?'EN':'한국어';
-    document.title=lang==='ko'?'DermCase | 개인정보 처리방침':'DermCase | Privacy policy';}
-  btn.addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);apply();});
-  apply();
-  if(location.hash==='#delete'&&lang==='ko'){var d=document.getElementById('delete-ko');if(d)d.scrollIntoView();}
-  var m=window.DERMCASE_CONTACT_EMAIL;
-  if(m&&/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(m)){
-    [].forEach.call(document.querySelectorAll('[data-contact]'),function(el){
-      var a=document.createElement('a');a.className='link';a.href='mailto:'+m;a.textContent=m;
-      el.textContent='';el.appendChild(a);
-    });
-  }
-})();
-</script>
+<script src="/assets/js/privacy.js"></script>
+<script src="/assets/js/analytics.js" defer></script>
 </body>
 </html>

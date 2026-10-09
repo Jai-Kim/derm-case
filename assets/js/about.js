@@ -1,0 +1,68 @@
+var I18N={
+ko:{navHome:'홈',navOpen:'앱 열기',tocPipe:'작동 방식',tocEv:'근거 수준',tocPr:'개인정보',tocLi:'한계',
+ h1:'어떻게 작동하고, 무엇을 저장하지 않는가.',
+ lede:'DermCase는 진단 도구가 아니라 문헌 검토를 돕는 도구입니다. 작동 방식과 데이터 처리 방식을 있는 그대로 설명합니다.',
+ pipeH:'증례에서 브리프까지',
+ p1h:'증례 입력',p1p:'증례 사진 최대 3장과 환자 정보를 받습니다. 나이, 성별, 부위, 기간, 피부 유형, 메모입니다.',
+ p2h:'사진 확인과 진단 도출',p2p:'모델이 먼저 임상 피부 사진인지 확인합니다. 아니면 추측하지 않고 거절합니다. 맞다면 보이는 형태와 임상 맥락에서 유력 진단을 좁힙니다.',
+ p3h:'문헌 검색',p3p:'그 진단에 맞춰 검색어를 구성하고 최신 문헌을 검색합니다. 일반 키워드 검색이 아니라 진단을 따라가는 검색입니다.',
+ p4h:'브리프 구성',p4p:'이 증례에 적용되는 근거만 추려 등급을 매기고 브리프로 정리합니다. 치료 옵션 비교는 선택이 분명하지 않을 때만 포함됩니다.',
+ evH:'모든 출처에 근거 수준을 표시합니다.',
+ evP:'강도는 막대 개수와 이름으로 표시되어 인쇄, 다크 모드, 색각 이상에서도 같게 읽힙니다.',
+ t3h:'강함',t3k:'가이드라인, 메타분석, RCT',t3p:'진료 지침, 체계적 문헌고찰, 무작위 대조 시험.',
+ t2h:'중간',t2k:'코호트 연구, 리뷰',t2p:'관찰 연구와 전문가 리뷰. 방향은 제시하지만 인과 추론에는 한계가 있습니다.',
+ t1h:'제한적',t1k:'증례 보고',t1p:'단일 또는 소수 증례. 드문 발현에는 유용하지만 일반화에는 약합니다.',
+ evNote:'등급은 검증된 학술 데이터베이스 조회가 아니라 모델의 판단입니다. 항상 원문과 최신 가이드라인에 대조해 확인하세요.',
+ privacyLink:'개인정보 처리방침',prH:'DermCase는 증례 사진을 저장하지 않습니다.',prP:'사진은 분석을 위해 AI 제공사로 전송될 뿐 DermCase 서버에 보관되지 않습니다. 저장되는 것은 구조화된 증례뿐이며, 저장을 선택했을 때만입니다. 자세한 내용은 개인정보 처리방침을 확인하세요.',
+ f1t:'사진',f1d:'분석을 위해 AI 제공사(Anthropic)로 한 번 전송됩니다. DermCase는 저장하지 않으며, Anthropic은 API 입력과 출력을 30일 이내에 삭제한다고 밝히고 있습니다.',
+ f2t:'저장한 증례',f2d:'저장을 선택하면 감별 고려 질환, 문헌, 치료 옵션과 증례 정보(나이, 성별, 부위, 기간, 피부 유형)만 보관됩니다. 이름도 이미지도 포함되지 않습니다.',
+ f3t:'접근 권한',f3d:'저장된 증례는 저장한 계정에서만 볼 수 있습니다.',
+ f4t:'기기 내 기록',f4d:'계정이 없으면 증례는 이 기기의 브라우저에만 남습니다.',
+ f5t:'파일럿 기간',f5d:'파일럿 동안에는 비식별화된 증례만 사용하세요.',
+ liH:'할 수 없는 것',liP:'신뢰는 정직에서 나옵니다. DermCase가 하지 못하는 것을 분명히 합니다.',
+ l1h:'진단을 내리지 않습니다',l1p:'유력 진단을 제시할 뿐 확정 진단이 아닙니다. 최종 판단은 의사의 몫입니다.',
+ l2h:'검증된 DB 조회가 아닙니다',l2p:'검색과 근거 등급은 모델의 판단에 의존하며 부정확하거나 불완전할 수 있습니다. 모든 참고문헌이 출처로 연결되는 이유입니다.',
+ l3h:'틀릴 수 있습니다',l3p:'모든 결과는 임상적 판단으로 검증하고 환자별 요인을 반영해야 합니다.',
+ l4h:'응급용이 아닙니다',l4p:'시간을 다투는 상황이나 긴급한 의사결정을 위한 도구가 아닙니다.',
+ ctaH:'실제 증례로 직접 확인하세요.',ctaP:'비전형적이거나 치료에 저항하는 증례에서 가장 쓸모가 있습니다.',
+ footDisc:'임상의를 위한 문헌 참고 도구입니다. DermCase는 의료기기가 아니며 어떤 질환도 진단, 치료, 완치 또는 예방하지 않습니다. 의사의 판단을 대체하지 않으며 응급 상황을 위한 도구가 아닙니다. 모든 결과는 최신 가이드라인과 환자별 요인에 따라 검증하세요.'},
+en:{navHome:'Home',navOpen:'Open app',tocPipe:'How it works',tocEv:'Evidence grades',tocPr:'Privacy',tocLi:'Limits',
+ h1:'How it works, and what it never stores.',
+ lede:'DermCase is a literature tool, not a diagnostic one. This page is the plain account of how it works and how it handles your data.',
+ pipeH:'From case to brief',
+ p1h:'Add the case',p1p:'Up to three case photos and patient context: age, sex, site, duration, skin type and notes.',
+ p2h:'Check the photo, then identify',p2p:'The model first decides whether a photo is a clinical image. If not, it declines instead of guessing. If so, it narrows the likely diagnosis from the visible morphology and clinical context.',
+ p3h:'Search',p3p:'It builds queries around that diagnosis and searches current published literature. The search follows the diagnosis rather than a generic keyword lookup.',
+ p4h:'Compose',p4p:'It keeps only what applies to this case, grades each source, and assembles the brief. Treatment options are compared only when the choice is not obvious.',
+ evH:'Every source is graded.',
+ evP:'Strength is shown as bars plus a name, so it reads the same in print, in dark mode, and for color-blind readers.',
+ t3h:'Strong',t3k:'Guideline, meta-analysis, RCT',t3p:'Practice guidelines, systematic reviews and randomized trials.',
+ t2h:'Moderate',t2k:'Cohort, review',t2p:'Observational studies and expert reviews. Directional, limited on causation.',
+ t1h:'Limited',t1k:'Case report',t1p:'One or a few cases. Useful for rare presentations, weak for generalizing.',
+ evNote:'The grade is the model\u2019s own judgment, not a lookup in a verified academic database. Always confirm it against the original source and current guidelines.',
+ privacyLink:'Privacy policy',prH:'DermCase does not save your photos.',prP:'Photos are sent to an AI provider for analysis and are not kept on DermCase servers. The only thing stored is the structured case, and only if you choose Save. The full account is in the privacy policy.',
+ f1t:'Photo',f1d:'Sent once to our AI provider, Anthropic, for analysis. DermCase does not store it. Anthropic states that it deletes API inputs and outputs within 30 days.',
+ f2t:'Saved case',f2d:'If you save, only the differential, references, treatment options and the case details (age, sex, site, duration, skin type) are kept. No name, no image.',
+ f3t:'Access',f3d:'A saved case is visible only to the account that saved it.',
+ f4t:'On this device',f4d:'Without an account, cases stay in your browser on this device.',
+ f5t:'Pilot period',f5d:'During the pilot, use de-identified cases only.',
+ liH:'What it cannot do',liP:'Trust comes from honesty. Here is what DermCase does not do.',
+ l1h:'It does not diagnose',l1p:'It surfaces a likely diagnosis, not a definitive one. The final call is the physician\u2019s.',
+ l2h:'It is not a verified database lookup',l2p:'Search and evidence grading rely on the model\u2019s judgment and can be inaccurate or incomplete. That is why every reference links to its source.',
+ l3h:'It can be wrong',l3p:'Validate every output with clinical judgment and weigh it against patient-specific factors.',
+ l4h:'It is not for emergencies',l4p:'It is not built for time-critical or urgent decisions.',
+ ctaH:'See it on a real case.',ctaP:'It is most useful on the atypical and treatment-resistant ones.',
+ footDisc:'A literature reference for clinicians. DermCase is not a medical device and does not diagnose, treat, cure or prevent any medical condition. It does not replace physician judgment and is not for emergencies. Validate all findings against current guidelines and patient-specific factors.'}};
+var lang=(window.dcLang?dcLang.get():'ko');
+function t(k){return I18N[lang][k]||I18N.en[k]||k;}
+function render(){if(window.dcMotion&&window.__rendered)setTimeout(function(){dcMotion.refresh();},0);window.__rendered=true;document.documentElement.lang=lang;document.querySelectorAll('[data-i18n]').forEach(function(el){el.textContent=t(el.getAttribute('data-i18n'));});document.getElementById('langBtn').textContent=lang==='ko'?'EN':'한국어';}
+document.getElementById('langBtn').addEventListener('click',function(){lang=lang==='ko'?'en':'ko';if(window.dcLang)dcLang.set(lang);render();});
+render();
+if(window.dcMotion)dcMotion.refresh();
+(function(){
+  var links=[].slice.call(document.querySelectorAll('.toc a'));
+  if(!links.length||!('IntersectionObserver' in window))return;
+  var map={};links.forEach(function(a){map[a.getAttribute('href').slice(1)]=a;});
+  var io=new IntersectionObserver(function(es){es.forEach(function(e){if(e.isIntersecting){links.forEach(function(a){a.classList.remove('on');});var a=map[e.target.id];if(a)a.classList.add('on');}});},{rootMargin:'-30% 0px -60% 0px'});
+  Object.keys(map).forEach(function(id){var el=document.getElementById(id);if(el)io.observe(el);});
+})();
