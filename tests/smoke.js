@@ -89,6 +89,13 @@ function fileChecks() {
   const gi = read('.gitignore');
   ok(/\*\.keystore/.test(gi) && /\*\.jks/.test(gi), '.gitignore blocks signing keystores');
   ok(/^store$/m.test(read('.vercelignore')) && /^tests$/m.test(read('.vercelignore')), '.vercelignore keeps store and tests off the site');
+  // env files and signing files must never be committable or uploadable (PWABuilder's zip holds signing-key-info.txt with the passwords; `vercel env pull` writes .env.local)
+  ['.env', '.env.local', '.env.production', '.vercel/project.json', 'signing-key-info.txt', 'android/signing-key-info.txt', 'android/signing.keystore', 'upload.jks', 'key.p12', 'key.pem', '.claude/settings.local.json'].forEach(f => {
+    let ignored = false; try { cp.execSync('git check-ignore -q -- ' + JSON.stringify(f), { cwd: ROOT, stdio: 'ignore' }); ignored = true; } catch (e) { }
+    ok(ignored, '.gitignore blocks ' + f);
+  });
+  { const vi = read('.vercelignore').split('\n').map(x => x.trim());
+    ['.env*', '*.keystore', '*.jks', '*.p12', '*.pem', 'signing-key-info.txt', '.claude'].forEach(l => ok(vi.indexOf(l) >= 0, '.vercelignore keeps ' + l + ' off the deployed site')); }
 
   // secrets must never be committed
   const files = cp.execSync('git ls-files', { cwd: ROOT }).toString().split('\n').filter(Boolean)

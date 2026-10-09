@@ -5,3 +5,11 @@ android
 *.md
 supabase-schema.sql
 architecture.mermaid
+# Never upload secrets or signing files to a deployment, even by accident
+.env*
+*.keystore
+*.jks
+*.p12
+*.pem
+signing-key-info.txt
+.claude
