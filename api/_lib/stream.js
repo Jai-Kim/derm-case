@@ -11,6 +11,8 @@ const MAX_TOOL_JSON_CHARS = 4000;
 const MAX_QUERY_CHARS = 110;
 // Everything that is not a visible character: controls, every Unicode "format" character (zero-width, bidi marks and isolates,
 // soft hyphen, the invisible tag block used to hide text), line and paragraph separators, lone surrogates, variation-selector supplement.
+// The only stop reasons the browser may be told about. Anything else from upstream is dropped (stays null).
+const STOP_REASONS = ['end_turn', 'max_tokens', 'stop_sequence', 'tool_use', 'pause_turn', 'refusal', 'model_context_window_exceeded'];
 const QUERY_INVISIBLE = /[\p{Cc}\p{Cf}\p{Zl}\p{Zp}\p{Cs}\u{E0100}-\u{E01EF}]/gu;
 
 // body: a web ReadableStream (what fetch returns) or any async iterable of Uint8Array/Buffer/string.
@@ -117,7 +119,7 @@ function makeReducer(emit) {
         case 'content_block_start': return onStart(ev);
         case 'content_block_delta': return onDelta(ev);
         case 'content_block_stop': return onStop(ev);
-        case 'message_delta': if (ev.delta && typeof ev.delta.stop_reason === 'string') stop = ev.delta.stop_reason; return;
+        case 'message_delta': if (ev.delta && STOP_REASONS.indexOf(ev.delta.stop_reason) >= 0) stop = ev.delta.stop_reason; return;
         case 'error': err = (ev.error && ev.error.type === 'overloaded_error') ? 'busy' : 'upstream_error'; return;
         default: return;
       }

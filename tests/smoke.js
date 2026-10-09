@@ -362,6 +362,11 @@ async function serverChecks() {
   globalThis.fetch = async () => upstreamOk({ stop: 'max_tokens' });
   r = await call(goodReq({ headers: { accept: 'application/x-ndjson' } }));
   { const L = r.lines(); ok(L[L.length - 1].t === 'done' && L[L.length - 1].stop_reason === 'max_tokens', 'a cut-off answer is passed on with stop_reason max_tokens'); }
+  globalThis.fetch = async () => upstreamOk({ stop: 'LEAK-<b>unknown</b>-stop' });
+  r = await call(goodReq({ headers: { accept: 'application/x-ndjson' } }));
+  { const L = r.lines(), d = L[L.length - 1]; ok(d.t === 'done' && d.stop_reason === null && !/LEAK/.test(JSON.stringify(L)), 'only a known stop reason can reach the browser; any other upstream text is dropped', JSON.stringify(d.stop_reason)); }
+  r = await call(goodReq());
+  ok(r.code === 200 && r.body.stop_reason === null && !/LEAK/.test(JSON.stringify(r.body)), 'the same holds for the plain JSON answer');
   { // a browser that leaves mid-answer stops the model call
     let sig; globalThis.fetch = async (url, opt) => { sig = opt.signal; return { ok: true, status: 200, body: sseStream(modelEvents().slice(0, 4), { hold: true, signal: opt.signal }) }; };
     const rs = fakeRes(); const pr = handler(goodReq({ headers: { accept: 'application/x-ndjson' } }), rs);
