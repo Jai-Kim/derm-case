@@ -452,6 +452,25 @@ async function serverChecks() {
   globalThis.fetch = realFetch;
   Object.keys(env0).forEach(k => { const n = { a: 'ANTHROPIC_API_KEY', u: 'USAGE_KEY', c: 'DAILY_ANALYSIS_CAP' }[k]; if (env0[k] === undefined) delete process.env[n]; else process.env[n] = env0[k]; });
 
+  console.log('Service worker');
+  { const vm = require('vm'), listeners = {}, puts = [];
+    let netHeaders = {};
+    const fakeNet = async () => ({ ok: true, type: 'basic', redirected: false, headers: { get: k => netHeaders[String(k).toLowerCase()] || null }, clone() { return this; } });
+    const box = { self: { addEventListener: (t, f) => { listeners[t] = f; }, skipWaiting() { }, clients: { claim() { } } }, location: new URL('https://dermcase.example/sw.js'), URL, setTimeout, clearTimeout, Promise, Response, fetch: fakeNet,
+      caches: { open: async () => ({ put: r => { puts.push(r.url); }, match: async () => undefined }), keys: async () => [], delete: async () => true, match: async () => undefined } };
+    vm.createContext(box); vm.runInContext(read('sw.js'), box);
+    const handle = async (p, method) => { let promise = null; listeners.fetch({ request: { method: method || 'GET', url: 'https://dermcase.example' + p, mode: 'cors' }, respondWith: pr => { promise = pr; } }); if (promise) await promise; return !!promise; };
+    for (const p of ['/app', '/assets/ds.css', '/report']) ok(await handle(p) === true, 'service worker serves ' + p);
+    const never = ['/api/health', '/api/analyze', '/api', '/api/', '//api/health', '/%61pi/health', '/api%2Fhealth', '/API/health', '/_vercel/insights/script.js', '//_vercel/insights/script.js', '/.well-known/assetlinks.json', '/sw.js', '/%E0%A4%A'];
+    for (const p of never) ok(await handle(p) === false, 'service worker never touches ' + p);
+    ok(await handle('/api/analyze', 'POST') === false, 'service worker ignores POST');
+    puts.length = 0; netHeaders = {};
+    await handle('/app');
+    ok(puts.length === 1, 'service worker keeps a normal page for offline use (control)', String(puts.length));
+    puts.length = 0; netHeaders = { 'cache-control': 'no-store' };
+    await handle('/app');
+    ok(puts.length === 0, 'service worker never keeps a response that says no-store', String(puts.length)); }
+
   console.log('DCSafe');
   const S = require(path.join(ROOT, 'assets/safe.js'));
   const yes = ['https://doi.org/10.1016/j.jaad.2023.01.001', 'https://pubmed.ncbi.nlm.nih.gov/12345/', 'https://www.jaad.org/article/S0190', 'https://academic.oup.com/bjd/article/1', 'https://www.cochranelibrary.com/cdsr/doi/1'];
