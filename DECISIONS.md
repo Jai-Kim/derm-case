@@ -303,3 +303,27 @@ These are lab and online studies of generic waits, not of clinicians. "30 to 60 
 
 **Also noted:** there is no "forgot password" flow in the app yet. With confirmation on, a user who forgets a password has no way back in except a new address.
 
+
+## D-017: End-to-end security audit (October 2026)
+
+**Date:** October 2026
+**Flagged by:** User ("create a subagent who can check end to end security and fix them")
+**Who did it:** the `security-auditor` agent (`.claude/agents/security-auditor.md`) on branch `security/audit-oct-2026`, then re-checked by the owner's assistant: full suite re-run, every code diff read.
+
+| ID | Severity | Found | Fixed with |
+|---|---|---|---|
+| F-01 | High | One request with a few hundred KB of text in the notes could keep a server instance busy for minutes (tag-removal loop ran before the length check) | Raw length refused before any cleaning |
+| F-02 | Medium | `.gitignore` and `.vercelignore` did not block env files or `signing-key-info.txt` | Both files extended, with tests |
+| F-04 | Low | Pressing Cancel during the daily-cap check still caused one paid model call | Close listener registered before the check; the slot is given back |
+| F-05 | Low | Invisible Unicode (tag characters, direction isolates, soft hyphen) could hide instructions in case notes or search queries | Stripped in `validate.js` and `cleanQuery` |
+| F-06 | Low | The service worker skipped `/api` only for one spelling of the path and kept `no-store` responses | Path normalised first; `no-store` and `private` responses are never cached |
+| F-07 | Low | Parallel inserts could pass the 200-brief cap | Per-user advisory lock in the trigger (needs the schema re-run in Supabase) |
+| F-08 | Low | No password rule shown on sign-up | Hint and client check, English and Korean |
+| F-09 | Low | Three real regressions would have left the old suite green | Tests for key logging, CORS headers and the service worker bypass; font hashes pinned |
+| F-10, F-11 | Info | Any upstream stop reason was forwarded; a stream line of `null` broke the reader | Fixed list of stop reasons; non-object lines skipped |
+
+**Accepted, with reasons.** `sseEvents` trusts Anthropic over TLS (a hostile upstream could make it rescan its buffer). `/api/health` shows the cap and whether the key and counters are set, never a value. The burst limiter trusts the forwarded IP header (the Vercel firewall rule and the daily cap are the real limits). `style-src 'unsafe-inline'` stays; scripts remain `'self'` only. The vendored supabase-js is not covered by Dependabot. A hostile `/report` link slows only the tab that opens it.
+
+**Open, owner side.** Forgot-password flow (F-03). Recommended design: a "Forgot password?" link in sign-in mode calling `resetPasswordForEmail` with `redirectTo` set to `https://dermcase.jai-kim.com/login?reset=1`; the screen always says "If an account exists, we sent a link"; on `/login?reset=1` call `exchangeCodeForSession` explicitly (the client has `detectSessionInUrl:false`), remove the code from the address bar, show a new-password form with the same `passwordOk` rule, call `updateUser`, then send the person to sign-in. It needs custom SMTP first and one Redirect URL (`https://dermcase.jai-kim.com/login`) in Supabase, which D-016 left empty on purpose.
+
+**Not checked by the auditor** (no access by design): live response headers, Vercel and Supabase dashboard settings, whether Vercel overwrites the forwarded IP headers, a true two-connection race on the 200-brief cap.
