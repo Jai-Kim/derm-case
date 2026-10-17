@@ -8,3 +8,14 @@ android/build/
 android/.gradle/
 android/app/
 node_modules/
+
+# Environment files (vercel env pull writes the Anthropic key into one) and Vercel's local link folder
+.env
+.env.*
+!.env.example
+.vercel/
+# PWABuilder writes this next to the keystore, and it holds the passwords in plain text
+signing-key-info.txt
+*.pfx
+# Local assistant settings
+.claude/settings.local.json

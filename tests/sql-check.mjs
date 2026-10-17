@@ -42,6 +42,11 @@ await t('gate after refund (cap 5)', () => as('anon', () => q("select public.usa
 await t('hit junk event ignored', () => as('anon', () => q("select public.usage_hit($1,'DROP TABLE','ko',1)", [key])));
 console.log(await q('select * from public.usage_daily order by evt, lang'));
 
+// signed-in users have no business calling the usage functions (the proxy uses the anon role)
+await t('authenticated cannot call usage_gate', () => as('authenticated', () => q('select public.usage_gate($1,\'ko\',5)', [key])), true);
+await t('authenticated cannot call usage_hit', () => as('authenticated', () => q("select public.usage_hit($1,'analyze_ok','ko',1)", [key])), true);
+await t('authenticated cannot call usage_check', () => as('authenticated', () => q('select public.usage_check($1)', [key])), true);
+
 // cases: RLS, size caps, row cap, no update
 const A = '11111111-1111-1111-1111-111111111111', B = '22222222-2222-2222-2222-222222222222';
 await db.exec(`insert into auth.users(id) values ('${A}'),('${B}')`);
@@ -57,6 +62,15 @@ await t('oversize dx rejected', () => asUser(A, () => q("insert into public.case
 await db.exec(`insert into public.cases(user_id,dx) select '${B}','x' from generate_series(1,199)`);
 await t('B 200th case allowed', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])));
 await t('B 201st case blocked', () => asUser(B, () => q("insert into public.cases(user_id,dx) values ($1,'x')", [B])), true);
+await t('inserting a case takes a per-user lock (parallel inserts cannot slip past the 200 cap)', () => asUser(A, async () => {
+  await db.exec('begin');
+  try {
+    await q("insert into public.cases(user_id,dx) values ($1,'lock probe')", [A]);
+    const n = (await q("select count(*)::int as n from pg_locks where locktype = 'advisory' and pid = pg_backend_pid()"))[0].n;
+    if (n < 1) throw new Error('no advisory lock held after an insert');
+    return { advisory_locks_held: n };
+  } finally { await db.exec('rollback'); }
+}));
 await t('oversize meta rejected', () => asUser(A, () => q("insert into public.cases(user_id,meta) values ($1, to_jsonb(repeat('x',3000)))", [A])), true);
 await t('result under the limit accepted', () => asUser(A, () => q("insert into public.cases(user_id,result) values ($1, to_jsonb(repeat('x',30000))) returning 1", [A])));
 await t('B deletes own', () => asUser(B, () => q("delete from public.cases returning 1")).then(r => r.length));
