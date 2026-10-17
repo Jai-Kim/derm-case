@@ -120,6 +120,15 @@
       ]
     },
     {
+      "source": "/reset",
+      "headers": [
+        {
+          "key": "X-Robots-Tag",
+          "value": "noindex, nofollow"
+        }
+      ]
+    },
+    {
       "source": "/api/(.*)",
       "headers": [
         {

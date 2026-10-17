@@ -13,6 +13,9 @@ const I18N = {
     notConfigured: '클라우드 계정이 아직 설정되지 않았습니다. 로그인 없이 앱을 사용할 수 있습니다.',
     working: '처리 중',
     pwHint: '비밀번호는 10자 이상이어야 하며 영문 소문자, 영문 대문자, 숫자를 각각 1개 이상 포함해야 합니다.',
+    forgot: '비밀번호를 잊으셨나요?', forgotNeedEmail: '위에 이메일 주소를 먼저 입력해 주세요.',
+    forgotSent: '해당 주소로 가입된 계정이 있다면 비밀번호 재설정 링크를 보냈습니다. 링크는 15분 동안 유효합니다.',
+    forgotFail: '지금은 메일을 보낼 수 없습니다. 잠시 후 다시 시도해 주세요.',
   },
   en: {
     navApp: 'Open app',
@@ -28,6 +31,9 @@ const I18N = {
     notConfigured: 'Cloud accounts aren\u2019t set up yet. You can use the app without signing in.',
     working: 'Working',
     pwHint: 'Use at least 10 characters, with a lowercase letter, an uppercase letter and a number.',
+    forgot: 'Forgot your password?', forgotNeedEmail: 'Enter your email address above first.',
+    forgotSent: 'If an account exists for that address, we sent a link to reset the password. It is valid for 15 minutes.',
+    forgotFail: 'We could not send the email right now. Please try again in a few minutes.',
   }
 };
 let lang = (window.dcLang ? dcLang.get() : 'ko');
@@ -49,6 +55,8 @@ function render(){
   $('pwHint').textContent = t('pwHint');
   $('pwHint').classList.toggle('hide', mode === 'signin');
   if (mode === 'signin') $('password').removeAttribute('aria-describedby'); else $('password').setAttribute('aria-describedby', 'pwHint');
+  $('forgotBtn').textContent = t('forgot');
+  $('forgotRow').classList.toggle('hide', mode !== 'signin');
 }
 function setMsg(text, kind){
   const el = $('msg');
@@ -58,6 +66,18 @@ function setMsg(text, kind){
 
 $('langBtn').addEventListener('click', () => { lang = lang === 'ko' ? 'en' : 'ko'; if(window.dcLang) dcLang.set(lang); render(); });
 $('toggleMode').addEventListener('click', () => { mode = mode === 'signin' ? 'signup' : 'signin'; setMsg(''); render(); });
+
+// "Forgot your password?" always answers the same way for any address (no account is confirmed or denied). A failure to send says so plainly.
+$('forgotBtn').addEventListener('click', async () => {
+  setMsg('');
+  if (!window.DermCaseCloud || !DermCaseCloud.enabled()) { setMsg(t('notConfigured'), 'error'); return; }
+  const email = $('email').value.trim();
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) { setMsg(t('forgotNeedEmail'), 'error'); $('email').focus(); return; }
+  $('forgotBtn').disabled = true; setMsg(t('working'));
+  try { await DermCaseCloud.requestPasswordReset(email); setMsg(t('forgotSent'), 'ok'); }
+  catch (e) { setMsg(t('forgotFail'), 'error'); }
+  setTimeout(() => { $('forgotBtn').disabled = false; }, 20000);   // Supabase also allows one request per address per minute
+});
 
 $('submitBtn').addEventListener('click', async () => {
   setMsg('');

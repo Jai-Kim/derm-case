@@ -106,7 +106,7 @@ function fileChecks() {
   ok(hits.length === 0, 'no secrets in tracked files', hits.join('; '));
 
   // claim guard: wording that over-promised before the Anthropic retention check
-  const claimFiles = ['index.html', 'app.html', 'about.html', 'login.html', 'library.html', 'report.html', 'privacy.html'];
+  const claimFiles = ['index.html', 'app.html', 'about.html', 'login.html', 'reset.html', 'library.html', 'report.html', 'privacy.html'];
   const bad = [/photos? (are |is )?never (stored|saved)/i, /never stored\. (for|the cloud)/i, /nowhere on any server/i, /not saved on any server/i, /then discarded/i, /어떤 서버에도/, /폐기됩니다/, /clinical assessment/i, /(sectionAssessment|sAssess):\s*'임상 평가'/];
   claimFiles.concat(fs.readdirSync(path.join(ROOT, 'assets/js')).map(f => 'assets/js/' + f)).forEach(f => { const s = read(f); bad.forEach(p => ok(!p.test(s), 'no overclaim ' + p + ' in ' + f)); });
   ok(!/김재이/.test(read('privacy.html')), 'privacy page invents no Korean spelling of a name');
@@ -125,7 +125,7 @@ function fileChecks() {
   ok(hv['X-Content-Type-Options'] === 'nosniff' && hv['X-Frame-Options'] === 'DENY' && hv['Referrer-Policy'] === 'no-referrer', 'nosniff, frame deny and no-referrer headers');
   ok(/geolocation=\(\)/.test(hv['Permissions-Policy'] || '') && /microphone=\(\)/.test(hv['Permissions-Policy'] || ''), 'Permissions-Policy denies geolocation and microphone');
   ok(hv['Cross-Origin-Opener-Policy'] === 'same-origin', 'COOP same-origin');
-  ['/report', '/library', '/login'].forEach(p => ok(hdr.indexOf(p) >= 0, 'noindex header on ' + p));
+  ['/report', '/library', '/login', '/reset'].forEach(p => ok(hdr.indexOf(p) >= 0, 'noindex header on ' + p));
   ok(exists('.well-known/security.txt') && /^Contact: mailto:/m.test(read('.well-known/security.txt')) && /^Expires: /m.test(read('.well-known/security.txt')), 'security.txt has Contact and Expires');
   const exp = (read('.well-known/security.txt').match(/^Expires: (.+)$/m) || [])[1];
   ok(exp && new Date(exp) > new Date(Date.now() + 30 * 864e5), 'security.txt does not expire within 30 days', exp);
@@ -155,7 +155,7 @@ function fileChecks() {
   ok(!/process\.env\.(ANTHROPIC|USAGE)[A-Z_]*\s*\)\s*;?\s*console/.test(read('api/analyze.js')), 'API never logs keys');
   // analytics wiring: only the four public pages, never pages whose link or screen can carry case content
   ['index.html', 'about.html', 'app.html', 'privacy.html'].forEach(f => ok(/assets\/js\/analytics\.js/.test(read(f)), f + ' counts page views'));
-  ['report.html', 'library.html', 'login.html', 'offline.html'].forEach(f => ok(!/analytics/.test(read(f)), f + ' has no analytics'));
+  ['report.html', 'library.html', 'login.html', 'reset.html', 'offline.html'].forEach(f => ok(!/analytics/.test(read(f)), f + ' has no analytics'));
   ok(/doNotTrack/.test(read('assets/js/analytics.js')) && /globalPrivacyControl/.test(read('assets/js/analytics.js')), 'analytics honors Do Not Track and Global Privacy Control');
   const stale = [/\bno analytics\b/i, /none\.\s*no analytics/i, /no tracking\b(?!\s+cookies)/i, /분석 도구, 광고, 광고 식별자, 추적 쿠키를 쓰지 않으며/, /광고와 추적이 없습니다/];
   ['index.html', 'about.html', 'app.html', 'privacy.html', 'store/listing.md', 'store/declarations.md'].forEach(f => stale.forEach(p => ok(!p.test(read(f)), 'no stale "no tracking" claim ' + p + ' in ' + f)));
@@ -508,7 +508,7 @@ async function serverChecks() {
 }
 
 // ---------------------------------------------------------------- 2. browser checks
-const PAGES = ['/', '/app', '/about', '/login', '/library', '/privacy', '/offline', '/report'];
+const PAGES = ['/', '/app', '/about', '/login', '/reset', '/library', '/privacy', '/offline', '/report'];
 async function newPage(browser, lang, w, h) {
   const ctx = await browser.newContext({ viewport: { width: w, height: h }, serviceWorkers: 'block', isMobile: w < 700, hasTouch: w < 700 });
   await ctx.addInitScript(l => { try { localStorage.setItem('dc_lang', l); } catch (e) { } }, lang);
@@ -907,7 +907,7 @@ async function browserChecks() {
   }
 
   console.log('Usage counting');
-  for (const p of ['/', '/app', '/about', '/privacy', '/report', '/login', '/library']) {
+  for (const p of ['/', '/app', '/about', '/privacy', '/report', '/login', '/reset', '/library']) {
     const pg = await newPage(browser, 'en', 1280, 900);
     await pg.goto(BASE + p, { waitUntil: 'load' });
     await pg.waitForTimeout(400);
@@ -955,6 +955,106 @@ async function browserChecks() {
     ok(pg.errs.length === 0, 'the login page raises no script error [' + lang + ']', pg.errs.join(' | '));
     await pg.context().close();
   }
+
+  console.log('Forgot password');
+  const CLOUD_STUB = "window.__calls=[];window.DermCaseCloud={enabled:function(){return true},user:async function(){return null}," +
+    "requestPasswordReset:async function(e){window.__calls.push(['reset',e]);if(window.__sendFail)throw new Error('smtp down')}," +
+    "exchangeRecoveryCode:async function(c){window.__calls.push(['exchange',c]);if(window.__exFail)throw new Error('bad code');return{}}," +
+    "setNewPassword:async function(p){window.__calls.push(['set',p]);if(window.__pwErr){var e=new Error('x');e.code=window.__pwErr;throw e}}," +
+    "signOut:async function(){window.__calls.push(['out'])}};";
+  const stubbed = async (lang, url, pre) => {
+    const pg = await newPage(browser, lang, 1280, 900);
+    await pg.route('**/dermcase-cloud.js', r => r.fulfill({ contentType: 'application/javascript', body: CLOUD_STUB }));
+    if (pre) await pg.addInitScript(pre);
+    await pg.goto(BASE + url, { waitUntil: 'load' });
+    await pg.waitForTimeout(350);
+    return pg;
+  };
+  const calls = pg => pg.evaluate(() => JSON.stringify(window.__calls));
+  const view = pg => pg.evaluate(() => ({ form: getComputedStyle(document.getElementById('resetForm')).display !== 'none', msg: document.getElementById('msg').textContent, kind: document.getElementById('msg').className, url: location.pathname + location.search + location.hash, back: getComputedStyle(document.querySelector('.auth-alt')).display !== 'none' }));
+  for (const lang of ['en', 'ko']) {
+    const T = lang === 'en'
+      ? { bad: /expired or was already used/, same: /same browser/, mism: /do not match/, done: /Password updated.*signed out on every device/, samePw: /not used before/, hint: /at least 10 characters/, forgotNeed: /Enter your email/, sent: /If an account exists.*15 minutes/, fail: /could not send the email/, link: 'Forgot your password?' }
+      : { bad: /만료되었거나 이미 사용/, same: /같은 브라우저/, mism: /일치하지 않습니다/, done: /비밀번호를 바꿨습니다.*모든 기기에서 로그아웃/, samePw: /쓰지 않은/, hint: /10자 이상/, forgotNeed: /이메일 주소를 먼저/, sent: /가입된 계정이 있다면.*15분/, fail: /메일을 보낼 수 없습니다/, link: '비밀번호를 잊으셨나요?' };
+    { // sign-in page: the link, the neutral answer, the failure answer
+      let pg = await stubbed(lang, '/login');
+      const vis = () => pg.evaluate(() => getComputedStyle(document.getElementById('forgotRow')).display !== 'none');
+      ok(await vis() && (await pg.textContent('#forgotBtn')) === T.link, 'sign-in offers "' + T.link + '" [' + lang + ']');
+      await pg.click('#forgotBtn');
+      let m = await pg.textContent('#msg');
+      ok(T.forgotNeed.test(m) && (await calls(pg)) === '[]', 'forgot-password with no email asks for one and sends nothing [' + lang + ']', m);
+      await pg.fill('#email', 'not an email'); await pg.click('#forgotBtn');
+      ok((await calls(pg)) === '[]', 'forgot-password with a malformed address sends nothing [' + lang + ']');
+      await pg.fill('#email', 'doc@clinic.example'); await pg.click('#forgotBtn'); await pg.waitForTimeout(150);
+      m = await pg.textContent('#msg');
+      ok((await calls(pg)) === '[["reset","doc@clinic.example"]]' && T.sent.test(m) && !/doc@clinic/.test(m), 'forgot-password asks for the link and answers neutrally (no account is confirmed) [' + lang + ']', m);
+      ok(await pg.evaluate(() => document.getElementById('forgotBtn').disabled), 'the link is locked for a moment after one request [' + lang + ']');
+      await pg.click('#toggleMode');
+      ok(!(await vis()), 'sign-up mode does not show the forgot link [' + lang + ']');
+      ok(pg.errs.length === 0, 'login with the forgot link raises no script error [' + lang + ']', pg.errs.join(' | '));
+      await pg.context().close();
+      pg = await stubbed(lang, '/login', () => { window.__sendFail = true; });
+      await pg.fill('#email', 'doc@clinic.example'); await pg.click('#forgotBtn'); await pg.waitForTimeout(150);
+      m = await pg.textContent('#msg');
+      ok(T.fail.test(m) && /error/.test(await pg.getAttribute('#msg', 'class')), 'a failure to send is reported plainly [' + lang + ']', m);
+      await pg.context().close();
+    }
+    { // /reset without a code, with junk, with a provider error
+      for (const [label, url] of [['no code', '/reset'], ['junk code', '/reset?code=%3Cscript%3Ealert(1)%3C/script%3E'], ['short code', '/reset?code=abc'], ['provider error in the query', '/reset?error=access_denied&error_code=otp_expired&code=abcdefgh-1234'], ['provider error in the fragment', '/reset#error=access_denied&error_code=otp_expired&error_description=Email+link+is+invalid']]) {
+        const pg = await stubbed(lang, url);
+        const v = await view(pg);
+        ok(!v.form && T.bad.test(v.msg) && /error/.test(v.kind) && v.back && (await calls(pg)) === '[]' && v.url === '/reset', 'reset page: ' + label + ' shows the expired-link message, no form, nothing sent, address cleaned [' + lang + ']', JSON.stringify(v));
+        ok(pg.errs.length === 0 && (await pg.evaluate(() => window.__csp.length)) === 0, 'reset page: ' + label + ' raises no script error or CSP violation [' + lang + ']', pg.errs.join(' | '));
+        await pg.context().close();
+      }
+    }
+    { // exchange fails (link opened in another browser, expired)
+      const pg = await stubbed(lang, '/reset?code=abcdefgh-1234', () => { window.__exFail = true; });
+      const v = await view(pg);
+      ok(!v.form && T.bad.test(v.msg) && T.same.test(v.msg) && v.url === '/reset', 'a link opened in the wrong browser explains how to fix it [' + lang + ']', v.msg);
+      await pg.context().close();
+    }
+    { // happy path
+      const pg = await stubbed(lang, '/reset?code=abcdefgh-1234');
+      let v = await view(pg);
+      ok(v.form && v.url === '/reset' && (await calls(pg)) === '[["exchange","abcdefgh-1234"]]', 'a good link is exchanged once and the code leaves the address bar [' + lang + ']', JSON.stringify(v) + (await calls(pg)));
+      ok(await pg.evaluate(() => document.activeElement && document.activeElement.id === 'pw1' && document.getElementById('pw1').autocomplete === 'new-password'), 'the new-password field is focused and marked for password managers [' + lang + ']');
+      ok(T.hint.test(await pg.textContent('#pwHint')), 'the password rule is shown [' + lang + ']');
+      for (const w of ['Short1a', 'alllowercase1234', 'ALLUPPERCASE1234', 'NoDigitsHereAtAll']) {
+        await pg.fill('#pw1', w); await pg.fill('#pw2', w); await pg.click('#saveBtn'); await pg.waitForTimeout(80);
+        ok(T.hint.test(await pg.textContent('#msg')), 'reset: the weak password "' + w + '" is explained [' + lang + ']');
+      }
+      await pg.fill('#pw1', 'GoodPassw0rd1'); await pg.fill('#pw2', 'GoodPassw0rd2'); await pg.click('#saveBtn'); await pg.waitForTimeout(80);
+      ok(T.mism.test(await pg.textContent('#msg')), 'reset: mismatched passwords are caught [' + lang + ']');
+      ok((await calls(pg)) === '[["exchange","abcdefgh-1234"]]', 'reset: nothing is sent until the rule and the match both pass [' + lang + ']', await calls(pg));
+      await pg.fill('#pw2', 'GoodPassw0rd1'); await pg.press('#pw2', 'Enter'); await pg.waitForTimeout(200);
+      v = await view(pg);
+      ok((await calls(pg)) === '[["exchange","abcdefgh-1234"],["set","GoodPassw0rd1"],["out"]]', 'reset: the password is saved, then every session is signed out [' + lang + ']', await calls(pg));
+      ok(!v.form && T.done.test(v.msg) && v.back && /ok/.test(v.kind), 'reset: the person is told it worked and pointed to sign in [' + lang + ']', JSON.stringify(v));
+      ok(await pg.evaluate(() => document.getElementById('pw1').value === '' && document.getElementById('pw2').value === ''), 'reset: the typed passwords are cleared from the page [' + lang + ']');
+      ok(pg.errs.length === 0 && (await pg.evaluate(() => window.__csp.length)) === 0, 'the reset flow raises no script error or CSP violation [' + lang + ']', pg.errs.join(' | '));
+      await pg.context().close();
+    }
+    { // server-side refusals map to plain messages
+      const pg = await stubbed(lang, '/reset?code=abcdefgh-1234', () => { window.__pwErr = 'same_password'; });
+      await pg.fill('#pw1', 'GoodPassw0rd1'); await pg.fill('#pw2', 'GoodPassw0rd1'); await pg.click('#saveBtn'); await pg.waitForTimeout(150);
+      ok(T.samePw.test(await pg.textContent('#msg')) && (await view(pg)).form, 'reset: reusing the old password is explained and the form stays [' + lang + ']');
+      await pg.context().close();
+      const p2 = await stubbed(lang, '/reset?code=abcdefgh-1234', () => { window.__pwErr = 'unexpected'; });
+      await p2.fill('#pw1', 'GoodPassw0rd1'); await p2.fill('#pw2', 'GoodPassw0rd1'); await p2.click('#saveBtn'); await p2.waitForTimeout(150);
+      ok(!/unexpected|Error:/.test(await p2.textContent('#msg')) && (await view(p2)).form && !/\["out"\]/.test(await calls(p2)), 'reset: an unknown failure shows a plain message, keeps the form and does not sign out [' + lang + ']');
+      await p2.context().close();
+    }
+  }
+  for (const p of ['/login', '/reset', '/offline']) { // centered pages keep a side gutter on a phone (the old rule zeroed it)
+    const pg = await newPage(browser, 'en', 360, 740);
+    await pg.goto(BASE + p, { waitUntil: 'load' }); await pg.waitForTimeout(300);
+    const g = await pg.evaluate(() => { const r = document.querySelector('main').firstElementChild.getBoundingClientRect(); return { l: Math.round(r.left), r: Math.round(innerWidth - r.right) }; });
+    ok(g.l >= 16 && g.r >= 16, p + ' keeps at least 16px of side gutter on a 360px phone', JSON.stringify(g));
+    await pg.context().close();
+  }
+  ok(/resetPasswordForEmail/.test(read('dermcase-cloud.js')) && /redirectTo: window\.location\.origin \+ '\/reset'/.test(read('dermcase-cloud.js')) && /exchangeCodeForSession/.test(read('dermcase-cloud.js')), 'the cloud client sends the reset link to /reset and exchanges the code explicitly');
+  ok(/detectSessionInUrl: false/.test(read('dermcase-cloud.js')), 'the client still never adopts a session from the address bar');
 
   console.log('Library: account zone');
   {
