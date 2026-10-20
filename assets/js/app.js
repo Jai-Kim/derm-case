@@ -49,6 +49,7 @@ const I18N = {
     partialNote: '응답이 길어 일부가 잘렸습니다. 받은 부분까지 표시합니다. 다시 분석하면 전체를 받을 수 있습니다.', rerun: '다시 분석', errCut: '응답이 너무 길어 끝까지 받지 못했습니다. 다시 시도해 주세요.',
     exTag: '예시', exNote: '예시 출력입니다. 내 증례를 분석하려면 사진을 추가하세요.', clearExample: '예시 지우기', seeExample: '예시 브리프 보기', cancel: '취소', canceled: '분석을 취소했습니다', secUnit: '초',
     evGuideline: '가이드라인', evMetaAnalysis: '메타분석', evRct: 'RCT', evCohort: '코호트 연구', evReview: '리뷰', evCaseReport: '증례 보고',
+    reportLink: '이 브리프의 문제 신고', reportSubject: 'DermCase: 브리프 문제 신고', reportBody: '무엇이 잘못되었거나 위험해 보였나요? 환자 이름 등 식별 정보는 적지 마세요.\n\n',
   },
   en: {
     navAbout: 'About',
@@ -100,6 +101,7 @@ const I18N = {
     partialNote: 'The response was cut off, so some sections may be missing. Run the analysis again for the full brief.', rerun: 'Run again', errCut: 'The response was too long to finish. Please try again.',
     exTag: 'Example', exNote: 'Example output. Add your own photo to analyze a real case.', clearExample: 'Clear example', seeExample: 'See an example brief', cancel: 'Cancel', canceled: 'Analysis canceled', secUnit: 's',
     evGuideline: 'Guideline', evMetaAnalysis: 'Meta-analysis', evRct: 'RCT', evCohort: 'Cohort', evReview: 'Review', evCaseReport: 'Case report',
+    reportLink: 'Report a problem with this brief', reportSubject: 'DermCase: problem with a brief', reportBody: 'What looked wrong or unsafe? Please do not include patient names or other identifying details.\n\n',
   }
 };
 
@@ -365,6 +367,13 @@ function ctxHtml(meta){
   return parts.join('')||`<span>${esc(t('briefTitle'))}</span>`;
 }
 
+// "Report a problem" opens the user's mail app with a blank message to the contact address. It never carries case text or the brief.
+function reportHref(){
+  const m=window.DERMCASE_CONTACT_EMAIL;
+  if(typeof m!=='string'||!/^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}$/.test(m)) return '';
+  return 'mailto:'+m+'?subject='+encodeURIComponent(t('reportSubject'))+'&body='+encodeURIComponent(t('reportBody'));
+}
+
 function renderOutput(d, metaIn, opts){
   opts=opts||{};const ex=!!opts.example;
   const partialBanner=opts.partial?`<div class="warn-banner" role="status"><span>${esc(t('partialNote'))}</span><button class="btn btn-line btn-sm" id="rerunBtn" type="button">${esc(t('rerun'))}</button></div>`:'';
@@ -384,7 +393,9 @@ function renderOutput(d, metaIn, opts){
   const fullActions=`<div class="actions"><button class="btn btn-solid btn-sm" id="saveBtn" type="button">${esc(t('saveCase'))}</button><button class="btn btn-line btn-sm" id="copyBtn" type="button">${esc(t('copyChart'))}</button><button class="btn btn-line btn-sm" id="pdfBtn" type="button">${esc(t('exportPdf'))}</button><button class="btn btn-line btn-sm" id="shareBtn" type="button">${esc(t('shareReport'))}</button><button class="btn btn-quiet btn-sm" id="newBtn" type="button">${esc(t('newCase'))}</button></div>`;
   const exActions=`<div class="actions"><button class="btn btn-quiet btn-sm" id="newBtn" type="button">${esc(t('clearExample'))}</button></div>`;
   const exBanner=`<div class="ex-banner"><span class="ex-tag">${esc(t('exTag'))}</span><span>${esc(t('exNote'))}</span></div>`;
-  setOutput(`<article class="brief" id="brief"><div class="brief-head"><div class="ctx">${ctxHtml(meta)}</div>${ex?exActions:fullActions}</div>${ex?exBanner:''}${partialBanner}${assessHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionAssessment'))}</h2><div class="dx-list">${assessHtml}</div></section>`:''}${txHtml}${refHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionLit'))}</h2>${refHtml}</section>`:''}</article>`);
+  const rh=ex?'':reportHref();
+  const reportHtml=rh?`<div class="brief-foot"><p class="fine"><a class="link" id="reportLink" href="${esc(rh)}">${esc(t('reportLink'))}</a></p></div>`:'';
+  setOutput(`<article class="brief" id="brief"><div class="brief-head"><div class="ctx">${ctxHtml(meta)}</div>${ex?exActions:fullActions}</div>${ex?exBanner:''}${partialBanner}${assessHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionAssessment'))}</h2><div class="dx-list">${assessHtml}</div></section>`:''}${txHtml}${refHtml?`<section class="sec"><h2 class="sec-h">${esc(t('sectionLit'))}</h2>${refHtml}</section>`:''}${reportHtml}</article>`);
   analyzeBtn.disabled=images.length===0;
   announce(t('ready'));
   scrollToBrief();

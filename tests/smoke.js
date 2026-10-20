@@ -617,6 +617,7 @@ async function browserChecks() {
     await pg.waitForTimeout(900);
     const r = await pg.evaluate(() => ({ secs: document.querySelectorAll('#brief .sec').length, ctx: (document.querySelector('#brief .ctx') || {}).innerText || '', head: [...document.querySelectorAll('#brief .sec-h')].map(e => e.textContent.trim()), form: document.getElementById('duration').value }));
     ok(r.secs >= 3, 'example brief has differential, treatment and references [' + lang + ']', String(r.secs));
+    ok(await pg.evaluate(() => !document.getElementById('reportLink')), 'the example brief has no Report a problem link (it is not model output) [' + lang + ']');
     if (lang === 'ko') {
       ok(!/[A-Za-z]{4,}.*months|Bilateral/i.test(r.ctx.replace(/Fitzpatrick/g, '')), 'Korean example context is localized', r.ctx);
       ok(!/months/.test(r.form), 'Korean sample fills the form in Korean', r.form);
@@ -721,6 +722,15 @@ async function browserChecks() {
     await pg.waitForFunction(() => document.querySelectorAll('#brief .sec').length >= 3, null, { timeout: 4000 });
     ok(await pg.evaluate(() => !document.querySelector('.lt') && window.__cancelled === true), 'the finished brief replaces the loading screen and the stream is closed [' + lang + ']');
     ok(pg.errs.length === 0 && (await pg.evaluate(() => window.__csp.length)) === 0, 'the streamed analysis raises no script error or CSP violation [' + lang + ']', pg.errs.join(' | '));
+    { // "Report a problem" link: mail only, blank message, no case data, localized
+      const rp = await pg.evaluate(() => { const a = document.getElementById('reportLink'); return a ? { href: a.getAttribute('href'), text: a.textContent, inBrief: !!a.closest('#brief'), target: a.getAttribute('target') } : null; });
+      ok(rp && /^mailto:jaikyeong\.kim@gmail\.com\?subject=/.test(rp.href) && rp.inBrief, 'a finished brief offers a Report a problem mail link [' + lang + ']', rp && rp.href);
+      ok(rp && rp.text === (lang === 'ko' ? '이 브리프의 문제 신고' : 'Report a problem with this brief'), 'the report link is localized [' + lang + ']', rp && rp.text);
+      const dec = rp ? decodeURIComponent(rp.href) : '';
+      ok(rp && !/34|forearm|3 months|Male|SECRET|base64|dermcase\.example/i.test(dec) && /identif|식별/.test(dec), 'the report mail is blank: it carries no case details and asks for none [' + lang + ']', dec.slice(0, 160));
+      const bad = await pg.evaluate(() => { const keep = window.DERMCASE_CONTACT_EMAIL; const out = []; ['', 'x', 'a@b', 'a b@c.com', 'a@b.com"><img src=x onerror=1>', 'javascript:alert(1)@x.com', 42, null].forEach(v => { window.DERMCASE_CONTACT_EMAIL = v; out.push(reportHref()); }); window.DERMCASE_CONTACT_EMAIL = keep; return out; });
+      ok(bad.every(x => x === ''), 'the report link is dropped when the contact address is not a plain email [' + lang + ']', JSON.stringify(bad));
+    }
     await pg.context().close();
   }
   { // Cancel stops the read and puts the form back

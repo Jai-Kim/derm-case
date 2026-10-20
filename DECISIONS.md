@@ -327,3 +327,20 @@ These are lab and online studies of generic waits, not of clinicians. "30 to 60 
 **Open, owner side.** Forgot-password flow (F-03). Recommended design: a "Forgot password?" link in sign-in mode calling `resetPasswordForEmail` with `redirectTo` set to `https://dermcase.jai-kim.com/login?reset=1`; the screen always says "If an account exists, we sent a link"; on `/login?reset=1` call `exchangeCodeForSession` explicitly (the client has `detectSessionInUrl:false`), remove the code from the address bar, show a new-password form with the same `passwordOk` rule, call `updateUser`, then send the person to sign-in. It needs custom SMTP first and one Redirect URL (`https://dermcase.jai-kim.com/login`) in Supabase, which D-016 left empty on purpose.
 
 **Not checked by the auditor** (no access by design): live response headers, Vercel and Supabase dashboard settings, whether Vercel overwrites the forwarded IP headers, a true two-connection race on the 200-brief cap.
+
+
+## D-018: Email domain, Play Store gate, and a way to report bad output
+
+**Date:** October 2026
+**Flagged by:** User ("Make as much progress as possible", Play developer fee paid)
+
+| Topic | Decision | Why |
+|---|---|---|
+| Where DNS lives | Wix manages the DNS for `jai-kim.com` (not Vercel). Records are edited in Wix. | The domain was registered there; moving it is not needed for anything |
+| Sending domain | `mail.jai-kim.com` verified in Resend (four DNS records: DKIM, return path, SPF, MX for bounces). Verified 17 Oct 2026. | A subdomain keeps sign-up mail separate from any future personal mail on the main domain |
+| Sender | `DermCase <no-reply@mail.jai-kim.com>` over `smtp.resend.com:465`, password = a sending-only Resend key pasted by the owner into Supabase | Supabase's built-in sender only reaches your own organization, 2 an hour |
+| Play Store gate | New personal developer accounts must run a closed test with at least 12 testers opted in for 14 continuous days before applying for production. The 14 days cannot start until the declarations, store listing and a first closed-test release exist. | Google policy for accounts created after 13 Nov 2023 |
+| Public listing | Get a short regulatory read before the production application (see `store/declarations.md`) | A clinical-photo analyzer can be treated as a medical device whatever the disclaimer says |
+| Reporting bad output | Each real brief ends with "Report a problem with this brief", a mail link to the contact address with a blank message. No case text, photo or brief content goes into the mail. | Google's AI-content policy expects a way to flag offensive or unsafe generated content; a mail link needs no new server, no new data store and sends nothing the user did not type |
+
+**Not done by design:** an in-app report form that posts text to our servers. It would create a new place where patient details could land. A mail link keeps that decision with the user.
