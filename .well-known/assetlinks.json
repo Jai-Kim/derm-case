@@ -1,1 +1,12 @@
-[]
+[
+  {
+    "relation": ["delegate_permission/common.handle_all_urls"],
+    "target": {
+      "namespace": "android_app",
+      "package_name": "com.jai_kim.dermcase",
+      "sha256_cert_fingerprints": [
+        "34:29:08:C7:DA:42:6C:20:4D:FA:D5:F7:3F:24:83:D3:0D:80:FC:78:8D:0C:5A:B9:4B:C7:F5:2C:F4:9D:C7:C6"
+      ]
+    }
+  }
+]
