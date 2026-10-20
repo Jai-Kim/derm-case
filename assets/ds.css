@@ -288,7 +288,7 @@ html[data-theme="dark"] .ico-moon{display:none}
 .page-foot{margin-top:28px;font-size:12.5px;line-height:1.65;color:var(--ink-3);max-width:70ch}
 
 /* Auth + library */
-.center{min-height:calc(100vh - 65px);display:grid;place-items:center;padding:40px 0}
+.center{min-height:calc(100vh - 65px);display:grid;place-items:center;padding:40px clamp(18px,4vw,44px)}
 .auth{width:100%;max-width:400px}
 .auth h1{font-size:clamp(28px,4vw,36px);font-weight:700;letter-spacing:-.04em;line-height:1.15}
 .auth .sub{margin-top:8px;color:var(--ink-2);font-size:15px}

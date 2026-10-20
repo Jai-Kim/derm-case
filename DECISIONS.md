@@ -344,3 +344,23 @@ These are lab and online studies of generic waits, not of clinicians. "30 to 60 
 | Reporting bad output | Each real brief ends with "Report a problem with this brief", a mail link to the contact address with a blank message. No case text, photo or brief content goes into the mail. | Google's AI-content policy expects a way to flag offensive or unsafe generated content; a mail link needs no new server, no new data store and sends nothing the user did not type |
 
 **Not done by design:** an in-app report form that posts text to our servers. It would create a new place where patient details could land. A mail link keeps that decision with the user.
+
+
+## D-019: Forgot-password flow, as built
+
+**Date:** October 2026
+**Closes:** F-03 in D-017 (no way back in after a forgotten password)
+**Changed from the D-017 sketch:** the email link returns to a page of its own, `/reset`, not to `/login?reset=1`. Supabase checks the return address against an allow-list, and an exact path with no query string is the least ambiguous entry. A separate page also keeps the sign-in script simple.
+
+| Step | What happens | Why |
+|---|---|---|
+| 1 | Sign-in shows "Forgot your password?". It sends a reset email for the address typed above it. | No separate page to find |
+| 2 | The answer is always "If an account exists for that address, we sent a link. Valid for 15 minutes." A send failure says so plainly. | Does not reveal which addresses have accounts. Supabase returns success for unknown addresses |
+| 3 | The email link opens `/reset?code=...`. The code is read once, taken out of the address bar, then exchanged explicitly (`exchangeCodeForSession`). The client still has `detectSessionInUrl: false`. | A crafted link cannot sign anyone in on its own |
+| 4 | PKCE: the code only works in the browser that asked for the link. Opened elsewhere, the page says to request a new link there. | A link stolen from the mailbox is useless without the browser that requested it. The cost is one extra step for people who switch devices |
+| 5 | New password form with the sign-up rule (10 or more characters, lowercase, uppercase, digit) and a repeat field. After saving, every session on every device is signed out and the person is sent to sign in. | A reset should end any session an intruder may hold |
+| 6 | `/reset` is `noindex`, has no analytics, and shows no provider error text, only fixed messages in Korean and English. | Matches `/login` |
+
+**Owner side (Supabase, Authentication, URL Configuration):** add `https://dermcase.jai-kim.com/reset` and `https://derm-case.vercel.app/reset` to Redirect URLs. It needs working custom SMTP first (D-018), otherwise the email never arrives.
+
+**Also fixed here:** the centered pages (`/login`, `/reset`, `/offline`) had no side gutter on phones because `.center` overrode the page padding, so inputs touched the screen edges. Now at least 16 px, with a test.

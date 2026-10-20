@@ -28,6 +28,23 @@
       if (error) throw error; return data;
     },
     async signOut() { const c = client(); if (c) await c.auth.signOut(); },
+    // Password reset. The link in the email comes back to /reset with a one-time code. PKCE means the code only works in the
+    // browser that asked for the link, so a stolen link on its own is useless.
+    async requestPasswordReset(email) {
+      const c = client(); if (!c) throw new Error('Cloud is not configured.');
+      const { error } = await c.auth.resetPasswordForEmail(email, { redirectTo: window.location.origin + '/reset' });
+      if (error) throw error;
+    },
+    async exchangeRecoveryCode(code) {
+      const c = client(); if (!c) throw new Error('Cloud is not configured.');
+      const { data, error } = await c.auth.exchangeCodeForSession(code);
+      if (error) throw error; return data;
+    },
+    async setNewPassword(password) {
+      const c = client(); if (!c) throw new Error('Cloud is not configured.');
+      const { error } = await c.auth.updateUser({ password });
+      if (error) throw error;
+    },
     // Deletes the signed-in account and, by cascade, every saved case.
     // Needs delete_my_account() from supabase-schema.sql to exist in the project.
     async deleteAccount() {
