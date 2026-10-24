@@ -16,9 +16,14 @@
   }
   function fill(tpl, n) { return String(tpl).replace('{n}', String(n)); }
 
-  // cfg: { t(key), photo (data:image URL or ''), chips [string], onCancel(), announce(msg) }
+  // The one non-data image it will show: the landing page illustration, used by the example run ("Illustration, not a real patient").
+  var EXAMPLE_PHOTO = '/assets/lens.jpg';
+
+  // cfg: { t(key), photo (data:image URL or ''), chips [string], onCancel(), announce(msg), example (bool) }
+  // example: the scripted preview behind "Load example". It is labeled as an example and says nothing is sent.
   function mount(root, cfg) {
     var t = cfg.t;
+    var isExample = cfg.example === true;
     var box = el('div', 'lt ph-read');
     box.setAttribute('aria-busy', 'true');
 
@@ -26,9 +31,12 @@
     var top = el('div', 'lt-top');
     var lens = el('div', 'lt-lens');
     var photo = el('img', 'lt-photo'); photo.alt = '';
-    if (cfg.photo && /^data:image\/(jpeg|png);base64,/.test(cfg.photo)) photo.src = cfg.photo; else photo.className += ' blank';
+    if (cfg.photo && /^data:image\/(jpeg|png);base64,/.test(cfg.photo)) photo.src = cfg.photo;
+    else if (isExample && cfg.photo === EXAMPLE_PHOTO) photo.src = EXAMPLE_PHOTO;
+    else photo.className += ' blank';
     lens.appendChild(photo); lens.appendChild(el('span', 'lt-scan')); lens.appendChild(el('span', 'lt-ring'));
     var side = el('div', 'lt-case');
+    if (isExample) side.appendChild(el('span', 'lt-extag', t('exTag')));
     side.appendChild(el('p', 'lt-title', t('ldTitle')));
     var chips = el('ul', 'lt-chips');
     (cfg.chips || []).slice(0, 6).forEach(function (c) { if (c) chips.appendChild(el('li', '', String(c).slice(0, 40))); });
@@ -83,7 +91,7 @@
       bar.firstChild.style.setProperty('--p', prog.toFixed(3));
       var s = Math.floor((Date.now() - t0) / 1000);
       if (s > 75 && !over) over = true;
-      time.textContent = s + t('secUnit') + ' · ' + (over ? t('ldLong') : t('ldUsually'));
+      time.textContent = s + t('secUnit') + ' · ' + (isExample ? t('ldExample') : over ? t('ldLong') : t('ldUsually'));
     }
     function frame() {
       var tg = target();

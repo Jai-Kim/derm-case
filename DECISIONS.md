@@ -364,3 +364,23 @@ These are lab and online studies of generic waits, not of clinicians. "30 to 60 
 **Owner side (Supabase, Authentication, URL Configuration):** add `https://dermcase.jai-kim.com/reset` and `https://derm-case.vercel.app/reset` to Redirect URLs. It needs working custom SMTP first (D-018), otherwise the email never arrives.
 
 **Also fixed here:** the centered pages (`/login`, `/reset`, `/offline`) had no side gutter on phones because `.center` overrode the page padding, so inputs touched the screen edges. Now at least 16 px, with a test.
+
+
+## D-020: "Load example" plays the loading screen
+
+**Date:** October 2026
+**Flagged by:** User ("When we click load example, can you put the ui animation that's similar to loading screen when uploading the actual photo?")
+
+| Topic | Decision | Why |
+|---|---|---|
+| What it does | Load example fills the form, plays the same light-table loading screen a real photo gets (reading, searching with three queries and source counts, writing, bar fills), then shows the example brief. About five seconds in all. | A first-time visitor sees what the wait looks like before they spend a real case on it |
+| It is labeled | The screen carries an "Example" tag and says "Example run. Nothing is sent or analyzed." instead of the usual-wait line. Queries and counts are scripted. | The real loading screen shows what the server is actually doing; the example must not pass for that |
+| The photo | The landing page illustration (`/assets/lens.jpg`, "Illustration, not a real patient"), even if the user already added a photo. The loader accepts that one path, only for the example run. | The example case is not the user's photo |
+| No network | Nothing is requested from `/api/analyze`; no usage is counted. | It is a preview, not an analysis |
+| Cancel | Same Cancel button as a real run. It clears the screen, keeps the example form filled, and the example does not come back later. | A wait of any length needs a way out |
+| Who wins | A real analysis, or a saved case opened while the example plays, always takes over and is never overwritten. Load example is ignored while a real analysis runs, and a second click while it plays does nothing. | The example must never replace someone's real result |
+| Language | Switching language mid-example restarts it in the new language. | The form, the loading screen and the brief must agree |
+
+**Also fixed here:** the "Example loaded" label used to go back to the old-language "Load example" if the language was switched within 2.6 seconds. It now resolves the label when it goes back.
+
+**Tests:** `tests/smoke.js`, "App: example loading screen" (69 checks: stages, labels, timing, no network, Cancel in the middle and in the last moment, repeat clicks, real analysis takeover, saved case takeover, language switch, phone with reduced motion, image URL allow-list).

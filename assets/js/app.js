@@ -22,7 +22,7 @@ const I18N = {
     emptyTitle: '브리프가 여기에 표시됩니다',
     emptyBody: '사진을 1장에서 3장 올리고 환자 정보를 입력한 뒤 증례 분석을 누르세요. 감별진단과 참고문헌, 선택이 분명하지 않은 경우에는 치료 옵션 비교까지 한 장으로 정리됩니다. 먼저 결과가 어떤 모습인지 보고 싶다면 예시를 열어 보세요.',
     analyzing: '사진을 읽고 문헌을 검색하고 있습니다',
-    ldTitle: '증례를 분석하고 있습니다', ldRead: '사진 읽는 중', ldSearch: '문헌 검색 중', ldWrite: '브리프 작성 중', ldSources: '출처 {n}건', ldSourcesTotal: '출처 {n}건 확인', ldUsually: '보통 30초에서 60초 걸립니다', ldLong: '평소보다 오래 걸리고 있습니다. 계속 진행 중입니다.',
+    ldTitle: '증례를 분석하고 있습니다', ldRead: '사진 읽는 중', ldSearch: '문헌 검색 중', ldWrite: '브리프 작성 중', ldSources: '출처 {n}건', ldSourcesTotal: '출처 {n}건 확인', ldUsually: '보통 30초에서 60초 걸립니다', ldLong: '평소보다 오래 걸리고 있습니다. 계속 진행 중입니다.', ldExample: '예시 실행입니다. 전송되거나 분석되는 내용은 없습니다.',
     ready: '브리프가 준비되었습니다',
     optimizing: '이미지 처리 중',
     removePhoto: '사진 삭제', addPhoto: '사진 추가',
@@ -74,7 +74,7 @@ const I18N = {
     emptyTitle: 'Your brief appears here',
     emptyBody: 'Add one to three photos and a few details, then select Analyze case. You get the assessment and references, plus a treatment comparison when the choice is not obvious. Want to see the result first? Open the example.',
     analyzing: 'Reading the photo and searching the literature',
-    ldTitle: 'Working on your case', ldRead: 'Reading the photo', ldSearch: 'Searching the literature', ldWrite: 'Writing the brief', ldSources: '{n} sources', ldSourcesTotal: '{n} sources checked', ldUsually: 'Usually 30 to 60 seconds', ldLong: 'Taking longer than usual. Still working.',
+    ldTitle: 'Working on your case', ldRead: 'Reading the photo', ldSearch: 'Searching the literature', ldWrite: 'Writing the brief', ldSources: '{n} sources', ldSourcesTotal: '{n} sources checked', ldUsually: 'Usually 30 to 60 seconds', ldLong: 'Taking longer than usual. Still working.', ldExample: 'Example run. Nothing is sent or analyzed.',
     ready: 'Brief ready',
     optimizing: 'Processing image',
     removePhoto: 'Remove photo', addPhoto: 'Add photo',
@@ -190,24 +190,69 @@ function resetImages(){images=[];fileInput.value='';renderThumbs();updateBtn();}
 function updateBtn(){analyzeBtn.disabled=images.length===0;}
 
 document.addEventListener('DOMContentLoaded', () => { document.getElementById('lang').value = currentLang; applyI18n(); });
-document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; if(window.dcLang) dcLang.set(currentLang); applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); if(window.__renderHistory) window.__renderHistory(); });
+document.getElementById('lang').addEventListener('change', e => { currentLang = e.target.value; if(window.dcLang) dcLang.set(currentLang); applyI18n(); if(window.__renderAuth) window.__renderAuth(); if(window.__renderFitz) window.__renderFitz(); if(window.__renderHistory) window.__renderHistory(); if(exRun) startExample(); });   // a playing example restarts in the new language, so the form and the brief agree
 const SAMPLE_TXT = {
   ko: { area: '양쪽 정강이와 팔꿈치', duration: '8개월, 악화 중',
         notes: '경계가 분명한 홍반성 판과 두꺼운 은백색 비늘. 고효능 국소 스테로이드와 비타민 D 유도체를 3개월 사용했으나 반응이 없었음. 경증 고혈압 병력. 환자가 전신 치료 옵션을 문의함. Fitzpatrick III.' }
 };
-document.getElementById('sampleBtn').addEventListener('click', () => {
-  const S = Object.assign({}, SAMPLE_CASE, SAMPLE_TXT[currentLang] || {});
+// "Load example": fill the form, then play the same light-table loading screen a real photo gets, scripted and short
+// (the stages, the search queries and the progress bar), and show the example brief when it ends.
+// The queries and counts below are illustrative, and the screen says so: it is labeled Example, and nothing is sent anywhere.
+const EX_SCRIPT = [
+  [700,  { t: 'search', n: 1, q: 'plaque psoriasis systemic therapy after topical failure' }],
+  [1350, { t: 'found', n: 6 }],
+  [1700, { t: 'search', n: 2, q: 'IL-17 IL-23 inhibitors versus methotrexate plaque psoriasis' }],
+  [2250, { t: 'found', n: 5 }],
+  [2600, { t: 'search', n: 3, q: 'systemic psoriasis treatment mild hypertension' }],
+  [3100, { t: 'found', n: 4 }],
+  [3500, { t: 'w', n: 600 }], [3900, { t: 'w', n: 1500 }], [4300, { t: 'w', n: 2700 }], [4700, { t: 'w', n: 3900 }]
+];
+const EX_DONE_MS = 5000;
+let exRun = null;                                  // the example that is playing now, if any
+function stopExample() {                           // also runs when anything else takes over the output (a real analysis, a saved case)
+  if (!exRun) return;
+  const run = exRun;
+  exRun = null;
+  run.timers.forEach(clearTimeout);
+  if (run.loader) { run.loader.stop(); if (loader === run.loader) loader = null; }
+}
+function startExample() {
+  if (aborter) return;                             // a real analysis is running: leave it alone
+  stopExample();
+  const lang = currentLang;
+  const S = Object.assign({}, SAMPLE_CASE, SAMPLE_TXT[lang] || {});
   document.getElementById('age').value = S.age;
   document.getElementById('sex').value = S.sex;
   document.getElementById('area').value = S.area;
   document.getElementById('duration').value = S.duration;
   document.getElementById('notes').value = S.notes;
   fitz = S.fitz || ''; renderFitz();
+  const run = { timers: [] };
+  exRun = run;
+  const at = (ms, fn) => run.timers.push(setTimeout(() => { if (exRun === run) fn(); }, ms));
+  setOutput('<div id="loaderRoot"></div>');
+  announce(t('ldExample'));
+  if (loader) { loader.stop(); loader = null; }
+  const L = window.DermLoader.mount(document.getElementById('loaderRoot'), {
+    t: t, photo: '/assets/lens.jpg', example: true, chips: caseChips(), announce: announce,
+    onCancel: function () { if (exRun !== run) return; stopExample(); setOutput(''); announce(t('canceled')); }
+  });
+  run.loader = L;
+  loader = L;
+  scrollToBrief();
+  EX_SCRIPT.forEach(([ms, ev]) => at(ms, () => L.event(ev)));
+  at(EX_DONE_MS, () => L.finish(() => {
+    if (exRun !== run) return;                     // canceled, or a real analysis took over, while the bar was filling
+    stopExample();
+    renderOutput(EXAMPLE[lang] || EXAMPLE.en, Object.assign({}, S), { example: true });
+  }));
+}
+document.getElementById('sampleBtn').addEventListener('click', () => {
+  if (aborter || exRun) return;                    // already running: a second click must not restart or stack it
   const b = document.getElementById('sampleBtn');
-  const orig = t('trySample');
   b.textContent = t('sampleLoaded');
-  setTimeout(() => { b.textContent = orig; }, 2600);
-  renderOutput(EXAMPLE[currentLang] || EXAMPLE.en, Object.assign({}, S), { example: true });
+  setTimeout(() => { b.textContent = t('trySample'); }, 2600);
+  startExample();
 });
 
 // Fitzpatrick skin-type picker
@@ -243,6 +288,7 @@ function caseChips(){
   return [age?age+t('ageUnit'):'',sexTxt,val('area'),val('duration'),fitz?'Fitzpatrick '+fitz:''].filter(Boolean);
 }
 function showProgress(){
+  stopExample();                                   // a real analysis always wins over a playing example
   setOutput('<div id="loaderRoot"></div>');
   announce(t('analyzing'));
   if(loader){loader.stop();loader=null;}
@@ -375,6 +421,7 @@ function reportHref(){
 }
 
 function renderOutput(d, metaIn, opts){
+  stopExample();                                   // e.g. a saved case opened from the library while the example plays
   opts=opts||{};const ex=!!opts.example;
   const partialBanner=opts.partial?`<div class="warn-banner" role="status"><span>${esc(t('partialNote'))}</span><button class="btn btn-line btn-sm" id="rerunBtn" type="button">${esc(t('rerun'))}</button></div>`:'';
   const meta=metaIn||readMeta();
