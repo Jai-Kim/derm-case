@@ -235,6 +235,7 @@ html[data-theme="dark"] .ico-moon{display:none}
 @keyframes ltspin{to{transform:rotate(360deg)}}
 .lt-case{min-width:0}
 .lt-title{font-size:16px;font-weight:650;letter-spacing:-.015em;line-height:1.4}
+.lt-extag{display:inline-flex;align-items:center;height:22px;padding:0 9px;margin-bottom:6px;border-radius:999px;background:var(--bed-ink);color:var(--bed);font-size:12px;font-weight:700}
 .lt-chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:10px}
 .lt-chips li{border:1px solid #343A44;border-radius:999px;padding:3px 10px;font-size:12.5px;font-weight:600;color:var(--bed-ink);max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .lt-steps{display:grid;gap:16px}

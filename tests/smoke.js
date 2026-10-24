@@ -613,8 +613,10 @@ async function browserChecks() {
     const pg = await newPage(browser, lang, 1280, 900);
     await pg.goto(BASE + '/app', { waitUntil: 'load' });
     await pg.waitForTimeout(400);
+    const tEx = Date.now();
     await pg.click('#emptyExample');
-    await pg.waitForTimeout(900);
+    await pg.waitForSelector('#brief', { timeout: 9000 });   // Load example plays a short loading screen first (see "App: example loading screen")
+    ok(Date.now() - tEx >= 4500, 'in real time the example plays its loading screen for about five seconds before the brief [' + lang + ']', String(Date.now() - tEx));
     const r = await pg.evaluate(() => ({ secs: document.querySelectorAll('#brief .sec').length, ctx: (document.querySelector('#brief .ctx') || {}).innerText || '', head: [...document.querySelectorAll('#brief .sec-h')].map(e => e.textContent.trim()), form: document.getElementById('duration').value }));
     ok(r.secs >= 3, 'example brief has differential, treatment and references [' + lang + ']', String(r.secs));
     ok(await pg.evaluate(() => !document.getElementById('reportLink')), 'the example brief has no Report a problem link (it is not model output) [' + lang + ']');
@@ -801,6 +803,187 @@ async function browserChecks() {
     await pg.waitForFunction(() => document.querySelectorAll('#brief .sec').length >= 3, null, { timeout: 4000 }).catch(() => { });
     const r = await pg.evaluate(() => ({ secs: document.querySelectorAll('#brief .sec').length, head: (document.querySelector('#brief .sec-h') || {}).textContent, bad: /\uFFFD/.test(document.getElementById('outputArea').innerText) }));
     ok(r.secs >= 3 && r.head === '감별 고려 질환' && !r.bad, 'the answer is read correctly when split across chunks, inside a character, after junk lines', JSON.stringify(r));
+    await pg.context().close(); }
+
+  console.log('App: example loading screen');
+  // "Load example" plays the same light-table loading screen a real photo gets (scripted, about five seconds), then shows the example brief.
+  // The timing tests freeze the page clock and step it by hand, so they do not depend on how fast the machine is.
+  const exState = pg => pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, brief: !!document.getElementById('brief'), banner: !!document.querySelector('.ex-banner'), empty: getComputedStyle(document.getElementById('emptyState')).display, root: document.querySelectorAll('#loaderRoot').length, age: document.getElementById('age').value, out: document.getElementById('outputArea').innerText }));
+  const upload = async pg => {
+    const b64 = await pg.evaluate(() => { const c = document.createElement('canvas'); c.width = c.height = 96; const x = c.getContext('2d'); x.fillStyle = '#c98f78'; x.fillRect(0, 0, 96, 96); return c.toDataURL('image/jpeg').split(',')[1]; });
+    await pg.setInputFiles('#fileInput', { name: 'case.jpg', mimeType: 'image/jpeg', buffer: Buffer.from(b64, 'base64') });
+    await pg.waitForFunction(() => !document.getElementById('analyzeBtn').disabled, null, { timeout: 8000 });
+  };
+  const openApp = async (pg) => { await pg.goto(BASE + '/app', { waitUntil: 'load' }); await pg.waitForTimeout(400); };
+  const openFrozen = async (pg) => { await pg.clock.install(); await openApp(pg); const now = await pg.evaluate(() => Date.now()); await pg.clock.pauseAt(now + 100); };
+  for (const lang of ['en', 'ko']) {
+    const pg = await newPage(browser, lang, 1280, 900);
+    let calls = 0; await pg.route('**/api/analyze', r => { calls++; r.abort(); });
+    await openFrozen(pg);
+    await pg.click('#emptyExample');
+    await pg.waitForSelector('.lt', { timeout: 1500 });
+    const first = await pg.evaluate(() => ({ brief: !!document.getElementById('brief'), tag: (document.querySelector('.lt-extag') || {}).textContent, photo: (document.querySelector('.lt-photo') || document.body).getAttribute('src'), chips: [...document.querySelectorAll('.lt-chips li')].map(x => x.textContent), cancel: !!document.getElementById('cancelBtn'), busy: document.querySelector('.lt').getAttribute('aria-busy'), time: document.querySelector('.lt-time').textContent, empty: getComputedStyle(document.getElementById('emptyState')).display, exTag: t('exTag'), note: t('ldExample'), area: document.getElementById('area').value, status: document.getElementById('status').textContent }));
+    ok(!first.brief && first.empty === 'none', 'Load example shows the loading screen first, not the finished brief [' + lang + ']');
+    ok(first.tag === first.exTag && first.time.indexOf(first.note) >= 0, 'the loading screen is labeled as an example and says nothing is sent [' + lang + ']', first.tag + ' | ' + first.time);
+    ok(first.photo === '/assets/lens.jpg' && first.cancel && first.busy === 'true', 'the example run shows the illustration, a Cancel button and aria-busy [' + lang + ']', first.photo);
+    ok(first.chips.some(c => /47/.test(c)) && first.chips.some(c => c === first.area) && first.chips.some(c => c === 'Fitzpatrick III'), 'the example case details are pinned beside the photo [' + lang + ']', first.chips.join('|'));
+    ok(first.status === first.note, 'screen readers are told it is an example run [' + lang + ']', first.status);
+    ok((await stepState(pg)).read === 'on', 'step one is active at the start of the example [' + lang + ']');
+    await pg.clock.runFor(800);                         // 0.8 s: the first search has been issued (at 0.7 s)
+    let st = await stepState(pg);
+    ok(await pg.evaluate(() => document.querySelectorAll('.lt-q li').length) === 1 && st.read === 'done' && st.search === 'on' && st.write === 'idle', 'the example moves on to searching the literature [' + lang + ']', JSON.stringify(st));
+    const p1 = await progress(pg); await pg.clock.runFor(500); const p2 = await progress(pg);
+    ok(p1 > 0 && p1 <= p2 && p2 < 1, 'the example progress bar moves forward and never goes back [' + lang + ']', p1 + ' ' + p2);
+    await pg.clock.runFor(2300);                        // 3.6 s: all three searches are in and writing has started
+    const mid = await pg.evaluate(() => ({ phase: document.querySelector('.lt').className, q: [...document.querySelectorAll('.lt-q li')].map(x => x.firstChild.textContent), n: document.querySelectorAll('.lt-n').length, sub: document.querySelector('[data-s=search] .lt-sub').textContent }));
+    ok(mid.q.length === 3 && mid.n === 3 && /15/.test(mid.sub), 'it shows three searches with their source counts, 15 in all [' + lang + ']', JSON.stringify(mid));
+    st = await stepState(pg);
+    ok(mid.phase.indexOf('ph-write') >= 0 && st.read === 'done' && st.search === 'done' && st.write === 'on', 'then it moves on to writing the brief [' + lang + ']', JSON.stringify(st));
+    await pg.clock.runFor(1300);                        // 4.9 s
+    let s = await exState(pg);
+    ok(s.lt === 1 && !s.brief, 'the brief is not shown before the loading screen has played out [' + lang + ']');
+    await pg.clock.runFor(600);                         // 5.5 s
+    s = await exState(pg);
+    ok(s.lt === 0 && s.brief && s.banner && s.root === 0, 'after about five seconds the loading screen is replaced by the example brief, still labeled Example [' + lang + ']');
+    ok(!(await pg.evaluate(() => !!document.getElementById('reportLink'))) && (await pg.evaluate(() => document.querySelectorAll('#brief .sec').length)) >= 3, 'the example brief is complete and has no Report a problem link [' + lang + ']');
+    ok(calls === 0, 'the example run sends nothing to the server [' + lang + ']', String(calls));
+    ok(pg.ext.length === 0 && (await pg.evaluate(() => window.__csp.length)) === 0 && pg.errs.length === 0, 'the example run raises no script error, CSP violation or outside request [' + lang + ']', pg.errs.concat(pg.ext).join(' | '));
+    ok(await pg.evaluate(() => document.getElementById('sampleBtn').textContent === t('trySample')), 'the Load example label is restored in the page language [' + lang + ']');
+    await pg.click('#newBtn');
+    s = await exState(pg);
+    ok(s.empty !== 'none' && s.age === '' && s.lt === 0, 'Clear example still resets the page [' + lang + ']');
+    await pg.click('#emptyExample'); await pg.waitForSelector('.lt', { timeout: 1500 });
+    await pg.clock.runFor(5500);
+    ok((await exState(pg)).banner, 'the example can be run again after clearing it [' + lang + ']');
+    ok(pg.errs.length === 0 && calls === 0, 'running it twice stays clean [' + lang + ']', pg.errs.join(' | '));
+    await pg.context().close();
+  }
+  { // Cancel during the example clears it, keeps the form, and the example does not come back
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(1600);
+    await pg.click('#cancelBtn');
+    let s = await exState(pg);
+    ok(s.lt === 0 && !s.brief && s.empty !== 'none', 'Cancel during the example clears the loading screen and shows the empty state');
+    ok(s.age === '47' && await pg.evaluate(() => document.getElementById('analyzeBtn').disabled === true), 'Cancel keeps the example form filled, and Analyze stays off until a photo is added');
+    ok((await pg.evaluate(() => document.getElementById('status').textContent)) === (await pg.evaluate(() => t('canceled'))), 'Cancel is announced to screen readers');
+    await pg.clock.runFor(9000);
+    s = await exState(pg);
+    ok(s.lt === 0 && !s.brief && s.empty !== 'none', 'a canceled example does not come back later');
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(6500);
+    ok((await exState(pg)).brief, 'the example can be started again after a Cancel');
+    ok(pg.errs.length === 0, 'Cancel raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // Cancel while the bar is filling up at the end must not let the brief appear anyway
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(5100);                        // the bar has filled (5.0 s) and the hand-over beat (0.38 s) is still running
+    ok(await pg.evaluate(() => !!document.querySelector('.lt.ph-done')), 'at the end the bar fills and every step is ticked');
+    await pg.click('#cancelBtn');
+    await pg.clock.runFor(3000);
+    const s = await exState(pg);
+    ok(s.lt === 0 && !s.brief && s.empty !== 'none', 'Cancel in the last moment still cancels');
+    ok(pg.errs.length === 0, 'late Cancel raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // a second click while it plays neither restarts nor stacks it
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(2000);
+    const before = await pg.evaluate(() => document.querySelectorAll('.lt-q li').length);
+    await pg.click('#sampleBtn'); await pg.click('#sampleBtn');
+    const after = await exState(pg);
+    ok(before >= 1 && after.lt === 1 && after.root === 1 && (await pg.evaluate(() => document.querySelectorAll('.lt-q li').length)) === before, 'clicking Load example again while it plays does not restart or stack it', JSON.stringify(after));
+    await pg.clock.runFor(4000);                        // 6.0 s since the first click: it would still be playing if the second click had restarted it
+    const end = await pg.evaluate(() => ({ briefs: document.querySelectorAll('#brief').length, lt: document.querySelectorAll('.lt').length }));
+    ok(end.briefs === 1 && end.lt === 0, 'it ends on time with exactly one example brief', JSON.stringify(end));
+    ok(pg.errs.length === 0, 'repeated clicks raise no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // starting a real analysis while the example plays: the real one wins and is never overwritten by the example
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    const full = await pg.evaluate(() => { const d = JSON.parse(JSON.stringify(EXAMPLE.en)); d.assessment[0].diagnosis = 'REAL-RESULT-DX'; return JSON.stringify(d); });
+    let release; const gate = new Promise(r => { release = r; });   // the real answer is held back, as a real 30 to 60 second analysis would be
+    await pg.route('**/api/analyze', async r => { await gate; r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [{ type: 'text', text: full }], stop_reason: 'end_turn' }) }); });
+    await upload(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt-extag');
+    ok(await pg.evaluate(() => document.querySelector('.lt-photo').getAttribute('src') === '/assets/lens.jpg'), 'the example run shows the illustration even when the user already added a photo');
+    await pg.clock.runFor(1500);
+    await pg.click('#analyzeBtn');
+    await pg.waitForFunction(() => !document.querySelector('.lt-extag'));
+    const live = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, photo: document.querySelector('.lt-photo').getAttribute('src').slice(0, 22), time: document.querySelector('.lt-time').textContent, note: t('ldExample') }));
+    ok(live.lt === 1 && live.photo === 'data:image/jpeg;base64' && live.time.indexOf(live.note) < 0, 'the real analysis replaces the example with the real loading screen', JSON.stringify(live));
+    await pg.clock.runFor(9000);                          // far past the moment the example would have ended (5 s), with the real answer still pending
+    const wait = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, banner: !!document.querySelector('.ex-banner'), brief: !!document.getElementById('brief'), tag: !!document.querySelector('.lt-extag'), busy: document.querySelector('.lt') && document.querySelector('.lt').getAttribute('aria-busy') }));
+    ok(wait.lt === 1 && !wait.banner && !wait.brief && !wait.tag && wait.busy === 'true', 'the example does not finish on top of a real analysis that is still running', JSON.stringify(wait));
+    release();
+    await pg.waitForSelector('.lt.ph-done', { timeout: 8000 });      // the real answer arrived (the page clock is frozen, so only real network time passes)
+    await pg.clock.runFor(1000);
+    const end = await pg.evaluate(() => ({ out: document.getElementById('outputArea').innerText, banner: !!document.querySelector('.ex-banner'), lt: document.querySelectorAll('.lt').length }));
+    ok(end.out.indexOf('REAL-RESULT-DX') >= 0 && !end.banner && end.lt === 0, 'the real result then shows, never the example', end.out.slice(0, 60));
+    ok(pg.errs.length === 0, 'taking over from the example raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // Load example during a real analysis is ignored, and the real result still arrives
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await startStreamed(pg, 'en');
+    const full = await pg.evaluate(() => JSON.stringify(EXAMPLE.en));
+    await pg.evaluate(() => window.__push({ t: 'ready' }));
+    await pg.click('#sampleBtn');
+    const s = await exState(pg);
+    ok(s.lt === 1 && s.age === '34' && await pg.evaluate(() => !document.querySelector('.lt-extag') && document.querySelector('.lt-photo').getAttribute('src').indexOf('data:image/jpeg') === 0), 'Load example is ignored while a real analysis runs: the form and the real loading screen are untouched', JSON.stringify(s).slice(0, 120));
+    await pg.evaluate(txt => window.__push({ t: 'done', content: [{ type: 'text', text: '```json\n' + txt + '\n```' }], stop_reason: 'end_turn' }), full);
+    await pg.waitForFunction(() => document.querySelectorAll('#brief .sec').length >= 3, null, { timeout: 4000 });
+    ok(await pg.evaluate(() => !document.querySelector('.ex-banner') && !!document.getElementById('reportLink')), 'the real brief arrives as a real brief, not as the example');
+    ok(pg.errs.length === 0, 'ignoring Load example mid-analysis raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // opening something else in the output (a saved case from the library) while the example plays: the example stops
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(1500);
+    await pg.evaluate(() => renderOutput({ relevant: true, assessment: [{ diagnosis: 'SAVED-CASE-DX', icd10: '', rationale: 'r' }], references: [] }, null, {}));
+    await pg.clock.runFor(9000);
+    const end = await pg.evaluate(() => ({ out: document.getElementById('outputArea').innerText, banner: !!document.querySelector('.ex-banner'), lt: document.querySelectorAll('.lt').length }));
+    ok(end.out.indexOf('SAVED-CASE-DX') >= 0 && !end.banner && end.lt === 0, 'a case opened mid-example stays on screen, the example does not overwrite it', end.out.slice(0, 60));
+    ok(pg.errs.length === 0, 'opening a case mid-example raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // switching the language mid-example restarts it in the new language, so the form, the loading screen and the brief agree
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(1500);
+    await pg.selectOption('#lang', 'ko');
+    const k = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, tag: (document.querySelector('.lt-extag') || {}).textContent, dur: document.getElementById('duration').value, note: document.querySelector('.lt-time').textContent, q: document.querySelectorAll('.lt-q li').length }));
+    ok(k.lt === 1 && k.tag === '예시' && !/months/.test(k.dur) && /예시 실행/.test(k.note) && k.q === 0, 'switching language mid-example restarts it in Korean, once', JSON.stringify(k));
+    await pg.clock.runFor(7000);
+    const e = await pg.evaluate(() => ({ head: (document.querySelector('#brief .sec-h') || {}).textContent, ctx: (document.querySelector('#brief .ctx') || {}).innerText || '', lt: document.querySelectorAll('.lt').length, btn: document.getElementById('sampleBtn').textContent, want: t('trySample') }));
+    ok(e.head === '감별 고려 질환' && !/Bilateral|months/.test(e.ctx) && e.lt === 0, 'the brief that follows is in Korean, matching the form', JSON.stringify(e));
+    ok(e.btn === e.want, 'the Load example label ends in the new language, not the old one', e.btn + ' vs ' + e.want);
+    ok(pg.errs.length === 0, 'switching language mid-example raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // a phone with reduced motion: calm, no overflow, and it still ends in the brief
+    const pg = await newPage(browser, 'ko', 360, 740);
+    await pg.emulateMedia({ reducedMotion: 'reduce' });
+    await openFrozen(pg);
+    await pg.click('#sampleBtn'); await pg.waitForSelector('.lt');
+    await pg.clock.runFor(3000);
+    const m = await pg.evaluate(() => ({ sw: document.documentElement.scrollWidth, iw: window.innerWidth, anim: getComputedStyle(document.querySelector('.lt-scan')).animationName, ring: getComputedStyle(document.querySelector('.lt-ring')).animationName, tag: !!document.querySelector('.lt-extag') }));
+    ok(m.sw <= m.iw + 1 && m.tag, 'the example loading screen does not overflow a 360px phone', m.sw + ' > ' + m.iw);
+    ok(m.anim === 'none' && m.ring === 'none', 'reduced motion switches the example animations off', JSON.stringify(m));
+    await pg.clock.runFor(3000);
+    const e = await pg.evaluate(() => ({ brief: !!document.getElementById('brief'), lt: document.querySelectorAll('.lt').length, sw: document.documentElement.scrollWidth, iw: window.innerWidth }));
+    ok(e.brief && e.lt === 0 && e.sw <= e.iw + 1, 'on the phone it ends in the example brief without overflow', JSON.stringify(e));
+    ok(pg.errs.length === 0, 'the phone example run raises no script error', pg.errs.join(' | '));
+    await pg.context().close(); }
+  { // the loader only ever shows the one built-in illustration, never an arbitrary image URL
+    const pg = await newPage(browser, 'en', 1280, 900);
+    await openApp(pg);
+    const srcs = await pg.evaluate(() => { const out = []; ['https://evil.example/x.jpg', '/assets/other.jpg', 'javascript:1'].forEach(p => { const r = document.createElement('div'); document.body.appendChild(r); DermLoader.mount(r, { t: t, photo: p, example: true, chips: [], onCancel() { } }).stop(); out.push(r.querySelector('.lt-photo').getAttribute('src') || 'blank'); const r2 = document.createElement('div'); document.body.appendChild(r2); DermLoader.mount(r2, { t: t, photo: '/assets/lens.jpg', chips: [], onCancel() { } }).stop(); out.push(r2.querySelector('.lt-photo').getAttribute('src') || 'blank'); }); return out; });
+    ok(srcs.length === 6 && srcs.every(x => x === 'blank'), 'the loader refuses any other image URL, and the illustration unless it is the example run', srcs.join(' | '));
+    ok(pg.ext.length === 0, 'no outside request was made', pg.ext.join(' '));
     await pg.context().close(); }
 
   console.log('Security: hostile content and CSP');
