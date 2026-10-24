@@ -383,4 +383,4 @@ These are lab and online studies of generic waits, not of clinicians. "30 to 60 
 
 **Also fixed here:** the "Example loaded" label used to go back to the old-language "Load example" if the language was switched within 2.6 seconds. It now resolves the label when it goes back.
 
-**Tests:** `tests/smoke.js`, "App: example loading screen" (69 checks: stages, labels, timing, no network, Cancel in the middle and in the last moment, repeat clicks, real analysis takeover, saved case takeover, language switch, phone with reduced motion, image URL allow-list).
+**Tests:** `tests/smoke.js`, "App: example loading screen" (72 checks, with a frozen page clock: stages, labels, timing, no network, Cancel in the middle and in the last moment, repeat clicks, a real analysis that is still running when the example would have ended, saved case takeover, language switch, phone with reduced motion, image URL allow-list). Each guard was removed in turn to confirm a test fails..

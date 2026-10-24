@@ -906,18 +906,24 @@ async function browserChecks() {
     const pg = await newPage(browser, 'en', 1280, 900);
     await openFrozen(pg);
     const full = await pg.evaluate(() => { const d = JSON.parse(JSON.stringify(EXAMPLE.en)); d.assessment[0].diagnosis = 'REAL-RESULT-DX'; return JSON.stringify(d); });
-    await pg.route('**/api/analyze', r => r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [{ type: 'text', text: full }], stop_reason: 'end_turn' }) }));
+    let release; const gate = new Promise(r => { release = r; });   // the real answer is held back, as a real 30 to 60 second analysis would be
+    await pg.route('**/api/analyze', async r => { await gate; r.fulfill({ status: 200, contentType: 'application/json', body: JSON.stringify({ content: [{ type: 'text', text: full }], stop_reason: 'end_turn' }) }); });
     await upload(pg);
     await pg.click('#sampleBtn'); await pg.waitForSelector('.lt-extag');
     ok(await pg.evaluate(() => document.querySelector('.lt-photo').getAttribute('src') === '/assets/lens.jpg'), 'the example run shows the illustration even when the user already added a photo');
     await pg.clock.runFor(1500);
     await pg.click('#analyzeBtn');
+    await pg.waitForFunction(() => !document.querySelector('.lt-extag'));
+    const live = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, photo: document.querySelector('.lt-photo').getAttribute('src').slice(0, 22), time: document.querySelector('.lt-time').textContent, note: t('ldExample') }));
+    ok(live.lt === 1 && live.photo === 'data:image/jpeg;base64' && live.time.indexOf(live.note) < 0, 'the real analysis replaces the example with the real loading screen', JSON.stringify(live));
+    await pg.clock.runFor(9000);                          // far past the moment the example would have ended (5 s), with the real answer still pending
+    const wait = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, banner: !!document.querySelector('.ex-banner'), brief: !!document.getElementById('brief'), tag: !!document.querySelector('.lt-extag'), busy: document.querySelector('.lt') && document.querySelector('.lt').getAttribute('aria-busy') }));
+    ok(wait.lt === 1 && !wait.banner && !wait.brief && !wait.tag && wait.busy === 'true', 'the example does not finish on top of a real analysis that is still running', JSON.stringify(wait));
+    release();
     await pg.waitForSelector('.lt.ph-done', { timeout: 8000 });      // the real answer arrived (the page clock is frozen, so only real network time passes)
-    const live = await pg.evaluate(() => ({ lt: document.querySelectorAll('.lt').length, tag: !!document.querySelector('.lt-extag'), photo: document.querySelector('.lt-photo').getAttribute('src').slice(0, 22), time: document.querySelector('.lt-time').textContent, note: t('ldExample') }));
-    ok(live.lt === 1 && !live.tag && live.photo === 'data:image/jpeg;base64' && live.time.indexOf(live.note) < 0, 'the real analysis replaces the example with the real loading screen', JSON.stringify(live));
-    await pg.clock.runFor(9000);
+    await pg.clock.runFor(1000);
     const end = await pg.evaluate(() => ({ out: document.getElementById('outputArea').innerText, banner: !!document.querySelector('.ex-banner'), lt: document.querySelectorAll('.lt').length }));
-    ok(end.out.indexOf('REAL-RESULT-DX') >= 0 && !end.banner && end.lt === 0, 'the real result stays on screen, the example never overwrites it', end.out.slice(0, 60));
+    ok(end.out.indexOf('REAL-RESULT-DX') >= 0 && !end.banner && end.lt === 0, 'the real result then shows, never the example', end.out.slice(0, 60));
     ok(pg.errs.length === 0, 'taking over from the example raises no script error', pg.errs.join(' | '));
     await pg.context().close(); }
   { // Load example during a real analysis is ignored, and the real result still arrives
